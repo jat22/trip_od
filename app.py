@@ -24,3 +24,8 @@ db.create_all()
 
 REC_BASE_URL = "https://ridb.recreation.gov/api/v1"
 GEOCODE_BASE_URL = f"https://api.tomtom.com/search/2/geocode/"
+
+
+@app.route('/')
+def show_home():
+    return render_template("home.html")
