@@ -136,32 +136,3 @@ def clean_resources(type, resource_list):
     	for res in resource_list]
     
     return resources
-
-        # [{
-    #     "id" : "fac" + fac["FacilityID"],
-    #     "name" : fac["FacilityName"],
-    #     "lat" : fac["FacilityLatitude"],
-    #     "long" : fac["FacilityLongitude"],
-    #     "activities" : [act["ActivityName"] for act in fac["ACTIVITY"]]
-	# 	}
-    # 	for fac in facilities]
-
-	# [{
-    #     "id" : "rec" + rec["RecAreaID"],
-    #     "name" : rec["RecAreaName"],
-    #     "lat" : rec["RecAreaLatitude"],
-    #     "long" : rec["RecAreaLongitude"],
-    #     "activities" : [act["ActivityName"] for act in rec["ACTIVITY"]]
-	# 	}
-    # 	for rec in recareas]
-
-	   # results = {
-    #     "geo_location" : {
-    #         city : city,
-    #         state : state,
-    #         lat : lat,
-    #         long : long
-	# 	}, 
-    #     "activities" : activities,
-    #     # "camgrounds" : [camp for camp in campgrounds]
-	# }

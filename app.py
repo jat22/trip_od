@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, url_for, request, flash, session, g
+from flask import Flask, redirect, render_template, url_for, request, flash, session, g, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 import json
 from keys import REC_API_KEY, MAPS_KEY, TOMTOM_KEY
@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from models import connect_db, db, User, Trip, Location, Activity, TripDay, DayActivity, Campground, UnassignedTripActivities, UnassignedTripCampground
 from forms import CreateAccountForm, CreateTripForm, LoginForm, LocationSearchForm
+from functions import search_by_location
 
 app = Flask(__name__)
 app.app_context().push()
@@ -123,12 +124,20 @@ def create_trip():
 @app.route("/trips/where")
 def trip_location():
     form = LocationSearchForm()
-    if form.validate_on_submit():
-        city = form.city.data
-        state = form.state.data
-        lat = form.lat.data
-        long = form.long.data
-        
-        return redirect("/trips/stay")
+    return render_template("/trip/where.html", form=form, title="Where", action="/trips/stay", submit_button="Next", back_action="/", method="GET")
+
+@app.route("/api/search")
+def search():
+    city = request.args.get("city")
+    state = request.args.get("state")
+    latitude = request.args.get("latitude")
+    longitude = request.args.get("longitude")
+    radius = request.args.get("radius")
     
-    return render_template("form-simple.html", form=form, title="Where", action="/trips/where", submit_button="Next", back_action="/", method="GET")
+    results = search_by_location(city, state, latitude, longitude, radius)
+    return jsonify(results)
+
+
+@app.route("/trips/stay")
+def show_campgrounds():
+	return render_template("/trip/stay.html")
