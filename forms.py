@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, TextAreaField, RadioField, DateField, FloatField
+from wtforms import StringField, PasswordField, TextAreaField, RadioField, DateField, FloatField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Email, Length
 
 
@@ -26,6 +26,8 @@ class UpdateUserForm(FlaskForm):
 class LocationSearchForm(FlaskForm):
     loc_type = RadioField(choices=["City/State", "Latitude/Longitude"])
     city = StringField("City")
-    state = StringField("State")
+    state = SelectField("State", choices=
+                        ["Alabama","Alaska","Arizona","Arkansas","California","Colorado", "Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"])
     lat = FloatField("Latitude")
     long = FloatField("Longitude")
+    radius = IntegerField("Radius")

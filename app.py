@@ -121,11 +121,14 @@ def create_trip():
     return render_template("form-simple.html", form=form, title="New Trip", action="/trips/create", submit_button="Create", back_action="/", method="POST")
 
 @app.route("/trips/where")
-def trip_location(trip_id):
-    form = LocationSearchForm
+def trip_location():
+    form = LocationSearchForm()
     if form.validate_on_submit():
         city = form.city.data
         state = form.state.data
         lat = form.lat.data
         long = form.long.data
         
+        return redirect("/trips/stay")
+    
+    return render_template("form-simple.html", form=form, title="Where", action="/trips/where", submit_button="Next", back_action="/", method="GET")

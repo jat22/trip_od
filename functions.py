@@ -5,6 +5,8 @@ from keys import REC_API_KEY, MAPS_KEY, TOMTOM_KEY
 
 REC_BASE_URL = "https://ridb.recreation.gov/api/v1"
 GEOCODE_BASE_URL = "https://api.tomtom.com/search/2/structuredGeocode.json"
+
+######### ENDPOINTS ##############
 ACTIVITIES = "activities"
 CAMPSITES = "campsites"
 EVENTS = "events"
@@ -14,6 +16,8 @@ RECAREAS = "recareas"
 TOURS = "tours"
 
 
+
+################# REC API SEARCH ############################
 def resource_search(endpoint, query="", limit="", offset="", full="true", state="", activity="", lat="", long="", radius="", sort=""):
     
     resp = requests.get(f"{REC_BASE_URL}/{endpoint}",
@@ -32,84 +36,132 @@ def resource_search(endpoint, query="", limit="", offset="", full="true", state=
 		})
     return resp.json()
 
-def activities_with_parent_resources_by_location(location_type, city="", state=""):
-    coords = get_coordinates(location_type, city, state)
-    lat = coords[0].get('lat')
-    long = coords[0].get('lon')
-
-    recareas = min_data(resource_search(RECAREAS, lat=lat, long=long)["RECDATA"], "RecArea")
-    facilities = min_data(resource_search(FACILITIES, lat=lat, long=long)["RECDATA"], "Facility")
-
-    fac_rec_data = recareas + facilities
-    print(fac_rec_data)
-    fac_rec_activities =[]
-    all_activities_dict = {}
-
-    for fac_rec in fac_rec_data:
-        for activity in fac_rec["activities"]:
-            fac_rec_activities.append(activity)
 
 
-    for a in fac_rec_activities:
-        name = a["name"]
-        id = a["id"]
-        parent_type = a["parent_type"]
-        parent_id = a["parent_id"]
-        parent_name = a["parent_name"]
 
-        if name not in all_activities_dict:
-            all_activities_dict[name] = ({"name" : name, "id" : id, "type" : "activity",
-                                    "parents" : [{"type" : parent_type, "id" : parent_id, "name" : parent_name}]})
-        else:
-            all_activities_dict[name]['parents'].append({"type" : parent_type, "id" : parent_id, "name" : parent_name})
-
-    all_activites_parents = [all_activities_dict[act] for act in all_activities_dict]
-
-    print(all_activites_parents)
-
-    return all_activites_parents
-
-
-def geolocation_search(city="", state="", zip=""):
+######################### TOMTOM API GEOLOCATION SEARCH #######################
+def geolocation_search(city, state):
     resp = requests.get(f"{GEOCODE_BASE_URL}",
                         params = {
                             "key" : TOMTOM_KEY,
                             "countryCode" : "US",
                             "municipality" : city,
                             "countrySubdivision" : state,
-                            "postalCode" : zip
+							"entityTypeSet" : "Municipality"
                         })
     return resp.json()
 
-def get_coordinates(search_type, city="", state="", zip=""):
-    data = geolocation_search(city, state, zip)
-    if search_type == "city-state":
-        coordinates = [result.get('position') for result in data.get("results")
-            if result.get('entityType') == "Municipality"]
-        return coordinates
-    if search_type == "zip":
-        coordinates = [result.get('position') for result in data.get("results")
-            if result.get('entityType') == "PostalCodeArea"]
-        return coordinates
+def get_coordinates(city, state):
+    data = geolocation_search(city, state)
+    coordinates = [result.get("position") for result in data.get("results")]
+    return coordinates
 
-def min_data(data, type):
-    rec_areas = data
-    clean_rec_areas = [{
-        "name" : area.get(f"{type}Name"),
-        "id" : area.get(f"{type}ID"),
-        "activities" : clean_activities(
-            area.get("ACTIVITY"), type, area.get(f"{type}ID"), area.get(f"{type}Name")),
-        }
-        for area in rec_areas]
-    return clean_rec_areas
 
-def clean_activities(list, parentType, parentID, parentName):
-    activities = [{
-		"name" : data.get("ActivityName").lower(),
-        "id" : data.get("ActivityID"),
-        "parent_type" : parentType,
-        "parent_id" : parentID,
-        "parent_name" : parentName
-        }
-        for data in list]
-    return activities
+
+
+############################ MAIN SEARCH FUNCTION ###########################
+def search_by_location(city, state, latitude, longitude, radius="50"):
+    lat = latitude
+    long = longitude
+    if not lat and not long:
+        coords = get_coordinates(city, state)
+        lat = coords[0].get("lat")
+        long = coords[0].get("lon")
+    
+    activities_campgrounds = get_activities_campgrounds(lat, long, radius)
+
+    results = {
+        		"search_geolocation" : {"lat" : lat, "long" : long},
+                "activities" : activities_campgrounds["activities"],
+                "campgrounds" : activities_campgrounds["campgrounds"]
+	}
+
+    return results
+
+
+
+
+######################## SEARCH HELPERS ##################################    
+def get_activities_campgrounds(lat, long, radius):
+    
+    facilities = resource_search(FACILITIES, lat=lat, long=long, radius=radius)["RECDATA"]
+    clean_facilities = clean_resources("Facility", facilities)
+
+    recareas = resource_search(RECAREAS, lat=lat, long=long, radius=radius)["RECDATA"]
+    clean_recareas = clean_resources("RecArea", recareas)
+
+    locations = clean_facilities + clean_recareas
+
+    activity_names = []
+    for loc in locations:
+        for act in loc["activities"]:
+            activity_names.append(act)
+    unique_activity_names = list(set(activity_names))
+	
+    activities = [{"name" : act, "locations" : []} for act in unique_activity_names]
+    
+    for act in activities:
+        for loc in locations:
+            for loc_act in loc["activities"]:
+                if loc_act == act["name"]:
+                    act["locations"].append(loc)
+    
+    campgrounds = filter_campgrounds(facilities)
+
+    return {"activities": activities, "campgrounds" : campgrounds}
+
+
+
+
+############################### FILETER AND CLEAN #########################
+def filter_campgrounds(facilities):
+    campgrounds = [fac for fac in facilities 
+                   if fac["FacilityTypeDescription"] == "Campground"]
+    clean_campgrounds = clean_resources("Facility", campgrounds)
+    return clean_campgrounds
+
+def clean_resources(type, resource_list):
+    if type == "Facility":
+        typ_abr = "fac"
+    if type == "RecArea":
+        typ_abr = "rec"
+
+    resources = [{
+        "id" : typ_abr + res[f"{type}ID"],
+        "name" : res[f"{type}Name"],
+        "lat" : res[f"{type}Latitude"],
+        "long" : res[f"{type}Longitude"],
+        "activities" : [act["ActivityName"] for act in res["ACTIVITY"]]
+		}
+    	for res in resource_list]
+    
+    return resources
+
+        # [{
+    #     "id" : "fac" + fac["FacilityID"],
+    #     "name" : fac["FacilityName"],
+    #     "lat" : fac["FacilityLatitude"],
+    #     "long" : fac["FacilityLongitude"],
+    #     "activities" : [act["ActivityName"] for act in fac["ACTIVITY"]]
+	# 	}
+    # 	for fac in facilities]
+
+	# [{
+    #     "id" : "rec" + rec["RecAreaID"],
+    #     "name" : rec["RecAreaName"],
+    #     "lat" : rec["RecAreaLatitude"],
+    #     "long" : rec["RecAreaLongitude"],
+    #     "activities" : [act["ActivityName"] for act in rec["ACTIVITY"]]
+	# 	}
+    # 	for rec in recareas]
+
+	   # results = {
+    #     "geo_location" : {
+    #         city : city,
+    #         state : state,
+    #         lat : lat,
+    #         long : long
+	# 	}, 
+    #     "activities" : activities,
+    #     # "camgrounds" : [camp for camp in campgrounds]
+	# }
