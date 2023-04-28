@@ -17,7 +17,7 @@ TOURS = "tours"
 
 
 
-################# REC API SEARCH ############################
+################# REC API SEARCH FUNCTIONS ############################
 def resource_search(endpoint, query="", limit="", offset="", full="true", state="", activity="", lat="", long="", radius="", sort=""):
     
     resp = requests.get(f"{REC_BASE_URL}/{endpoint}",
@@ -36,6 +36,21 @@ def resource_search(endpoint, query="", limit="", offset="", full="true", state=
 		})
     return resp.json()
 
+def location_detail_search(location_id):
+    api_type = location_id[:3]
+    api_id = location_id[3:]
+
+    if api_type == "fac":
+        endpoint = FACILITIES
+        type = "Facility"
+    if api_type == "rec":
+        endpoint = RECAREAS
+        type = "RecArea"
+
+    resp = requests.get(f"{REC_BASE_URL}/{endpoint}/{api_id}",
+        params={"apikey" : REC_API_KEY, "full" : "true"})
+    
+    return {"type" : type, "data" : resp.json()}
 
 
 
@@ -78,8 +93,12 @@ def search_by_location(city, state, latitude, longitude, radius="50"):
 
     return results
 
-
-
+def get_location_details(location_id):
+    data = location_detail_search(location_id)
+    details = clean_location_data(data)
+    
+    return details
+        
 
 ######################## SEARCH HELPERS ##################################    
 def get_activities_campgrounds(lat, long, radius):
@@ -136,3 +155,27 @@ def clean_resources(type, resource_list):
     	for res in resource_list]
     
     return resources
+
+def clean_location_data(resp_data):
+    type = resp_data["type"]
+    data = resp_data["data"]
+    
+    if type == "Facility" :
+        id_type = "fac"
+    if type == "RecArea" :
+        id_type = "rec"
+
+    details = {
+        "id" : id_type + data[f"{type}ID"],
+    	"name" : data[f"{type}Name"],
+        "email" : data[f"{type}Email"],
+        "phone" : data[f"{type}Phone"],
+        "description" : data[f"{type}Description"],
+        "directions" : data[f"{type}Directions"],
+        "address" : data[f"{type.upper()}ADDRESS"][0][f"{type}StreetAddress1"],
+        "city" : data[f"{type.upper()}ADDRESS"][0]["City"],
+        "state" : data[f"{type.upper()}ADDRESS"][0]["AddressStateCode"],
+        "zip" : data[f"{type.upper()}ADDRESS"][0]["PostalCode"],
+        "links" : [{"title" : link["Title"], "url" : link["URL"]} for link in data["LINK"]]
+	}
+    return details

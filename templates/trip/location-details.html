@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ location["name"] }} Details{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	<div class="card">
+		<div class="card-body">
+			<h2 class="card-title">{{ location["name"] }}</h2>
+			
+			{% if session["curr_trip"] %}
+			<form action="/trips/campgrounds/add" method="POST">
+				<input type="hidden" value="{{ location['id'] }}">
+				<button type="submit" class="btn btn-sm btn-info">Add To Trip</button>
+			</form>
+			{% endif %}
+
+			<div class="card">
+				<div class="card-body">
+					<h4 class="card-title">Contact Info</h4>
+					<h6>Email: {{ location["email"] }}</h6>
+					<h6>Phone: {{ location["phone"] }}</h6>
+					<h6>{{ location["address"] }}</h6>
+					<h6>{{ location["city"] }}, {{ location["state"] }} {{ location["zip"] }}</h6>
+				</div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<h4 class="card-title">Links</h4>
+					{% for link in location["links"] %}
+					<span>| <a href="{{ link['url'] }}"">{{ link['title'] }}</a> |</span>
+					{% endfor %}
+				</div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<h4 class="card-title">Directions</h4>
+					<p>{{ location["directions"] }}</p>
+				</div>
+			</div>
+			<div class="card">
+				<div class="card-body">
+					<h4 class="card-title">Description</h4>
+					<p>{{ location["description"] | safe }}</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

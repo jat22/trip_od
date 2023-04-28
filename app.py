@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from models import connect_db, db, User, Trip, Location, Activity, TripDay, DayActivity, Campground, UnassignedTripActivities, UnassignedTripCampground
 from forms import CreateAccountForm, CreateTripForm, LoginForm, LocationSearchForm
-from functions import search_by_location
+from functions import search_by_location, get_location_details
 
 app = Flask(__name__)
 app.app_context().push()
@@ -141,3 +141,9 @@ def search():
 @app.route("/trips/stay")
 def show_campgrounds():
 	return render_template("/trip/stay.html")
+
+@app.route("/campgrounds/<campground_id>")
+def show_campground_details(campground_id):
+    campground_details = get_location_details(campground_id)
+	
+    return render_template("trip/location-details.html", location=campground_details, session=session)
