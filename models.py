@@ -56,11 +56,27 @@ class Location(db.Model):
 
 	id = db.Column(db.Text, primary_key=True, autoincrement=False)
 	name = db.Column(db.Text)
-	lat = db.Column(db.Float)
-	long = db.Column(db.Float)
+	phone = db.Column(db.Text)
+	email = db.Column(db.Text)
+	description = db.Column(db.Text)
+	directions = db.Column(db.Text)
+	address = db.Column(db.Text)
+	city = db.Column(db.Text)
+	state = db.Column(db.Text)
+	zip = db.Column(db.Text)
+	lat = db.Column(db.Text)
+	long = db.Column(db.Text)
 
 	def __repr__(self):
 		return f"<Location #{self.id}: {self.name}>"
+
+class Link(db.Model):
+	__tablebane__ = "links"
+
+	id = db.Column(db.Integer, primary_key=True)
+	title = db.Column(db.Text)
+	url = db.Column(db.Text)
+	location = db.Column(db.ForeignKey("locations.id"))
 
 class Activity(db.Model):
 	__tablename__ = "activities"
@@ -90,7 +106,7 @@ class TripDay(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	trip_id = db.Column(db.ForeignKey("trips.id"), nullable=False)
 	date = db.Column(db.Date, nullable=False)
-	campground = db.Column(db.ForeignKey("campgrounds.id"))
+	campground = db.Column(db.ForeignKey("locations.id"))
 	
 	def __repr__(self):
 		return f"<TripDay Trip#{self.trip_id} date: {self.date}>"
@@ -103,22 +119,22 @@ class DayActivity(db.Model):
 	activity = db.Column(db.ForeignKey("activities.name"))
 	location = db.Column(db.ForeignKey("locations.id"))
 
-class Campground(db.Model):
-	__tablename__ = "campgrounds"
+# class Campground(db.Model):
+# 	__tablename__ = "campgrounds"
 
-	id = db.Column(db.Text, primary_key=True, autoincrement=False)
-	name = db.Column(db.Text, nullable=False)
-	lat = db.Column(db.Float)
-	long = db.Column(db.Float)
+# 	id = db.Column(db.Text, primary_key=True, autoincrement=False)
+# 	name = db.Column(db.Text, nullable=False)
+# 	lat = db.Column(db.Float)
+# 	long = db.Column(db.Float)
 
-	def __repr__(self):
-		return f"<Campground #{self.id}: {self.name}>"
+# 	def __repr__(self):
+# 		return f"<Campground #{self.id}: {self.name}>"
 	
 class UnassignedTripCampground(db.Model):
 	__tablename__ = "usgnd_campgrounds"
 
 	id = db.Column(db.Integer, primary_key=True)
-	campground = db.Column(db.ForeignKey("campgrounds.id"))
+	campground = db.Column(db.ForeignKey("locations.id"))
 	trip = db.Column(db.ForeignKey("trips.id"))
 
 class UnassignedTripActivities(db.Model):

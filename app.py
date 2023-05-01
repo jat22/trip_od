@@ -5,7 +5,8 @@ from keys import REC_API_KEY, MAPS_KEY, TOMTOM_KEY
 
 from sqlalchemy.exc import IntegrityError
 
-from models import connect_db, db, User, Trip, Location, Activity, TripDay, DayActivity, Campground, UnassignedTripActivities, UnassignedTripCampground
+
+from models import connect_db, db, User, Trip, Location, Activity, TripDay, DayActivity, UnassignedTripActivities, UnassignedTripCampground, Link
 from forms import CreateAccountForm, CreateTripForm, LoginForm, LocationSearchForm
 from functions import search_by_location, get_location_details
 
@@ -147,3 +148,35 @@ def show_campground_details(campground_id):
     campground_details = get_location_details(campground_id)
 	
     return render_template("trip/location-details.html", location=campground_details, session=session)
+
+@app.route("/trips/campgrounds/<campground_id>/add", methods=["POST"])
+def add_campground(campground_id):
+
+    if Location.query.get(campground_id):
+        new_unassinged_cg = UnassignedTripCampground(
+            campground = campground_id,
+            trip = session[CURR_TRIP].id
+        )
+        db.session.add(new_unassinged_cg)
+        db.session.commit()
+    else:
+        cmpgrd_data = get_location_details(campground_id)
+        links = cmpgrd_data.pop("links")
+
+        new_location = Location(**cmpgrd_data)
+        db.session.add(new_location)
+        db.session.commit()
+
+        for link in links:
+            new_link = Link(**link)
+            db.session.add(new_link)
+            db.session.commit()
+
+        new_unassinged_cg = UnassignedTripCampground(
+            campground = campground_id,
+            trip = session[CURR_TRIP])
+        
+        db.session.add(new_unassinged_cg)
+        db.session.commit()
+
+    return redirect("/trips/stay")

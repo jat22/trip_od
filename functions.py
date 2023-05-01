@@ -125,7 +125,7 @@ def get_activities_campgrounds(lat, long, radius):
                 if loc_act == act["name"]:
                     act["locations"].append(loc)
     
-    campgrounds = filter_campgrounds(facilities)
+    campgrounds = filter_campgrounds(locations)
 
     return {"activities": activities, "campgrounds" : campgrounds}
 
@@ -134,10 +134,10 @@ def get_activities_campgrounds(lat, long, radius):
 
 ############################### FILETER AND CLEAN #########################
 def filter_campgrounds(facilities):
+    print(facilities)
     campgrounds = [fac for fac in facilities 
-                   if fac["FacilityTypeDescription"] == "Campground"]
-    clean_campgrounds = clean_resources("Facility", campgrounds)
-    return clean_campgrounds
+                   if "CAMPING" in fac["activities"]]
+    return campgrounds
 
 def clean_resources(type, resource_list):
     if type == "Facility":
@@ -172,10 +172,15 @@ def clean_location_data(resp_data):
         "phone" : data[f"{type}Phone"],
         "description" : data[f"{type}Description"],
         "directions" : data[f"{type}Directions"],
-        "address" : data[f"{type.upper()}ADDRESS"][0][f"{type}StreetAddress1"],
-        "city" : data[f"{type.upper()}ADDRESS"][0]["City"],
-        "state" : data[f"{type.upper()}ADDRESS"][0]["AddressStateCode"],
-        "zip" : data[f"{type.upper()}ADDRESS"][0]["PostalCode"],
-        "links" : [{"title" : link["Title"], "url" : link["URL"]} for link in data["LINK"]]
+        "address" : data.get(f"{type.upper()}ADDRESS")[0][f"{type}StreetAddress1"],
+        "city" : data.get(f"{type.upper()}ADDRESS")[0]["City"],
+        "state" : data.get(f"{type.upper()}ADDRESS")[0]["AddressStateCode"],
+        "zip" : data.get(f"{type.upper()}ADDRESS")[0]["PostalCode"],
+        "lat" : data[f"{type}Latitude"],
+        "long" : data[f"{type}Longitude"],
+        "links" : [{"title" : link["Title"], 
+                    "url" : link["URL"],
+                    "location" : id_type + data[f"{type}ID"]} 
+                    for link in data["LINK"]]
 	}
     return details

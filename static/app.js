@@ -58,12 +58,18 @@ $(document).ready(function(){
 			$("#results-list").append(
 				`<li class="list-group-item">
 					<a href="/campgrounds/${campground.id}">${campground.name}</a>
-					<form action="/trips/campgrounds/add" method="POST">
-						<input type="hidden" value="${campground.id}">
+					<form action="/trips/campgrounds/${campground.id}/add" method="POST">
 						<button type="submit" class="btn btn-sm btn-info">Add To Trip</button>
 					</form>
 				</li>`
 			)
+		)
+	}
+	if(window.location.href.indexOf("http://127.0.0.1:5000/trips/where") > -1){
+		states = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado", "Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]
+
+		states.forEach( state =>
+			$("#state-field").append(`<option>${state}</option`)
 		)
 	}
 })
