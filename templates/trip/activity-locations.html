@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ activity_name }}{% endblock %}
+
+
+{% block content %}
+
+<div class="container" id="results-container">
+	<div class="card">
+		<h2 class="card-title">{{ activity_name }} Locations</h2>
+		<div class="card-body">
+			<ul class="list-group list-group-flush" id="activity-locations">
+			</ul>
+		</div>
+		<a href="/trips/{{ trip_id }}/activities" class="btn btn-secondary">Back</a>
+	</div>
+</div>
+
+<script> let activityName = "{{ activity_name }}"; let tripId="{{ trip_id }}"</script>
+
+{% endblock %}

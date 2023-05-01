@@ -1,17 +1,18 @@
-{% extend "/results/results-base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}Stay{% endblock %}
 
-{% block header %}
-<div class="container">
-	<h2>Where would you like to stay?</h2>
-</div>>
-{% endblock %}
+{% block content %}
 
-{% block next_link %}
-	<a href="/trips/what" class="btn btn-secondary" role="button">Next</a>
-{% endblock %}
-
-{% block script %}
-<script> let results = "{{ results|tojson }}"; </script>
+<div class="container" id="results-container">
+	<div class="card">
+		<h2 class="card-title">Where Do You Want to Stay?</h2>
+		<div class="card-body">
+			<ul class="list-group list-group-flush" id="results-list">
+			</ul>
+		</div>
+		<a href="/trips/{{ trip_id }}/activities" class="btn btn-secondary">Next</a>
+	</div>
+</div>
+<script> let tripId= "{{ trip_id }}"; </script>
 {% endblock %}

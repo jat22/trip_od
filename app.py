@@ -96,7 +96,7 @@ def logout():
     return redirect('/')
 
 
-####################### TRIP VIEW FUNCTIONS ##############################
+####################### CREATES TRIP##############################
 
 @app.route("/trips/create", methods=["GET", "POST"])
 def create_trip():
@@ -122,10 +122,15 @@ def create_trip():
     
     return render_template("form-simple.html", form=form, title="New Trip", action="/trips/create", submit_button="Create", back_action="/", method="POST")
 
+
+
+####################### LOCATION SEARCH INPUT##############
 @app.route("/trips/<int:trip_id>/where")
 def trip_location(trip_id):
-    return render_template("/trip/where.html", trip_id=trip_id)
+    return render_template("/trip/search.html", trip_id=trip_id)
 
+
+################### LOCATION SEARCH
 @app.route("/api/search")
 def search():
     city = request.args.get("city")
@@ -138,28 +143,35 @@ def search():
     return jsonify(results)
 
 
-@app.route("/trips/<int:trip_id>/stay")
-def show_campgrounds(trip_id):
-	return render_template("/trip/stay.html", trip_id=trip_id)
 
+
+########################CAMPGROUNDS####################
+
+########   Show Campground Results   #########
+@app.route("/trips/<int:trip_id>/campgrounds")
+def show_campgrounds(trip_id):
+    return render_template("/results/campgrounds.html", trip_id=trip_id)
+
+####### Campground Details
 @app.route("/campgrounds/<campground_id>")
 def show_campground_details(campground_id):
     campground_details = get_location_details(campground_id)
 	
-    return render_template("/trip/location-details.html", location=campground_details, session=session)
+    return render_template("/trip/campground-details.html", location=campground_details, session=session)
 
-@app.route("/trips/<int:trip_id>/campgrounds/<campground_id>/add", methods=["POST"])
-def add_campground(trip_id, campground_id):
+############# Add Campground to Trip
+@app.route("/trips/<int:trip_id>/campgrounds/<location_id>/add", methods=["POST"])
+def add_campground(trip_id, location_id):
 
-    if Location.query.get(campground_id):
+    if Location.query.get(location_id):
         new_unassinged_cg = UnassignedTripCampground(
-            campground = campground_id,
+            campground = location_id,
             trip = session[CURR_TRIP].id
         )
         db.session.add(new_unassinged_cg)
         db.session.commit()
     else:
-        cmpgrd_data = get_location_details(campground_id)
+        cmpgrd_data = get_location_details(location_id)
         links = cmpgrd_data.pop("links")
 
         new_location = Location(**cmpgrd_data)
@@ -172,14 +184,87 @@ def add_campground(trip_id, campground_id):
             db.session.commit()
 
         new_unassinged_cg = UnassignedTripCampground(
-            campground = campground_id,
+            campground = location_id,
             trip = trip_id)
         
         db.session.add(new_unassinged_cg)
         db.session.commit()
+    flash(f"{cmpgrd_data['name']} added to your trip", "success")
+    return redirect(f"/trips/{trip_id}/campgrounds")
 
-    return redirect(f"/trips/{trip_id}/stay")
 
-@app.route("/trips/<int:trip_id>/what")
+################### ACTIVITIES ###################
+
+########### Activity Search Results
+@app.route("/trips/<int:trip_id>/activities")
 def show_activitiy_options(trip_id):
     return render_template("/results/activities.html", trip_id=trip_id)
+
+@app.route("/trips/<int:trip_id>/<activity_name>")
+def activity_locations(trip_id, activity_name):
+    return render_template("trip/activity-locations.html", trip_id=trip_id, activity_name=activity_name)
+
+############### Activity location page
+@app.route("/trips/<int:trip_id>/<activity_name>/<location_id>/add", methods=["POST"])
+def add_activity_to_trip(trip_id, activity_name, location_id):
+    if not Activity.query.get(activity_name):
+        new_activity = Activity(name = activity_name)
+        db.session.add(new_activity)
+        db.session.commit()
+
+    if Location.query.get(location_id):
+        new_unassigned_activity = UnassignedTripActivities(
+            activity = activity_name,
+            location = location_id,
+            trip = trip_id
+        )
+        db.session.add(new_unassigned_activity)
+        db.session.commit()
+    else:
+        location_data = get_location_details(location_id)
+        links = location_data.pop("links")
+
+        new_location = Location(**location_data)
+        db.session.add(new_location)
+        db.session.commit()
+
+        for link in links:
+            new_link = Link(**link)
+            db.session.add(new_link)
+            db.session.commit()
+
+        new_unassigned_activity = UnassignedTripActivities(
+            activity = activity_name,
+            location = location_id,
+            trip = trip_id
+        )
+        db.session.add(new_unassigned_activity)
+        db.session.commit()
+
+    flash(f"{activity_name} added to your trip", "success")
+
+    return redirect(f"/trips/{trip_id}/activities")
+
+
+
+
+
+    ### details about the location and button to add specific activity to trip ---- trips/id/activities/<activity_name>/<location_id>add (passing activity_name and location_id)
+
+# @app.route("/locations/<location_id>")
+# def show_locaiton_details(location_id):
+#     location_details = get_location_details(location_id)
+
+#     return render_template("/trip/location-details.html", location=location_details, session=session)
+
+
+
+# @app.route("locations/<location_id>/<acitivty_name>")
+# def add_session_activity(location_id, activity_name):
+#     session["curr_activity"] = activity_name
+#     return redirect(f"/location/{location_id}")
+
+
+@app.route("/trips/<int:trip_id>/activities/<activity_name>/add")
+def add_unassigned_acitivity(trip_id, activity_name):
+    location = request.form.get("location")

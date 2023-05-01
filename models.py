@@ -141,5 +141,6 @@ class UnassignedTripActivities(db.Model):
 	__tablename__ = "usgnd_acts"
 
 	id = db.Column(db.Integer, primary_key=True)
-	campground = db.Column(db.ForeignKey("activities.name"))
+	activity = db.Column(db.ForeignKey("activities.name"))
+	location = db.Column(db.ForeignKey("locations.id"))
 	trip = db.Column(db.ForeignKey("trips.id"))
