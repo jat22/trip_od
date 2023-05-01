@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}What To Do?{% endblock %}
+
+{% block content %}
+<div class="container" id="results-container">
+	<div class="card">
+		<h2 class="card-title">What Do You Want to Do?</h2>
+		<div class="card-body">
+			<ul class="list-group list-group-flush" id="results-list">
+			</ul>
+		</div>
+		<a href="/trips/{{ trip_id }}" class="btn btn-secondary">Next</a>
+	</div>
+</div>
+<script> let tripId= "{{ trip_id }}"; </script>
+{% endblock %}

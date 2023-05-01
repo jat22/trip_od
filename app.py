@@ -118,14 +118,13 @@ def create_trip():
         
         session[CURR_TRIP] = new_trip.id
         
-        return redirect(f"/trips/where")
+        return redirect(f"/trips/{new_trip.id}/where")
     
     return render_template("form-simple.html", form=form, title="New Trip", action="/trips/create", submit_button="Create", back_action="/", method="POST")
 
-@app.route("/trips/where")
-def trip_location():
-    form = LocationSearchForm()
-    return render_template("/trip/where.html", form=form, title="Where", action="/trips/stay", submit_button="Next", back_action="/", method="GET")
+@app.route("/trips/<int:trip_id>/where")
+def trip_location(trip_id):
+    return render_template("/trip/where.html", trip_id=trip_id)
 
 @app.route("/api/search")
 def search():
@@ -139,18 +138,18 @@ def search():
     return jsonify(results)
 
 
-@app.route("/trips/stay")
-def show_campgrounds():
-	return render_template("/trip/stay.html")
+@app.route("/trips/<int:trip_id>/stay")
+def show_campgrounds(trip_id):
+	return render_template("/trip/stay.html", trip_id=trip_id)
 
 @app.route("/campgrounds/<campground_id>")
 def show_campground_details(campground_id):
     campground_details = get_location_details(campground_id)
 	
-    return render_template("trip/location-details.html", location=campground_details, session=session)
+    return render_template("/trip/location-details.html", location=campground_details, session=session)
 
-@app.route("/trips/campgrounds/<campground_id>/add", methods=["POST"])
-def add_campground(campground_id):
+@app.route("/trips/<int:trip_id>/campgrounds/<campground_id>/add", methods=["POST"])
+def add_campground(trip_id, campground_id):
 
     if Location.query.get(campground_id):
         new_unassinged_cg = UnassignedTripCampground(
@@ -174,9 +173,13 @@ def add_campground(campground_id):
 
         new_unassinged_cg = UnassignedTripCampground(
             campground = campground_id,
-            trip = session[CURR_TRIP])
+            trip = trip_id)
         
         db.session.add(new_unassinged_cg)
         db.session.commit()
 
-    return redirect("/trips/stay")
+    return redirect(f"/trips/{trip_id}/stay")
+
+@app.route("/trips/<int:trip_id>/what")
+def show_activitiy_options(trip_id):
+    return render_template("/results/activities.html", trip_id=trip_id)

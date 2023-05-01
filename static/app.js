@@ -45,27 +45,53 @@ async function executeSearch(event){
 
 	localStorage.setItem(currSearch, JSON.stringify(response.data))
 
-	window.location.href = "/trips/stay"
+	window.location.href = `/trips/${tripId}/stay`
 }
 
 $searchButton.on("click", executeSearch);
 
 
 $(document).ready(function(){
-	if(window.location.href.indexOf("http://127.0.0.1:5000/trips/stay") > -1){
-		campgrounds = JSON.parse(localStorage.getItem(currSearch)).campgrounds
+	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/stay`) > -1){
+		const campgrounds = JSON.parse(localStorage.getItem(currSearch)).campgrounds
 		campgrounds.forEach(campground =>
 			$("#results-list").append(
 				`<li class="list-group-item">
 					<a href="/campgrounds/${campground.id}">${campground.name}</a>
-					<form action="/trips/campgrounds/${campground.id}/add" method="POST">
+					<form action="/trips/${tripId}/campgrounds/${campground.id}/add" method="POST">
 						<button type="submit" class="btn btn-sm btn-info">Add To Trip</button>
 					</form>
 				</li>`
 			)
 		)
 	}
-	if(window.location.href.indexOf("http://127.0.0.1:5000/trips/where") > -1){
+
+	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/what`) > -1){
+		const activities = JSON.parse(localStorage.getItem(currSearch)).activities
+
+		console.log(activities)
+
+		activities.forEach(function(activity){
+			$("#results-list").append(
+				`<li>
+					<div class="card">
+						<div class="card-body"
+						<h5 class=card-title>${activity.name}</h5>
+						<ul class="list-group list-group-flush" id="${activity.name}">
+				</div>`
+			);
+			activity.locations.forEach( location =>
+				$(`#${activity.name}`).append(
+					`<li class="list-group-item">
+						<a href="http://127.0.0.1:5000/locations/${location.id}">${location.name}</a>
+					</li>`
+				)
+			
+			)
+		})
+	}
+
+	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/where`) > -1){
 		states = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado", "Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]
 
 		states.forEach( state =>

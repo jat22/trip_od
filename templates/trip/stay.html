@@ -11,9 +11,8 @@
 			<ul class="list-group list-group-flush" id="results-list">
 			</ul>
 		</div>
-		<a href="/trips/what" class="btn btn-secondary">Next</a>
+		<a href="/trips/{{ trip_id }}/what" class="btn btn-secondary">Next</a>
 	</div>
 </div>
-
-
+<script> let tripId= "{{ trip_id }}"; </script>
 {% endblock %}

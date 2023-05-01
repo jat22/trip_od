@@ -10,7 +10,7 @@
 			<h2 class="card-title">{{ location["name"] }}</h2>
 			
 			{% if session["curr_trip"] %}
-			<form action="/trips/campgrounds/add" method="POST">
+			<form action="/trips/{{ session['curr_trip'] }}/campgrounds/{{ location['id'] }}/add" method="POST">
 				<input type="hidden" value="{{ location['id'] }}">
 				<button type="submit" class="btn btn-sm btn-info">Add To Trip</button>
 			</form>
