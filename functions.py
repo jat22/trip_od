@@ -2,6 +2,7 @@
 # from flask_debugtoolbar import DebugToolbarExtension
 import requests, json, asyncio
 from keys import REC_API_KEY, MAPS_KEY, TOMTOM_KEY
+from datetime import timedelta, date, datetime
 
 REC_BASE_URL = "https://ridb.recreation.gov/api/v1"
 GEOCODE_BASE_URL = "https://api.tomtom.com/search/2/structuredGeocode.json"
@@ -184,3 +185,22 @@ def clean_location_data(resp_data):
                     for link in data["LINK"]]
 	}
     return details
+
+
+def make_date_dict(date):
+    date_dict = {
+        "dow" : date.strftime("%a"),
+        "month" : date.strftime("%b"),
+        "day" : date.strftime("%-d"),
+        "year" : date.strftime("%Y"),
+        "id" : date.strftime("%Y%m%d"),
+        "datetime" : date
+    }
+    return date_dict
+
+def trip_dates(start, end):
+    date_range = [start + timedelta(days = x) for x in range((end-start).days + 1)]
+
+    trip_dates = [make_date_dict(date) for date in date_range]
+
+    return trip_dates

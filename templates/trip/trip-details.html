@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}{{ trip.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="card">
+		<div class="card-body">
+			<h2 class="card-title">{{ trip.name }}</h2>
+			<h4 class="card-subtitle">{{ trip.days[0]["month"] }} {{ trip.days[0]["day"] }}, {{ trip.days[0]["year"] }} to {{ trip.days[-1]["month"] }} {{ trip.days[-1]["day"] }}, {{ trip.days[-1]["year"] }}</h4>
+		</div>
+	</div>
+</div>
+
+<div class="container">
+	<div class="card">
+		<div class="card-body">
+			<h2 class="card-title">Campgrounds</h2>
+			<ul>
+			{% for campground in trip.unassigned_cgs %}
+				<li>
+					<a href="/loctions/{{ campground.id }}">{{ campground.name }}</a>
+					<form action="/trips/{{ trip.id }}/campground/assign", method="POST">
+						<select name="camp-day" id="day">
+							<option value="">Pick A Day</option>
+							{% for day in trip.days %}
+							<option value="{{ day.id }}">{{ day["dow"] }} {{ day["month"] }} {{ day["day"] }}, {{ day["year"] }}</option>
+							{% endfor %}
+						</select>
+						<input type="hidden" name="location-id" value="{{ campground.id }}">
+						<button type="submit" class="btn btn-sm btn-secondary">Add</button>
+					</form>
+				</li>
+			{% endfor %}
+			</ul>
+		</div>
+	</div>
+	<div class="card">
+		<div class="card-body">
+			<h2 class="card-title">Activities</h2>
+			<ul>
+			{% for act in trip.unassigned_acts %}
+				<li>{{ act.activity }} @ 
+					<a href="/loctions/{{ act.location.id }}">{{ act.location.name}}</a>
+					<form action="/trips/{{ trip.id }}/activity/assign", method="POST">
+						<select name="act-day" id="day">
+							<option value="">Pick A Day</option>
+							{% for day in trip.days %}
+							<option value="{{ day.id }}">{{ day["dow"] }} {{ day["month"] }} {{ day["day"] }}, {{ day["year"] }}</option>
+							{% endfor %}
+						</select>
+						<input type="hidden" name="location-id" value="{{ act.id }}">
+						<button type="submit" class="btn btn-sm btn-secondary">Add</button>
+					</form>
+				</li>
+			{% endfor %}
+			</ul>
+		</div>
+	</div>
+	<div class="card">
+		<div class="card-body">
+			<h2 class="card-title">Days</h2>
+			<ul>
+				{% for day in trip.days %}
+					<li>
+						<div class="card">
+							<div class="card-body">
+								<h5 class="card-title">{{ day["dow"] }}</h5>
+								<h6 class="card-subtitle">{{ day["month"] }} {{ day["day"] }}</h6>
+								<div class="container">
+									<h3>Campground</h3>
+									<h6> {{ day.campground.name }}</h6>
+								</div>
+							</div>
+						</div>
+						
+					</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+<!-- <h4 class="card-subtitle">{{ dates[0]["month"] }} {{ dates[0]["day"] }}, {{ dates[0]["year"] }} to {{ dates[-1]["month"] }} {{ dates[-1]["day"] }}, {{ dates[-1]["year"] }}</h4> -->

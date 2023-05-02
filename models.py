@@ -16,6 +16,7 @@ class User(db.Model):
 	password = db.Column(db.Text, nullable=False)
 	first_name = db.Column(db.Text)
 	last_name = db.Column(db.Text)
+	trips = db.relationship("Trip")
 	
 	def __repr__(self):
 		return f"<User:{self.username}>"
@@ -47,6 +48,11 @@ class Trip(db.Model):
 	end_date = db.Column(db.Date)
 	description = db.Column(db.Text)
 	user = db.Column(db.ForeignKey("users.username"))
+	days = db.Relationship("TripDay")
+	unassigned_cgs = db.Relationship("Location",
+				  secondary="u_campgrounds")
+	unassigned_acts = db.Relationship("UnassignedTripActivities")
+	
 
 	def __repr__(self):
 		return f"<Trip #{self.id}: {self.name} for {self.user}>"
@@ -66,6 +72,12 @@ class Location(db.Model):
 	zip = db.Column(db.Text)
 	lat = db.Column(db.Text)
 	long = db.Column(db.Text)
+	links = db.Relationship("Link")
+	day_acts = db.Relationship("DayActivity", backref="location")
+	u_acts = db.Relationship("UnassignedTripActivities", backref="location")
+	trip_day = db.Relationship("TripDay", backref="location")
+	u_campgrounds = db.Relationship("UnassignedTripCampground", backref="location")
+	trip_day = db.Relationship("TripDay", backref="campground")
 
 	def __repr__(self):
 		return f"<Location #{self.id}: {self.name}>"
@@ -78,13 +90,55 @@ class Link(db.Model):
 	url = db.Column(db.Text)
 	location = db.Column(db.ForeignKey("locations.id"))
 
-class Activity(db.Model):
-	__tablename__ = "activities"
+class TripDay(db.Model):
+	__tablename__ = "trip_days"
 
-	name = db.Column(db.Text, primary_key=True, nullable=False)
+	id = db.Column(db.Integer, primary_key=True)
+	trip_id = db.Column(db.ForeignKey("trips.id"), nullable=False)
+	date = db.Column(db.Date, nullable=False)
+	dow = db.Column(db.Text)
+	year = db.Column(db.Text)
+	month = db.Column(db.Text)
+	day = db.Column(db.Text)
+	campground_id = db.Column(db.ForeignKey("locations.id"), nullable=True)
+
+
 	
 	def __repr__(self):
-		return f"<Activity: {self.name}>"
+		return f"<TripDay Trip#{self.trip_id} date: {self.date}>"
+
+class DayActivity(db.Model):
+	__tablename__ = "day_acts"
+
+	id = db.Column(db.Integer, primary_key=True)
+	trip_day_id = db.Column(db.ForeignKey("trip_days.id"), nullable=False)
+	activity = db.Column(db.Text)
+	location_id = db.Column(db.ForeignKey("locations.id"))
+	trip_day = db.Relationship("TripDay", backref="activity")
+
+
+class UnassignedTripCampground(db.Model):
+	__tablename__ = "u_campgrounds"
+
+	id = db.Column(db.Integer, primary_key=True)
+	campground = db.Column(db.ForeignKey("locations.id"))
+	trip = db.Column(db.ForeignKey("trips.id"))
+
+class UnassignedTripActivities(db.Model):
+	__tablename__ = "u_acts"
+
+	id = db.Column(db.Integer, primary_key=True)
+	activity = db.Column(db.Text)
+	location_id = db.Column(db.ForeignKey("locations.id"))
+	trip = db.Column(db.ForeignKey("trips.id"))
+
+# class Activity(db.Model):
+# 	__tablename__ = "activities"
+
+# 	name = db.Column(db.Text, primary_key=True, nullable=False)
+	
+# 	def __repr__(self):
+# 		return f"<Activity: {self.name}>"
 	
 	# @classmethod
 	# def update_activities(self):
@@ -100,24 +154,7 @@ class Activity(db.Model):
 	# 		db.session.add(new_activity)
 	# 	db.session.commit()
 
-class TripDay(db.Model):
-	__tablename__ = "trip_days"
 
-	id = db.Column(db.Integer, primary_key=True)
-	trip_id = db.Column(db.ForeignKey("trips.id"), nullable=False)
-	date = db.Column(db.Date, nullable=False)
-	campground = db.Column(db.ForeignKey("locations.id"))
-	
-	def __repr__(self):
-		return f"<TripDay Trip#{self.trip_id} date: {self.date}>"
-
-class DayActivity(db.Model):
-	__tablename__ = "day_acts"
-
-	id = db.Column(db.Integer, primary_key=True)
-	trip_day = db.Column(db.ForeignKey("trip_days.id"), nullable=False)
-	activity = db.Column(db.ForeignKey("activities.name"))
-	location = db.Column(db.ForeignKey("locations.id"))
 
 # class Campground(db.Model):
 # 	__tablename__ = "campgrounds"
@@ -130,17 +167,3 @@ class DayActivity(db.Model):
 # 	def __repr__(self):
 # 		return f"<Campground #{self.id}: {self.name}>"
 	
-class UnassignedTripCampground(db.Model):
-	__tablename__ = "usgnd_campgrounds"
-
-	id = db.Column(db.Integer, primary_key=True)
-	campground = db.Column(db.ForeignKey("locations.id"))
-	trip = db.Column(db.ForeignKey("trips.id"))
-
-class UnassignedTripActivities(db.Model):
-	__tablename__ = "usgnd_acts"
-
-	id = db.Column(db.Integer, primary_key=True)
-	activity = db.Column(db.ForeignKey("activities.name"))
-	location = db.Column(db.ForeignKey("locations.id"))
-	trip = db.Column(db.ForeignKey("trips.id"))

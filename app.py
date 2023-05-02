@@ -2,13 +2,14 @@ from flask import Flask, redirect, render_template, url_for, request, flash, ses
 from flask_debugtoolbar import DebugToolbarExtension
 import json
 from keys import REC_API_KEY, MAPS_KEY, TOMTOM_KEY
-
+from datetime import timedelta, date, datetime
+from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 
 
-from models import connect_db, db, User, Trip, Location, Activity, TripDay, DayActivity, UnassignedTripActivities, UnassignedTripCampground, Link
+from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UnassignedTripActivities, UnassignedTripCampground, Link
 from forms import CreateAccountForm, CreateTripForm, LoginForm, LocationSearchForm
-from functions import search_by_location, get_location_details
+from functions import search_by_location, get_location_details, make_date_dict, trip_dates
 
 app = Flask(__name__)
 app.app_context().push()
@@ -115,7 +116,36 @@ def create_trip():
 		)
         db.session.add(new_trip)
         db.session.commit()
+
         
+        trip_days = trip_dates(new_trip.start_date, new_trip.end_date)
+
+        for d in trip_days:
+            new_day = TripDay(
+                trip_id = new_trip.id,
+                date = d["datetime"],
+                dow = d["dow"],
+                year = d["year"],
+                month = d["month"],
+                day = d["day"]
+            )
+            db.session.add(new_day)
+            db.session.commit()
+
+        # trip_days = []
+        # i = new_trip.start_date
+        # while i <= new_trip.end_date:
+        #     trip_days.append(i)
+        #     i += timedelta(days=1)
+
+        # for day in trip_days:
+        #     new_day = TripDay(
+        #         trip_id = new_trip.id,
+        #         date = day
+        #     )
+        #     db.session.add(new_day)
+        #     db.session.commit()
+
         session[CURR_TRIP] = new_trip.id
         
         return redirect(f"/trips/{new_trip.id}/where")
@@ -166,7 +196,7 @@ def add_campground(trip_id, location_id):
     if Location.query.get(location_id):
         new_unassinged_cg = UnassignedTripCampground(
             campground = location_id,
-            trip = session[CURR_TRIP].id
+            trip = session[CURR_TRIP]
         )
         db.session.add(new_unassinged_cg)
         db.session.commit()
@@ -189,7 +219,7 @@ def add_campground(trip_id, location_id):
         
         db.session.add(new_unassinged_cg)
         db.session.commit()
-    flash(f"{cmpgrd_data['name']} added to your trip", "success")
+    # flash(f"{cmpgrd_data['name']} added to your trip", "success")
     return redirect(f"/trips/{trip_id}/campgrounds")
 
 
@@ -207,15 +237,13 @@ def activity_locations(trip_id, activity_name):
 ############### Activity location page
 @app.route("/trips/<int:trip_id>/<activity_name>/<location_id>/add", methods=["POST"])
 def add_activity_to_trip(trip_id, activity_name, location_id):
-    if not Activity.query.get(activity_name):
-        new_activity = Activity(name = activity_name)
-        db.session.add(new_activity)
-        db.session.commit()
-
+    
     if Location.query.get(location_id):
+
+
         new_unassigned_activity = UnassignedTripActivities(
             activity = activity_name,
-            location = location_id,
+            location_id = location_id,
             trip = trip_id
         )
         db.session.add(new_unassigned_activity)
@@ -235,7 +263,7 @@ def add_activity_to_trip(trip_id, activity_name, location_id):
 
         new_unassigned_activity = UnassignedTripActivities(
             activity = activity_name,
-            location = location_id,
+            location_id = location_id,
             trip = trip_id
         )
         db.session.add(new_unassigned_activity)
@@ -246,25 +274,26 @@ def add_activity_to_trip(trip_id, activity_name, location_id):
     return redirect(f"/trips/{trip_id}/activities")
 
 
+@app.route("/trips/<int:trip_id>")
+def show_a_trip(trip_id):
+    trip = Trip.query.get(trip_id)
+    # dates = [make_date_dict(day.date) for day in trip.days]
 
+    return render_template("/trip/trip-details.html", trip = trip)
 
+@app.route("/trips/<int:trip_id>/campground/assign", methods=["POST"])
+def assign_campground(trip_id):
+    day_id = request.form.get("camp-day")
+    campground_id = request.form.get("location-id")
 
-    ### details about the location and button to add specific activity to trip ---- trips/id/activities/<activity_name>/<location_id>add (passing activity_name and location_id)
+    trip_day = TripDay.query.get(day_id)
 
-# @app.route("/locations/<location_id>")
-# def show_locaiton_details(location_id):
-#     location_details = get_location_details(location_id)
+    trip_day.campground_id = campground_id
+    db.session.add(trip_day)
 
-#     return render_template("/trip/location-details.html", location=location_details, session=session)
+    u_campground = UnassignedTripCampground.query.filter(and_(UnassignedTripCampground.campground==campground_id, UnassignedTripCampground.trip==trip_id)).first()
+    
+    db.session.delete(u_campground)
+    db.session.commit()
 
-
-
-# @app.route("locations/<location_id>/<acitivty_name>")
-# def add_session_activity(location_id, activity_name):
-#     session["curr_activity"] = activity_name
-#     return redirect(f"/location/{location_id}")
-
-
-@app.route("/trips/<int:trip_id>/activities/<activity_name>/add")
-def add_unassigned_acitivity(trip_id, activity_name):
-    location = request.form.get("location")
+    return redirect(f"/trips/{trip_id}")
