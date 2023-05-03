@@ -84,14 +84,21 @@ $(document).ready(function(){
 			$("#results-list").append(
 				`<li>
 					<div class="card">
-						<div class="card-body"
-						<h5 class=card-title><a href="/trips/${tripId}/${activity.name}">${activity.name}</a></h5>
-				</div>`
+						<div class="card-body">
+							<form action="/trips/${tripId}/${activity.name.replace(/\s/g, '')}">
+								<input type="hidden" value="${activity.name}" name="activity">
+								<button type="submit" class="btn btn-link">
+									<h5 class="card-title">${activity.name}</h5>
+								</button>
+							</form>
+						</div>
+					</div>
+				</li>`
 			);
 
 		})
 	}
-	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/${activityName}`) > -1){
+	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/${activityName.replace(/\s/g, '')}`) > -1){
 
 		const activities = JSON.parse(localStorage.getItem(currSearch)).activities;
 

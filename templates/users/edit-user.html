@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	<h2>Update User Information</h2>
+	<form action="/users/{{ user.username }}/edit" method="POST">
+		{{ edit_form.hidden_tag() }}
+		{% for field in edit_form if field.widget.input_type != 'hidden' %}
+			{% for error in field.errors %}
+				<span class="text-danger">{{ error }}</span>
+			{% endfor %}
+			{{ field.label }}
+			{{ field(class="form-control") }}
+		{% endfor %}
+		<button type="submit" class="btn btn-secondary">Update</button>
+		<a href="/users/{{ user.username }}" class="btn btn-dark" role="button">Cancel</a>
+	</form>
+</div>
+
+
+
+{% endblock %}
