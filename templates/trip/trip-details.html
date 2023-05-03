@@ -24,7 +24,7 @@
 					<form action="/trips/{{ trip.id }}/campground/assign", method="POST">
 						<select name="camp-day" id="day">
 							<option value="">Pick A Day</option>
-							{% for day in trip.days %}
+							{% for day in days %}
 							<option value="{{ day.id }}">{{ day["dow"] }} {{ day["month"] }} {{ day["day"] }}, {{ day["year"] }}</option>
 							{% endfor %}
 						</select>
@@ -47,7 +47,7 @@
 					<form action="/trips/{{ trip.id }}/activity/assign", method="POST">
 						<select name="act-day" id="day">
 							<option value="">Pick A Day</option>
-							{% for day in trip.days %}
+							{% for day in days %}
 							<option value="{{ day.id }}">{{ day["dow"] }} {{ day["month"] }} {{ day["day"] }}, {{ day["year"] }}</option>
 							{% endfor %}
 						</select>
@@ -63,28 +63,35 @@
 		<div class="card-body">
 			<h2 class="card-title">Days</h2>
 			<ul>
-				{% for day in trip.days %}
+				{% for day in days %}
 					<li>
 						<div class="card">
 							<div class="card-body">
-								<h5 class="card-title">{{ day["dow"] }}</h5>
+								<h3 class="card-title">{{ day["dow"] }}</h3>
 								<h6 class="card-subtitle">{{ day["month"] }} {{ day["day"] }}</h6>
-								<div class="container">
-									<h3>Campground</h3>
+								
+									<h5>Campground</h5>
 									<h6> 
-										<a href="/locations/{{ day.campground.id }}">{{ day.campground.name }}</a>
+										<a href="/locations/{{ day.campground.id }}">{{ day.campground.name }}
+										</a>
+										<form action="/trips/{{ trip.id }}/campground/unassign" action="POST">
+											<button type="submit" class="btn btn=sm btn-dark">Unassign</button>
+										</form>
 									</h6>
-								</div>
-								<div class="container">
-									<h3>Activities</h3>
+							
+								
+									<h5>Activities</h5>
 									{% for act in  day.activities %}
 									<h6> {{ act.activity }} @ 
 										<a href="/locations/{{act.location_id}}">
 											{{ act.location.name }}
 										</a>
+										<form action="/trips/{{ trip.id }}/activity/unassign" action="POST">
+											<button type="submit" class="btn btn=sm btn-dark">Unassign</button>
+										</form>
 									</h6>
 									{% endfor %}
-								</div>
+								
 							</div>
 						</div>
 						
