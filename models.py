@@ -114,7 +114,7 @@ class DayActivity(db.Model):
 	trip_day_id = db.Column(db.ForeignKey("trip_days.id"), nullable=False)
 	activity = db.Column(db.Text)
 	location_id = db.Column(db.ForeignKey("locations.id"))
-	trip_day = db.Relationship("TripDay", backref="activity")
+	trip_day = db.Relationship("TripDay", backref="activities")
 
 
 class UnassignedTripCampground(db.Model):

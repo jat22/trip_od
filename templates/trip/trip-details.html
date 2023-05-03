@@ -16,6 +16,7 @@
 	<div class="card">
 		<div class="card-body">
 			<h2 class="card-title">Campgrounds</h2>
+			<a href="/trips/{{ trip.id }}/campgrounds" class="btn btn-md btn-secondary">More Campgrounds</a>
 			<ul>
 			{% for campground in trip.unassigned_cgs %}
 				<li>
@@ -38,6 +39,7 @@
 	<div class="card">
 		<div class="card-body">
 			<h2 class="card-title">Activities</h2>
+			<a href="/trips/{{ trip.id }}/activities" class="btn btn-md btn-secondary">More Activities</a>
 			<ul>
 			{% for act in trip.unassigned_acts %}
 				<li>{{ act.activity }} @ 
@@ -49,7 +51,7 @@
 							<option value="{{ day.id }}">{{ day["dow"] }} {{ day["month"] }} {{ day["day"] }}, {{ day["year"] }}</option>
 							{% endfor %}
 						</select>
-						<input type="hidden" name="location-id" value="{{ act.id }}">
+						<input type="hidden" name="uact-id" value="{{ act.id }}">
 						<button type="submit" class="btn btn-sm btn-secondary">Add</button>
 					</form>
 				</li>
@@ -69,7 +71,19 @@
 								<h6 class="card-subtitle">{{ day["month"] }} {{ day["day"] }}</h6>
 								<div class="container">
 									<h3>Campground</h3>
-									<h6> {{ day.campground.name }}</h6>
+									<h6> 
+										<a href="/locations/{{ day.campground.id }}">{{ day.campground.name }}</a>
+									</h6>
+								</div>
+								<div class="container">
+									<h3>Activities</h3>
+									{% for act in  day.activities %}
+									<h6> {{ act.activity }} @ 
+										<a href="/locations/{{act.location_id}}">
+											{{ act.location.name }}
+										</a>
+									</h6>
+									{% endfor %}
 								</div>
 							</div>
 						</div>

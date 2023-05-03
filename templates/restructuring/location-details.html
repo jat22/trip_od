@@ -9,12 +9,22 @@
 		<div class="card-body">
 			<h2 class="card-title">{{ location["name"] }}</h2>
 			
-			{% if session["curr_trip"] %}
+			<!-- ADDING ACTIVITY attached to location -->
+			{% if session["curr_trip"] and session['curr_activity']%}
 
-			<form action="/trips/{{ session['curr_trip'] }}/campgrounds/{{ location['id'] }}/add" method="POST">
-				<input type="hidden" value="{{ location['id'] }}">
+			<form action="/trips/{{ session['curr_trip'] }}/activties/{{ session['curr_activity'] }}/add" method="POST">
+				<input type="hidden" value="{{ location['id'] }}" name="location">
 				<button type="submit" class="btn btn-sm btn-info">Add To Trip</button>
 			</form>
+
+			<!-- ADDING CAMPGROUND -->
+			{% if session["curr_trip"] and session["curr_function"] == "campground" %}
+
+
+			<!-- <form action="/trips/{{ session['curr_trip'] }}/campgrounds/{{ location['id'] }}/add" method="POST">
+				<input type="hidden" value="{{ location['id'] }}">
+				<button type="submit" class="btn btn-sm btn-info">Add To Trip</button>
+			</form> -->
 
 			{% endif %}
 

@@ -66,7 +66,7 @@ $(document).ready(function(){
 		campgrounds.forEach(campground =>
 			$("#results-list").append(
 				`<li class="list-group-item">
-					<a href="/campgrounds/${campground.id}">${campground.name}</a>
+					<a href="/locations/${campground.id}">${campground.name}</a>
 					<form action="/trips/${tripId}/campgrounds/${campground.id}/add" method="POST">
 						<button type="submit" class="btn btn-sm btn-info">Add To Trip</button>
 					</form>

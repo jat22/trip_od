@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}MyTrips{% endblock %}
+
+{% block content %}
+<div class="container">
+	<h1>MyTrips</h1>
+</div>
+<div class="container">
+	{% for trip in trips %}
+	<div class="card">
+		<div class="card-body">
+			<a href="/trips/{{ trip.id }}">
+				<h2 class="card-title">{{ trip.name }}</h2>
+				<h4 class="card-subtitle">
+					{{ trip.days[0]["month"] }} {{ trip.days[0]["day"] }}, {{ trip.days[0]["year"] }} to {{ trip.days[-1]["month"] }} {{ trip.days[-1]["day"] }}, {{ trip.days[-1]["year"] }}
+				</h4>
+			</a>
+		</div>
+	</div>
+	{% endfor %}
+</div>
+
+{% endblock %}

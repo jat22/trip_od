@@ -132,20 +132,6 @@ def create_trip():
             db.session.add(new_day)
             db.session.commit()
 
-        # trip_days = []
-        # i = new_trip.start_date
-        # while i <= new_trip.end_date:
-        #     trip_days.append(i)
-        #     i += timedelta(days=1)
-
-        # for day in trip_days:
-        #     new_day = TripDay(
-        #         trip_id = new_trip.id,
-        #         date = day
-        #     )
-        #     db.session.add(new_day)
-        #     db.session.commit()
-
         session[CURR_TRIP] = new_trip.id
         
         return redirect(f"/trips/{new_trip.id}/where")
@@ -182,12 +168,12 @@ def search():
 def show_campgrounds(trip_id):
     return render_template("/results/campgrounds.html", trip_id=trip_id)
 
-####### Campground Details
-@app.route("/campgrounds/<campground_id>")
-def show_campground_details(campground_id):
-    campground_details = get_location_details(campground_id)
+####### Location Details
+@app.route("/locations/<location_id>")
+def show_location_details(location_id):
+    location_details = get_location_details(location_id)
 	
-    return render_template("/trip/campground-details.html", location=campground_details, session=session)
+    return render_template("/trip/location-details.html", location=location_details, session=session)
 
 ############# Add Campground to Trip
 @app.route("/trips/<int:trip_id>/campgrounds/<location_id>/add", methods=["POST"])
@@ -196,7 +182,7 @@ def add_campground(trip_id, location_id):
     if Location.query.get(location_id):
         new_unassinged_cg = UnassignedTripCampground(
             campground = location_id,
-            trip = session[CURR_TRIP]
+            trip = trip_id
         )
         db.session.add(new_unassinged_cg)
         db.session.commit()
@@ -239,8 +225,6 @@ def activity_locations(trip_id, activity_name):
 def add_activity_to_trip(trip_id, activity_name, location_id):
     
     if Location.query.get(location_id):
-
-
         new_unassigned_activity = UnassignedTripActivities(
             activity = activity_name,
             location_id = location_id,
@@ -297,3 +281,30 @@ def assign_campground(trip_id):
     db.session.commit()
 
     return redirect(f"/trips/{trip_id}")
+
+@app.route("/trips/<int:trip_id>/activity/assign", methods=["POST"])
+def assign_activity(trip_id):
+    u_act = UnassignedTripActivities.query.get(request.form.get("uact-id"))
+    
+    new_day_activity = DayActivity(
+        trip_day_id = request.form.get("act-day"),
+        activity = u_act.activity,
+        location_id = u_act.location_id
+    )
+
+    db.session.add(new_day_activity)
+
+    # u_act = UnassignedTripActivities.query.filter(and_(UnassignedTripActivities.activity==activity, UnassignedTripActivities.trip==trip_id)).first()
+
+    db.session.delete(u_act)
+    db.session.commit()
+
+    return redirect(f"/trips/{trip_id}")
+
+
+@app.route("/trips")
+def show_mytrips():
+    user = User.query.get(session[CURR_USER])
+    trips = user.trips
+
+    return render_template("trip/mytrips.html", trips=trips)
