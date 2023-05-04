@@ -123,7 +123,6 @@ class UnassignedTripCampground(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	campground = db.Column(db.ForeignKey("locations.id"))
 	trip = db.Column(db.ForeignKey("trips.id"))
-	#change to trip_id
 
 class UnassignedTripActivities(db.Model):
 	__tablename__ = "u_acts"

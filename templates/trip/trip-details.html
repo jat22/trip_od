@@ -21,10 +21,6 @@
 			{% for campground in trip.unassigned_cgs %}
 				<li>
 					<a href="/loctions/{{ campground.id }}">{{ campground.name }}</a>
-					<form action="/trips/{{ trip.id }}/campground/delete" method="POST">
-						<input type="hidden" value="{{ campground.id }}" name="ucampground-id">
-						<button type="submit" class="btn btn-sm btn-danger">Remove</button>
-					</form>
 					<form action="/trips/{{ trip.id }}/campground/assign", method="POST">
 						<select name="camp-day" id="day">
 							<option value="">Pick A Day</option>
@@ -48,10 +44,6 @@
 			{% for act in trip.unassigned_acts %}
 				<li>{{ act.activity }} @ 
 					<a href="/loctions/{{ act.location.id }}">{{ act.location.name}}</a>
-					<form action="/trips/{{ trip.id }}/activity/delete" method="POST">
-						<input type="hidden" value="{{ act.id }}" name="uact-id">
-						<button type="submit" class="btn btn-sm btn-danger">Remove</button>
-					</form>
 					<form action="/trips/{{ trip.id }}/activity/assign", method="POST">
 						<select name="act-day" id="day">
 							<option value="">Pick A Day</option>
@@ -77,40 +69,28 @@
 							<div class="card-body">
 								<h3 class="card-title">{{ day["dow"] }}</h3>
 								<h6 class="card-subtitle">{{ day["month"] }} {{ day["day"] }}</h6>
-
-									<div class="card">
-										<div class="card-body">
-											<h5 class="card-title">Campground</h5>
-											{% if day.campground %}
-											<h6> 
-												<a href="/locations/{{ day.campground.id }}">{{ day.campground.name }}
-												</a>
-												<form action="/trips/{{ trip.id }}/campground/unassign" method="POST">
-													<input type="hidden" value="{{ day.campground.id }}" name="campground-id">
-													<input type="hidden" value="{{ day.id }}" name="day-id">
-													<button type="submit" class="btn btn=sm btn-dark">Unassign</button>
-												</form>
-											</h6>
-											{% endif %}
-										</div>
-									</div>
 								
-									<div class="card">
-										<div class="card-body">
-											<h5 class="card-title">Activities</h5>
-											{% for act in  day.activities %}
-											<h6> {{ act.activity }} @ 
-												<a href="/locations/{{act.location_id}}">
-													{{ act.location.name }}
-												</a>
-												<form action="/trips/{{ trip.id }}/activity/unassign" method="POST">
-													<input type="hidden" value="{{ act.id }}" name="day-act-id">
-													<button type="submit" class="btn btn=sm btn-dark">Unassign</button>
-												</form>
-											</h6>
-											{% endfor %}
-										</div>
-									</div>	
+									<h5>Campground</h5>
+									<h6> 
+										<a href="/locations/{{ day.campground.id }}">{{ day.campground.name }}
+										</a>
+										<form action="/trips/{{ trip.id }}/campground/unassign" action="POST">
+											<button type="submit" class="btn btn=sm btn-dark">Unassign</button>
+										</form>
+									</h6>
+							
+								
+									<h5>Activities</h5>
+									{% for act in  day.activities %}
+									<h6> {{ act.activity }} @ 
+										<a href="/locations/{{act.location_id}}">
+											{{ act.location.name }}
+										</a>
+										<form action="/trips/{{ trip.id }}/activity/unassign" action="POST">
+											<button type="submit" class="btn btn=sm btn-dark">Unassign</button>
+										</form>
+									</h6>
+									{% endfor %}
 								
 							</div>
 						</div>

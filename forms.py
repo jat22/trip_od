@@ -10,14 +10,6 @@ class CreateAccountForm(FlaskForm):
     last_name = StringField('Last Name', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=20)])
     
-class EditUserForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired()])
-    first_name = StringField('First Name', validators=[DataRequired()])
-    last_name = StringField('Last Name', validators=[DataRequired()])
-    current_password = PasswordField('Current Password(required)', validators=[DataRequired(), Length(min=8, max=20)])
-    new_password = PasswordField('New Password')
-    pw_confirm = PasswordField("Confirm New Password")
-
 class LoginForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
 	password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=20)])
