@@ -1,6 +1,8 @@
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 
+from functions import get_all_activities
+
 bcrypt = Bcrypt()
 db = SQLAlchemy()
 
@@ -51,7 +53,8 @@ class Trip(db.Model):
 	days = db.Relationship("TripDay")
 	unassigned_cgs = db.Relationship("Location",
 				  secondary="u_campgrounds")
-	unassigned_acts = db.Relationship("UnassignedTripActivities")
+	unassigned_acts = db.Relationship("UnassignedTripActivities",
+				   secondary="u_act")
 	
 
 	def __repr__(self):
@@ -112,7 +115,7 @@ class DayActivity(db.Model):
 
 	id = db.Column(db.Integer, primary_key=True)
 	trip_day_id = db.Column(db.ForeignKey("trip_days.id"), nullable=False)
-	activity = db.Column(db.Text)
+	act_id = db.Column(db.ForeignKey("activities.id"))
 	location_id = db.Column(db.ForeignKey("locations.id"))
 	trip_day = db.Relationship("TripDay", backref="activities")
 
@@ -129,31 +132,35 @@ class UnassignedTripActivities(db.Model):
 	__tablename__ = "u_acts"
 
 	id = db.Column(db.Integer, primary_key=True)
-	activity = db.Column(db.Text)
+	act_id = db.Column(db.ForeignKey("activities.id"))
 	location_id = db.Column(db.ForeignKey("locations.id"))
 	trip = db.Column(db.ForeignKey("trips.id"))
 
-# class Activity(db.Model):
-# 	__tablename__ = "activities"
 
-# 	name = db.Column(db.Text, primary_key=True, nullable=False)
+class Activity(db.Model):
+	__tablename__ = "activities"
 	
-# 	def __repr__(self):
-# 		return f"<Activity: {self.name}>"
+	id = db.Column(db.Integer, primary_key=True)
+	name = db.Column(db.Text, primary_key=True, nullable=False)
+	day_act = db.Relationship("DayActivity", backref="activities")
+	u_act = db.Relationship("UnassignedTripActivities", backref="activity")
 	
-	# @classmethod
-	# def update_activities(self):
-	# 	activities = get_all_activities()
-	# 	existing_act_ids = [id[0] for id in db.session.query(Activity.id).all()]
+	def __repr__(self):
+		return f"<Activity: {self.name}>"
+	
+	@classmethod
+	def update_activities(self):
+		activities = get_all_activities()
+		existing_act_ids = [id[0] for id in db.session.query(Activity.id).all()]
 
-	# 	for activity in activities:
-	# 		if activity["id"] not in existing_act_ids:
-	# 			new_activity = Activity(
-	# 				id=activity["id"],
-	# 				name=activity["name"]
-	# 			)
-	# 		db.session.add(new_activity)
-	# 	db.session.commit()
+		for activity in activities:
+			if activity["id"] not in existing_act_ids:
+				new_activity = Activity(
+					id=activity["id"],
+					name=activity["name"]
+				)
+			db.session.add(new_activity)
+		db.session.commit()
 
 
 
