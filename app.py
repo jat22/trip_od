@@ -7,8 +7,8 @@ from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 
 
-from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UnassignedTripActivities, UnassignedTripCampground, Link
-from forms import CreateAccountForm, CreateTripForm, LoginForm, LocationSearchForm
+from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UnassignedTripActivities, UnassignedTripCampground, Link, bcrypt
+from forms import CreateAccountForm, CreateTripForm, LoginForm, LocationSearchForm, EditUserForm
 from functions import search_by_location, get_location_details, make_date_dict, trip_dates
 
 app = Flask(__name__)
@@ -112,6 +112,30 @@ def logout():
     flash("You are now logged out.", "success")
     return redirect('/')
 
+@app.route("/users/<username>/edit", methods=["GET", "POST"])
+def edit_user(username):
+    if not g.user:
+        flash("Please Login or Create an Account")
+        return redirect("/login")
+    edit_form = EditUserForm(obj=g.user)
+
+    if edit_form.validate_on_submit():
+        if User.authenticate(g.user.username, edit_form.current_password.data):
+            g.user.email = edit_form.email.data
+            g.user.first_name = edit_form.first_name.data
+            g.user.last_name = edit_form.last_name.data
+        else:
+            flash("Incorrect Password", "danger")
+            return redirect(f"/users/{g.user.username}")
+        if edit_form.new_password.data:
+            if edit_form.new_password.data == edit_form.pw_confirm.data:
+                g.user.password = bcrypt.generate_password_hash(edit_form.new_password.data).decode('UTF-8')
+            else:
+                 flash("New Password does not match", "danger")
+                 return redirect(f"/users/{g.user.username}/edit")
+        db.session.commit()
+        return redirect(f"/users/{g.user.username}")
+    return render_template("/users/edit-user.html", edit_form=edit_form, user=g.user)
 
 ####################### CREATES TRIP##############################
 
@@ -331,23 +355,59 @@ def assign_campground(trip_id):
     if not g.user:
             flash("Please Login or Create an Account")
             return redirect("/login")
-    
+
     day_id = request.form.get("camp-day")
-    campground_id = request.form.get("location-id")
+    if day_id:
+        campground_id = request.form.get("location-id")
 
 
-    trip_day = TripDay.query.get(day_id)
-    if trip_day.campground:
-        flash("A campground is already assigned, if you would like to replace it, please delete current campground.", "danger")
+        trip_day = TripDay.query.get(day_id)
+        if trip_day.campground:
+            flash("A campground is already assigned, if you would like to replace it, please delete current campground.", "danger")
 
-    trip_day.campground_id = campground_id
-    db.session.add(trip_day)
+        trip_day.campground_id = campground_id
+        db.session.add(trip_day)
 
-    u_campground = UnassignedTripCampground.query.filter(and_(UnassignedTripCampground.campground==campground_id, UnassignedTripCampground.trip==trip_id)).first()
-    
-    db.session.delete(u_campground)
+        u_campground = UnassignedTripCampground.query.filter(and_(UnassignedTripCampground.campground==campground_id, UnassignedTripCampground.trip==trip_id)).first()
+        
+        db.session.delete(u_campground)
+        db.session.commit()
+    else:
+         flash("Please select a day.", "danger")
+
+    return redirect(f"/trips/{trip_id}")
+
+@app.route("/trips/<int:trip_id>/campground/delete", methods=["POST"])
+def delete_campground(trip_id):
+    if not g.user:
+        flash("Please Login or Create an Account")
+        return redirect("/login")
+    ucampground_id = request.form.get("ucampground-id")
+
+    ucampground = UnassignedTripCampground.query.filter(and_(UnassignedTripCampground.campground==ucampground_id, UnassignedTripCampground.trip==trip_id)).first()
+
+    db.session.delete(ucampground)
     db.session.commit()
 
+    return redirect(f"/trips/{trip_id}")
+
+@app.route("/trips/<int:trip_id>/campground/unassign", methods=["POST"])
+def unassign_campground(trip_id):
+    if not g.user:
+        flash("Please Login or Create an Account")
+        return redirect("/login")
+    campground_id = request.form.get("campground-id")
+    day_id = request.form.get("day-id")
+
+    trip_day = TripDay.query.get(day_id)
+    trip_day.campground = None
+
+    ucampground = UnassignedTripCampground(
+        campground = campground_id,
+        trip = trip_day.trip_id
+    )
+    db.session.add(ucampground)
+    db.session.commit()
     return redirect(f"/trips/{trip_id}")
 
 @app.route("/trips/<int:trip_id>/activity/assign", methods=["POST"])
@@ -356,22 +416,59 @@ def assign_activity(trip_id):
             flash("Please Login or Create an Account")
             return redirect("/login")
     
-    u_act = UnassignedTripActivities.query.get(request.form.get("uact-id"))
-    
-    new_day_activity = DayActivity(
-        trip_day_id = request.form.get("act-day"),
-        activity = u_act.activity,
-        location_id = u_act.location_id
-    )
+    trip_day_id = request.form.get("act-day")
+    if trip_day_id:
+        u_act = UnassignedTripActivities.query.get(request.form.get("uact-id"))
+        
+        new_day_activity = DayActivity(
+            trip_day_id = request.form.get("act-day"),
+            activity = u_act.activity,
+            location_id = u_act.location_id
+        )
 
-    db.session.add(new_day_activity)
+        db.session.add(new_day_activity)
 
 
-    db.session.delete(u_act)
-    db.session.commit()
+        db.session.delete(u_act)
+        db.session.commit()
+    else:
+        flash("Please select a date.", "danger")
 
     return redirect(f"/trips/{trip_id}")
 
+@app.route("/trips/<int:trip_id>/activity/unassign", methods=["POST"])
+def unassign_activity(trip_id):
+    if not g.user:
+        flash("Please Login or Create an Account")
+        return redirect("/login")
+    
+    day_act_id = request.form.get("day-act-id")
+    day_act = DayActivity.query.get(day_act_id)
+
+    uact = UnassignedTripActivities(
+         activity = day_act.activity,
+         location_id = day_act.location.id,
+         trip = trip_id
+    )
+
+    db.session.delete(day_act)
+    db.session.add(uact)
+    db.session.commit()
+    return redirect(f"/trips/{trip_id}")
+
+@app.route("/trips/<int:trip_id>/activity/delete", methods=["POST"])
+def delete_activity(trip_id):
+    if not g.user:
+        flash("Please Login or Create an Account")
+        return redirect("/login")
+    uact_id = request.form.get("uact-id")
+
+    uact = UnassignedTripActivities.query.get(uact_id)
+
+    db.session.delete(uact)
+    db.session.commit()
+
+    return redirect(f"/trips/{trip_id}")
 
 @app.route("/trips")
 def show_mytrips():
