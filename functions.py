@@ -140,9 +140,13 @@ def get_activities_campgrounds(lat, long, radius):
 
 ############################### FILETER AND CLEAN #########################
 def filter_campgrounds(facilities):
-    print(facilities)
-    campgrounds = [fac for fac in facilities 
-                   if "CAMPING" in fac["activities"]]
+    campgrounds = []
+
+    for fac in facilities:
+        for act in fac["activities"]:
+            if act["id"] == 9:
+                campgrounds.append(fac)
+
     return campgrounds
 
 def clean_resources(type, resource_list):
@@ -209,3 +213,15 @@ def trip_dates(start, end):
     trip_dates = [make_date_dict(date) for date in date_range]
 
     return trip_dates
+
+def get_all_activities():
+    data = resource_search("activities")["RECDATA"]
+    return name_id_only(data, "Activity")
+
+def name_id_only(list, type):
+    info = [{
+		"id" : data.get(f"{type}ID"), 
+		"name" : data.get(f"{type}Name").lower()
+		} 
+		for data in list]
+    return info
