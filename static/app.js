@@ -84,25 +84,31 @@ $(document).ready(function(){
 			$("#results-list").append(
 				`<li>
 					<div class="card">
-						<div class="card-body"
-						<h5 class=card-title><a href="/trips/${tripId}/${activity.name}">${activity.name}</a></h5>
-				</div>`
+						<div class="card-body">
+							<form action="/trips/${tripId}/activity/${activity.id}">
+								<button type="submit" class="btn btn-link">
+									<h5 class="card-title">${activity.name}</h5>
+								</button>
+							</form>
+						</div>
+					</div>
+				</li>`
 			);
 
 		})
 	}
-	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/${activityName}`) > -1){
+	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/activity/${activityId}`) > -1){
 
 		const activities = JSON.parse(localStorage.getItem(currSearch)).activities;
 
-		const locations = activities.find(activity => activity.name === activityName).locations;
+		const locations = activities.find(activity => activity.id == activityId).locations;
 		console.log(locations)
 		locations.forEach(function(location){
 			$("#activity-locations").append(
 				`<li>
 					<a href="/locations/${location.id}">${location.name}</a>
-					<form action="/trips/${tripId}/${activityName}/${location.id}/add" method="POST">
-						<button class="btn btn-sm btn-secondary" type="submit">Add to ${activityName} to Trip</button>
+					<form action="/trips/${tripId}/act${activityId}/${location.id}/add" method="POST">
+						<button class="btn btn-sm btn-secondary" type="submit">Add to activity to Trip</button>
 				</li>`
 			)})
 	}

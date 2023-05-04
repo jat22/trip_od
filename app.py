@@ -7,7 +7,7 @@ from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 
 
-from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UnassignedTripActivities, UnassignedTripCampground, Link, bcrypt
+from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UnassignedTripActivities, UnassignedTripCampground, Link, bcrypt, Activity
 from forms import CreateAccountForm, CreateTripForm, LoginForm, LocationSearchForm, EditUserForm
 from functions import search_by_location, get_location_details, make_date_dict, trip_dates
 
@@ -26,10 +26,14 @@ connect_db(app)
 
 db.create_all()
 
+Activity.update_activities()
+
 CURR_USER = "curr_user"
 CURR_TRIP = "curr_trip"
 REC_BASE_URL = "https://ridb.recreation.gov/api/v1"
 GEOCODE_BASE_URL = "https://api.tomtom.com/search/2/geocode/"
+
+
 
 def do_login(user):
     session[CURR_USER] = user.username
@@ -290,24 +294,25 @@ def show_activitiy_options(trip_id):
 
     return render_template("/results/activities.html", trip_id=trip_id)
 
-@app.route("/trips/<int:trip_id>/<activity_name>")
-def activity_locations(trip_id, activity_name):
+@app.route("/trips/<int:trip_id>/activity/<int:activity_id>")
+def activity_locations(trip_id, activity_id):
     if not g.user:
             flash("Please Login or Create an Account")
             return redirect("/login")
-    
-    return render_template("trip/activity-locations.html", trip_id=trip_id, activity_name=activity_name)
+    # activity = request.args.get("activity")
+
+    return render_template("trip/activity-locations.html", trip_id=trip_id, activity_id=activity_id)
 
 ############### Activity location page
-@app.route("/trips/<int:trip_id>/<activity_name>/<location_id>/add", methods=["POST"])
-def add_activity_to_trip(trip_id, activity_name, location_id):
+@app.route("/trips/<int:trip_id>/act<int:activity_id>/<location_id>/add", methods=["POST"])
+def add_activity_to_trip(trip_id, activity_id, location_id):
     if not g.user:
             flash("Please Login or Create an Account")
             return redirect("/login")
     
     if Location.query.get(location_id):
         new_unassigned_activity = UnassignedTripActivities(
-            activity = activity_name,
+            act_id = activity_id,
             location_id = location_id,
             trip = trip_id
         )
@@ -327,14 +332,14 @@ def add_activity_to_trip(trip_id, activity_name, location_id):
             db.session.commit()
 
         new_unassigned_activity = UnassignedTripActivities(
-            activity = activity_name,
+            act_id = activity_id,
             location_id = location_id,
             trip = trip_id
         )
         db.session.add(new_unassigned_activity)
         db.session.commit()
 
-    flash(f"{activity_name} added to your trip", "success")
+    flash(f"Activity added to your trip", "success")
 
     return redirect(f"/trips/{trip_id}/activities")
 
@@ -422,7 +427,7 @@ def assign_activity(trip_id):
         
         new_day_activity = DayActivity(
             trip_day_id = request.form.get("act-day"),
-            activity = u_act.activity,
+            act_id = u_act.act_id,
             location_id = u_act.location_id
         )
 
@@ -446,7 +451,7 @@ def unassign_activity(trip_id):
     day_act = DayActivity.query.get(day_act_id)
 
     uact = UnassignedTripActivities(
-         activity = day_act.activity,
+         act_id = day_act.act_id,
          location_id = day_act.location.id,
          trip = trip_id
     )
