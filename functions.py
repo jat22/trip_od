@@ -112,18 +112,23 @@ def get_activities_campgrounds(lat, long, radius):
 
     locations = clean_facilities + clean_recareas
 
-    activity_names = []
+    activity_ids = []
     for loc in locations:
         for act in loc["activities"]:
-            activity_names.append(act)
-    unique_activity_names = list(set(activity_names))
+            activity_ids.append(act["id"])
+    unique_activity_ids = list(set(activity_ids))
+
+
 	
-    activities = [{"name" : act, "locations" : []} for act in unique_activity_names]
+    activities = [{"id": id, "name" : "", "locations" : []} for id in unique_activity_ids]
     
+
+
     for act in activities:
         for loc in locations:
             for loc_act in loc["activities"]:
-                if loc_act == act["name"]:
+                if loc_act["id"] == act["id"]:
+                    act["name"] = loc_act["name"]
                     act["locations"].append(loc)
     
     campgrounds = filter_campgrounds(locations)
@@ -151,7 +156,7 @@ def clean_resources(type, resource_list):
         "name" : res[f"{type}Name"],
         "lat" : res[f"{type}Latitude"],
         "long" : res[f"{type}Longitude"],
-        "activities" : [act["ActivityName"] for act in res["ACTIVITY"]]
+        "activities" : [{"id": act["ActivityID"], "name" : act["ActivityName"]} for act in res["ACTIVITY"]]
 		}
     	for res in resource_list]
     
@@ -204,20 +209,3 @@ def trip_dates(start, end):
     trip_dates = [make_date_dict(date) for date in date_range]
 
     return trip_dates
-
-
-
-################# GET ALL ACTIVITIES ####################
-
-def get_all_activities():
-    data = resource_search("activities")["RECDATA"]
-    return name_id_only(data, "Activity")
-
-def name_id_only(list, type):
-
-    info = [{
-		"id" : data.get(f"{type}ID"), 
-		"name" : data.get(f"{type}Name").lower()
-		} 
-		for data in list]
-    return info
