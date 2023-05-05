@@ -87,7 +87,7 @@ def search_by_location(city, state, latitude, longitude, radius="50"):
     activities_campgrounds = get_activities_campgrounds(lat, long, radius)
 
     results = {
-        		"search_geolocation" : {"lat" : lat, "long" : long},
+        		"search_geolocation" : {"lat" : lat, "long" : long, "radius" : radius},
                 "activities" : activities_campgrounds["activities"],
                 "campgrounds" : activities_campgrounds["campgrounds"]
 	}
@@ -225,3 +225,6 @@ def name_id_only(list, type):
 		} 
 		for data in list]
     return info
+
+def display_date(date):
+    return date.strftime("%b %-d, %Y")

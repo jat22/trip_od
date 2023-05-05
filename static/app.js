@@ -12,7 +12,9 @@ const $radiusField = $("#radius-field")
 const $searchButton = $("#search-btn");
 
 
-const currSearch = "currSearch"
+const currTrip = "currTrip"
+const campOptions = "campOptions"
+const actOptions = "actOptions"
 
 function toggleSearchType(){
 	if($cityStateSelector.is(' :checked')){
@@ -39,16 +41,41 @@ async function executeSearch(event){
 			state : $stateField.val(),
 			latitude : $latField.val(),
 			longitude : $longField.val(),
-			radius : $radiusField.val()
+			radius : $radiusField.val(),
+			tripId : tripId
 		}
 	})
 
-	localStorage.setItem(currSearch, JSON.stringify(response.data))
+	localStorage.setItem(currTrip, tripId)
+	localStorage.setItem(campOptions, JSON.stringify(response.data.campgrounds))
+	localStorage.setItem(actOptions, JSON.stringify(response.data.activities))
 
 	window.location.href = `/trips/${tripId}/campgrounds`
 }
 
 $searchButton.on("click", executeSearch);
+
+async function updateOptions(event){
+	event.preventDefault();
+	if (localStorage.getItem(currTrip) != tripId){
+		response = await axios.get("/api/trip/options", {params: {trip_id : tripId}})
+
+		localStorage.setItem(currTrip, tripId)
+		localStorage.setItem(campOptions, JSON.stringify(response.data.campgrounds))
+		localStorage.setItem(actOptions, JSON.stringify(response.data.activities))
+	}
+
+	if($(event.target).is("#more-acts-btn")){
+		window.location.href = `/trips/${tripId}/activities`
+	}
+
+	if($(event.target).is("#more-camps-btn")){
+		window.location.href = `/trips/${tripId}/campgrounds`
+	}
+}
+
+$(".more-button").on("click", updateOptions)
+
 
 
 $(document).ready(function(){
@@ -62,7 +89,13 @@ $(document).ready(function(){
 	}
 
 	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/campgrounds`) > -1){
-		const campgrounds = JSON.parse(localStorage.getItem(currSearch)).campgrounds
+		if(tripId != localStorage.getItem(currTrip)){
+			updateOptions(tripId)
+		}	
+	
+		const campgrounds = JSON.parse(localStorage.getItem(campOptions))
+
+		console.log(campgrounds)
 		campgrounds.forEach(campground =>
 			$("#results-list").append(
 				`<li class="list-group-item">
@@ -76,7 +109,11 @@ $(document).ready(function(){
 	}
 
 	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/activities`) > -1){
-		const activities = JSON.parse(localStorage.getItem(currSearch)).activities
+		if(tripId != localStorage.getItem(currTrip)){
+			updateOptions(tripId)
+		}
+	
+		const activities = JSON.parse(localStorage.getItem(actOptions))
 
 		console.log(activities)
 
@@ -99,7 +136,7 @@ $(document).ready(function(){
 	}
 	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/activity/${activityId}`) > -1){
 
-		const activities = JSON.parse(localStorage.getItem(currSearch)).activities;
+		const activities = JSON.parse(localStorage.getItem(actOptions));
 
 		const locations = activities.find(activity => activity.id == activityId).locations;
 		console.log(locations)
@@ -113,5 +150,5 @@ $(document).ready(function(){
 			)})
 	}
 
-
+	
 })

@@ -14,7 +14,7 @@
 			<a href="/trips/{{ trip.id }}">
 				<h2 class="card-title">{{ trip.name }}</h2>
 				<h4 class="card-subtitle">
-					{{ trip.days[0]["month"] }} {{ trip.days[0]["day"] }}, {{ trip.days[0]["year"] }} to {{ trip.days[-1]["month"] }} {{ trip.days[-1]["day"] }}, {{ trip.days[-1]["year"] }}
+					{{ display_date(trip.start_date) }} to {{ display_date(trip.end_date) }}
 				</h4>
 			</a>
 		</div>

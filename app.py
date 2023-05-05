@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 
 from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, Link, bcrypt, Activity
 from forms import CreateAccountForm, CreateTripForm, LoginForm, LocationSearchForm, EditUserForm
-from functions import search_by_location, get_location_details, make_date_dict, trip_dates
+from functions import search_by_location, get_location_details, make_date_dict, trip_dates, display_date
 
 app = Flask(__name__)
 app.app_context().push()
@@ -155,9 +155,10 @@ def create_trip():
         if not g.user:
             flash("Please Login or Create an Account")
             return redirect("/login")
+        
         start_date = form.start_date.data
         end_date = form.end_date.data
-        if end_date > start_date:
+        if end_date >= start_date:
             new_trip = Trip.create_trip(
                     name = form.name.data,
                     start_date = start_date,
@@ -178,15 +179,38 @@ def create_trip():
 
 
 ####################### LOCATION SEARCH INPUT##############
-@app.route("/trips/<int:trip_id>/where")
+@app.route("/trips/<int:trip_id>/where", methods=["GET", "POST"])
 def trip_location(trip_id):
     if not g.user:
             flash("Please Login or Create an Account")
             return redirect("/login")
-    return render_template("/trip/search.html", trip_id=trip_id)
+    
+    if request.method == "GET":
+        return render_template("/trip/search.html", trip_id=trip_id)
+    
+    # if request.method == "POST":
+    #     trip = Trip.query.get(trip_id)
+    #     if not trip.lat and not trip.long:
+    #         city = request.form.get("city")
+    #         state = request.form.get("state")
+    #         lat = request.form.get("lat")
+    #         long = request.form.get("long")
+    #         radius = request.form.get("radius")
+
+    #         if city and state:
+                
+                
+    #         trip.lat = lat
+    #         trip.long = long
+    #         db.session.commit()
+
+
+
 
 
 ################### LOCATION SEARCH
+
+
 @app.route("/api/search")
 def search():
     city = request.args.get("city")
@@ -194,11 +218,30 @@ def search():
     lat = request.args.get("latitude")
     long = request.args.get("longitude")
     radius = request.args.get("radius")
+    trip_id = request.args.get("tripId")
     
     results = search_by_location(city, state, lat, long, radius)
+
+    trip = Trip.query.get(trip_id)
+    trip.lat = results['search_geolocation']['lat']
+    trip.logn = results['search_geolocation']['long']
+    trip.radius = results['search_geolocation']['radius']
+    db.session.commit()
+
     return jsonify(results)
 
+@app.route("/api/trip/options")
+def get_trip_options():
+    trip_id = request.args.get("trip_id")
 
+    trip = Trip.query.get(trip_id)
+    lat = trip.lat
+    long = trip.long
+    radius = ""
+
+    results = search_by_location("", "", lat, long, radius)
+    
+    return jsonify(results)
 
 
 ########################CAMPGROUNDS####################
@@ -240,18 +283,8 @@ def add_campground(trip_id, location_id):
         flash(f"{new_ucamp.location.name} added to your trip", "success")
     else:
         camp_data = get_location_details(location_id)
-        # links = camp_data.pop("links")
 
         Location.create_location(**camp_data)
-
-        # new_location = Location(**cmpgrd_data)
-        # db.session.add(new_location)
-        # db.session.commit()
-
-        # for link in links:
-        #     new_link = Link(**link)
-        #     db.session.add(new_link)
-        #     db.session.commit()
 
         new_ucamp = UTripCamp(
             location_id = location_id,
@@ -302,18 +335,8 @@ def add_activity_to_trip(trip_id, activity_id, location_id):
         db.session.commit()
     else:
         location_data = get_location_details(location_id)
-        # links = location_data.pop("links")
 
         Location.create_location(**location_data)
-
-        # new_location = Location(**location_data)
-        # db.session.add(new_location)
-        # db.session.commit()
-
-        # for link in links:
-        #     new_link = Link(**link)
-        #     db.session.add(new_link)
-        #     db.session.commit()
 
         new_uact = UTripAct(
             act_id = activity_id,
@@ -468,6 +491,6 @@ def show_mytrips():
     user = User.query.get(session[CURR_USER])
     trips = user.trips
 
-    return render_template("trip/mytrips.html", trips=trips)
+    return render_template("trip/mytrips.html", trips=trips, display_date=display_date)
 
 

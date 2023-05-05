@@ -78,7 +78,7 @@
 				<div class="card">
 					<div class="card-body">
 						<h2 class="card-title">Campgrounds</h2>
-						<a href="/trips/{{ trip.id }}/campgrounds" class="btn btn-md btn-secondary">More Campgrounds</a>
+						<a href="/trips/{{ trip.id }}/campgrounds" id="more-camps-btn" class="btn btn-md btn-secondary more-button">More Campgrounds</a>
 						<ul class="list-group">
 						{% for camp in trip.u_camps %}
 							<li class="list-group-item">
@@ -107,10 +107,10 @@
 				<div class="card">
 					<div class="card-body">
 						<h2 class="card-title">Activities</h2>
-						<a href="/trips/{{ trip.id }}/activities" class="btn btn-md btn-secondary">More Activities</a>
-						<ul>
+						<a href="" id="more-acts-btn" class="btn btn-md btn-secondary more-button">More Activities</a>
+						<ul class="list-group">
 						{% for act in trip.u_acts %}
-							<li>{{ act.activity.name }} @ 
+							<li class="list-group-item">{{ act.activity.name }} @ 
 								<a href="/locations/{{ act.location.id }}">{{ act.location.name}}</a>
 								<form action="/trips/{{ trip.id }}/activity/delete" method="POST">
 									<input type="hidden" value="{{ act.id }}" name="uact-id">
@@ -135,5 +135,5 @@
 		</div>
 	</div>	
 </div>
-
+<script>let tripId = "{{ trip.id }}"</script>
 {% endblock %}
