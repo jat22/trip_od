@@ -10,7 +10,7 @@
 				<div class="card">
 					<div class="card-body">
 						<h2 class="card-title">{{ trip.name }}</h2>
-						<h4 class="card-subtitle">{{ trip.days[0]["month"] }} {{ trip.days[0]["day"] }}, {{ trip.days[0]["year"] }} to {{ trip.days[-1]["month"] }} {{ trip.days[-1]["day"] }}, {{ trip.days[-1]["year"] }}</h4>
+						<h4 class="card-subtitle">{{ days[0]["month"] }} {{ days[0]["day"] }}, {{ days[0]["year"] }} to {{ days[-1]["month"] }} {{ days[-1]["day"] }}, {{ days[-1]["year"] }}</h4>
 					</div>
 				</div>
 			</div>
@@ -32,12 +32,12 @@
 												<div class="card">
 													<div class="card-body">
 														<h5 class="card-title">Campground</h5>
-														{% if day.campground %}
+														{% if day.camp_id %}
 														<h6> 
-															<a href="/locations/{{ day.campground.id }}">{{ day.campground.name }}
+															<a href="/locations/{{ day.camp.id }}">{{ day.camp.name }}
 															</a>
 															<form action="/trips/{{ trip.id }}/campground/unassign" method="POST">
-																<input type="hidden" value="{{ day.campground.id }}" name="campground-id">
+																<input type="hidden" value="{{ day.camp.id }}" name="campground-id">
 																<input type="hidden" value="{{ day.id }}" name="day-id">
 																<button type="submit" class="btn btn=sm btn-dark">Unassign</button>
 															</form>
@@ -49,7 +49,7 @@
 												<div class="card">
 													<div class="card-body">
 														<h5 class="card-title">Activities</h5>
-														{% for act in  day.activities %}
+														{% for act in  day.activity %}
 														<h6> {{ act.activities.name }} @ 
 															<a href="/locations/{{act.location_id}}">
 																{{ act.location.name }}
@@ -80,11 +80,11 @@
 						<h2 class="card-title">Campgrounds</h2>
 						<a href="/trips/{{ trip.id }}/campgrounds" class="btn btn-md btn-secondary">More Campgrounds</a>
 						<ul class="list-group">
-						{% for campground in trip.unassigned_cgs %}
+						{% for camp in trip.u_camps %}
 							<li class="list-group-item">
-								<a href="/loctions/{{ campground.id }}">{{ campground.name }}</a>
+								<a href="/locations/{{ camp.id }}">{{ camp.name }}</a>
 								<form action="/trips/{{ trip.id }}/campground/delete" method="POST">
-									<input type="hidden" value="{{ campground.id }}" name="ucampground-id">
+									<input type="hidden" value="{{ camp.id }}" name="ucampground-id">
 									<button type="submit" class="btn btn-sm btn-danger">Remove</button>
 								</form>
 								<form action="/trips/{{ trip.id }}/campground/assign", method="POST">
@@ -94,7 +94,7 @@
 										<option value="{{ day.id }}">{{ day["dow"] }} {{ day["month"] }} {{ day["day"] }}, {{ day["year"] }}</option>
 										{% endfor %}
 									</select>
-									<input type="hidden" name="location-id" value="{{ campground.id }}">
+									<input type="hidden" name="location-id" value="{{ camp.id }}">
 									<button type="submit" class="btn btn-sm btn-secondary">Add</button>
 								</form>
 							</li>
@@ -109,9 +109,9 @@
 						<h2 class="card-title">Activities</h2>
 						<a href="/trips/{{ trip.id }}/activities" class="btn btn-md btn-secondary">More Activities</a>
 						<ul>
-						{% for act in trip.unassigned_acts %}
+						{% for act in trip.u_acts %}
 							<li>{{ act.activity.name }} @ 
-								<a href="/loctions/{{ act.location.id }}">{{ act.location.name}}</a>
+								<a href="/locations/{{ act.location.id }}">{{ act.location.name}}</a>
 								<form action="/trips/{{ trip.id }}/activity/delete" method="POST">
 									<input type="hidden" value="{{ act.id }}" name="uact-id">
 									<button type="submit" class="btn btn-sm btn-danger">Remove</button>

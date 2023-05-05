@@ -1,7 +1,7 @@
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 
-from functions import get_all_activities
+from functions import get_all_activities, trip_dates
 
 bcrypt = Bcrypt()
 db = SQLAlchemy()
@@ -14,7 +14,7 @@ class User(db.Model):
 	__tablename__ = "users"
 
 	username = db.Column(db.Text, primary_key=True, autoincrement=False)
-	email = db.Column(db.Text, nullable=False)
+	email = db.Column(db.Text)
 	password = db.Column(db.Text, nullable=False)
 	first_name = db.Column(db.Text)
 	last_name = db.Column(db.Text)
@@ -27,7 +27,13 @@ class User(db.Model):
 	def signup(cls, username, email, first_name, last_name, password):
 		hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
 
-		user = User(username=username, email=email, first_name=first_name, last_name=last_name, password=hashed_pwd)
+		user = User(
+			username=username, 
+	     	email=email,
+			first_name=first_name,
+			last_name=last_name,
+			password=hashed_pwd
+		)
 
 		db.session.add(user)
 
@@ -48,16 +54,46 @@ class Trip(db.Model):
 	name = db.Column(db.Text, nullable=False)
 	start_date = db.Column(db.Date)
 	end_date = db.Column(db.Date)
+	lat = db.Column(db.Text)
+	long = db.Column(db.Text)
 	description = db.Column(db.Text)
-	user = db.Column(db.ForeignKey("users.username"))
-	days = db.Relationship("TripDay")
-	unassigned_cgs = db.Relationship("Location",
-				  secondary="u_campgrounds")
-	unassigned_acts = db.Relationship("UnassignedTripActivities")
+	username = db.Column(db.ForeignKey("users.username", ondelete="CASCADE"))
+	days = db.Relationship("TripDay", backref="trip")
+	u_camps = db.Relationship("Location",
+				  secondary="u_camps")
+	u_acts = db.Relationship("UTripAct")
 	
 
 	def __repr__(self):
-		return f"<Trip #{self.id}: {self.name} for {self.user}>"
+		return f"<Trip #{self.id}: {self.name} for {self.username}>"
+	
+	@classmethod
+	def create_trip(cls, name, start_date, end_date, description, username):
+		trip = Trip(
+			name = name,
+	    	start_date = start_date, 
+			end_date = end_date,
+			description = description,
+			username = username)
+		db.session.add(trip)
+		db.session.commit()
+
+		trip_days = trip_dates(start_date, end_date)
+
+		for d in trip_days:
+			new_day = TripDay(
+                trip_id = trip.id,
+                date = d["datetime"],
+                dow = d["dow"],
+                year = d["year"],
+                month = d["month"],
+                day = d["day"]
+            )
+			db.session.add(new_day)
+			db.session.commit()
+		
+		return trip
+
 
 class Location(db.Model):
 	__tablename__ = "locations"
@@ -76,13 +112,39 @@ class Location(db.Model):
 	long = db.Column(db.Text)
 	links = db.Relationship("Link")
 	day_acts = db.Relationship("DayActivity", backref="location")
-	u_acts = db.Relationship("UnassignedTripActivities", backref="location")
+	u_acts = db.Relationship("UTripAct", backref="location")
 	trip_day = db.Relationship("TripDay", backref="location")
-	u_campgrounds = db.Relationship("UnassignedTripCampground", backref="location")
-	trip_day = db.Relationship("TripDay", backref="campground")
+	u_camps = db.Relationship("UTripCamp", backref="location")
+	trip_day = db.Relationship("TripDay", backref="camp")
 
 	def __repr__(self):
 		return f"<Location #{self.id}: {self.name}>"
+
+	@classmethod
+	def create_location(cls, id, name, phone, email, description, directions, address, city, state, zip, lat, long, links):
+
+		location = Location(
+			id = id,
+			name = name,
+			phone = phone,
+			email = email,
+			description = description,
+			directions = directions,
+			address = address,
+			city = city,
+			state = state,
+			zip = zip,
+			lat = lat,
+			long = long
+		)
+		db.session.add(location)
+		db.session.commit()
+
+		for link in links:
+			new_link = Link(**link)
+			db.session.add(new_link)
+			db.session.commit()
+
 
 class Link(db.Model):
 	__tablebane__ = "links"
@@ -90,22 +152,20 @@ class Link(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	title = db.Column(db.Text)
 	url = db.Column(db.Text)
-	location = db.Column(db.ForeignKey("locations.id"))
+	location_id = db.Column(db.ForeignKey("locations.id", ondelete="CASCADE"))
 
 class TripDay(db.Model):
 	__tablename__ = "trip_days"
 
 	id = db.Column(db.Integer, primary_key=True)
-	trip_id = db.Column(db.ForeignKey("trips.id"), nullable=False)
+	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"), nullable=False)
 	date = db.Column(db.Date, nullable=False)
 	dow = db.Column(db.Text)
 	year = db.Column(db.Text)
 	month = db.Column(db.Text)
 	day = db.Column(db.Text)
-	campground_id = db.Column(db.ForeignKey("locations.id"), nullable=True)
+	camp_id = db.Column(db.ForeignKey("locations.id"), nullable=True)
 
-
-	
 	def __repr__(self):
 		return f"<TripDay Trip#{self.trip_id} date: {self.date}>"
 
@@ -115,7 +175,7 @@ class Activity(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.Text)
 	day_act = db.Relationship("DayActivity", backref="activities")
-	u_act = db.Relationship("UnassignedTripActivities", backref="activity")
+	u_acts = db.Relationship("UTripAct", backref="activity")
 	
 	def __repr__(self):
 		return f"<Activity: {self.name}>"
@@ -139,24 +199,24 @@ class DayActivity(db.Model):
 	__tablename__ = "day_acts"
 
 	id = db.Column(db.Integer, primary_key=True)
-	trip_day_id = db.Column(db.ForeignKey("trip_days.id"), nullable=False)
+	trip_day_id = db.Column(db.ForeignKey("trip_days.id", ondelete="CASCADE"), nullable=False)
 	act_id = db.Column(db.ForeignKey("activities.id"))
 	location_id = db.Column(db.ForeignKey("locations.id"))
-	trip_day = db.Relationship("TripDay", backref="activities")
+	trip_day = db.Relationship("TripDay", backref="activity")
 
 
-class UnassignedTripCampground(db.Model):
-	__tablename__ = "u_campgrounds"
+class UTripCamp(db.Model):
+	__tablename__ = "u_camps"
 
 	id = db.Column(db.Integer, primary_key=True)
-	campground = db.Column(db.ForeignKey("locations.id"))
-	trip = db.Column(db.ForeignKey("trips.id"))
+	location_id = db.Column(db.ForeignKey("locations.id"))
+	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"))
 
-class UnassignedTripActivities(db.Model):
+class UTripAct(db.Model):
 	__tablename__ = "u_acts"
 
 	id = db.Column(db.Integer, primary_key=True)
 	act_id = db.Column(db.ForeignKey("activities.id"))
 	location_id = db.Column(db.ForeignKey("locations.id"))
-	trip = db.Column(db.ForeignKey("trips.id"))
+	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"))
 

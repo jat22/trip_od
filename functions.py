@@ -190,7 +190,7 @@ def clean_location_data(resp_data):
         "long" : data[f"{type}Longitude"],
         "links" : [{"title" : link["Title"], 
                     "url" : link["URL"],
-                    "location" : id_type + data[f"{type}ID"]} 
+                    "location_id" : id_type + data[f"{type}ID"]} 
                     for link in data["LINK"]]
 	}
     return details

@@ -7,7 +7,7 @@ from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 
 
-from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UnassignedTripActivities, UnassignedTripCampground, Link, bcrypt, Activity
+from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, Link, bcrypt, Activity
 from forms import CreateAccountForm, CreateTripForm, LoginForm, LocationSearchForm, EditUserForm
 from functions import search_by_location, get_location_details, make_date_dict, trip_dates
 
@@ -24,9 +24,9 @@ debug = DebugToolbarExtension(app)
 
 connect_db(app)
 
-db.create_all()
+# db.create_all()
 
-Activity.update_activities()
+# Activity.update_activities()
 
 CURR_USER = "curr_user"
 CURR_TRIP = "curr_trip"
@@ -81,7 +81,7 @@ def signup():
             
 
         except IntegrityError:
-            flash("Username is already taken", "danger")
+            flash("Username or Email is already being used", "danger")
             return render_template("/users/user-new.html", form=form)
         
         do_login(User.query.get(username))
@@ -158,33 +158,16 @@ def create_trip():
         start_date = form.start_date.data
         end_date = form.end_date.data
         if end_date > start_date:
-            new_trip = Trip(
-                name = form.name.data,
-                start_date = start_date,
-                end_date = end_date,
-                description = form.description.data,
-                user = g.user.username
-            )
-            db.session.add(new_trip)
-            db.session.commit()
+            new_trip = Trip.create_trip(
+                    name = form.name.data,
+                    start_date = start_date,
+                    end_date = end_date,
+                    description = form.description.data,
+                    username = g.user.username
+             )
         else:
              flash("Last day must be after First day.")
              return redirect('/trips/create')
-
-        
-        trip_days = trip_dates(new_trip.start_date, new_trip.end_date)
-
-        for d in trip_days:
-            new_day = TripDay(
-                trip_id = new_trip.id,
-                date = d["datetime"],
-                dow = d["dow"],
-                year = d["year"],
-                month = d["month"],
-                day = d["day"]
-            )
-            db.session.add(new_day)
-            db.session.commit()
 
         session[CURR_TRIP] = new_trip.id
         
@@ -206,16 +189,13 @@ def trip_location(trip_id):
 ################### LOCATION SEARCH
 @app.route("/api/search")
 def search():
-    if not g.user:
-            flash("Please Login or Create an Account")
-            return redirect("/login")
     city = request.args.get("city")
     state = request.args.get("state")
-    latitude = request.args.get("latitude")
-    longitude = request.args.get("longitude")
+    lat = request.args.get("latitude")
+    long = request.args.get("longitude")
     radius = request.args.get("radius")
     
-    results = search_by_location(city, state, latitude, longitude, radius)
+    results = search_by_location(city, state, lat, long, radius)
     return jsonify(results)
 
 
@@ -251,34 +231,36 @@ def add_campground(trip_id, location_id):
     
     if Location.query.get(location_id):
 
-        new_unassinged_cg = UnassignedTripCampground(
-            campground = location_id,
-            trip = trip_id
+        new_ucamp = UTripCamp(
+            location_id = location_id,
+            trip_id = trip_id
         )
-        db.session.add(new_unassinged_cg)
+        db.session.add(new_ucamp)
         db.session.commit()
-        flash(f"{new_unassinged_cg.location.name} added to your trip", "success")
+        flash(f"{new_ucamp.location.name} added to your trip", "success")
     else:
-        cmpgrd_data = get_location_details(location_id)
-        links = cmpgrd_data.pop("links")
+        camp_data = get_location_details(location_id)
+        # links = camp_data.pop("links")
 
-        new_location = Location(**cmpgrd_data)
-        db.session.add(new_location)
-        db.session.commit()
+        Location.create_location(**camp_data)
 
-        for link in links:
-            new_link = Link(**link)
-            db.session.add(new_link)
-            db.session.commit()
+        # new_location = Location(**cmpgrd_data)
+        # db.session.add(new_location)
+        # db.session.commit()
 
-        new_unassinged_cg = UnassignedTripCampground(
-            campground = location_id,
-            trip = trip_id)
+        # for link in links:
+        #     new_link = Link(**link)
+        #     db.session.add(new_link)
+        #     db.session.commit()
+
+        new_ucamp = UTripCamp(
+            location_id = location_id,
+            trip_id = trip_id)
         
-        db.session.add(new_unassinged_cg)
+        db.session.add(new_ucamp)
         db.session.commit()
 
-        flash(f"{cmpgrd_data['name']} added to your trip", "success")
+        flash(f"{camp_data['name']} added to your trip", "success")
 
     return redirect(f"/trips/{trip_id}/campgrounds")
 
@@ -311,32 +293,34 @@ def add_activity_to_trip(trip_id, activity_id, location_id):
             return redirect("/login")
     
     if Location.query.get(location_id):
-        new_unassigned_activity = UnassignedTripActivities(
+        new_uact = UTripAct(
             act_id = activity_id,
             location_id = location_id,
-            trip = trip_id
+            trip_id = trip_id
         )
-        db.session.add(new_unassigned_activity)
+        db.session.add(new_uact)
         db.session.commit()
     else:
         location_data = get_location_details(location_id)
-        links = location_data.pop("links")
+        # links = location_data.pop("links")
 
-        new_location = Location(**location_data)
-        db.session.add(new_location)
-        db.session.commit()
+        Location.create_location(**location_data)
 
-        for link in links:
-            new_link = Link(**link)
-            db.session.add(new_link)
-            db.session.commit()
+        # new_location = Location(**location_data)
+        # db.session.add(new_location)
+        # db.session.commit()
 
-        new_unassigned_activity = UnassignedTripActivities(
+        # for link in links:
+        #     new_link = Link(**link)
+        #     db.session.add(new_link)
+        #     db.session.commit()
+
+        new_uact = UTripAct(
             act_id = activity_id,
             location_id = location_id,
-            trip = trip_id
+            trip_id = trip_id
         )
-        db.session.add(new_unassigned_activity)
+        db.session.add(new_uact)
         db.session.commit()
 
     flash(f"Activity added to your trip", "success")
@@ -363,19 +347,19 @@ def assign_campground(trip_id):
 
     day_id = request.form.get("camp-day")
     if day_id:
-        campground_id = request.form.get("location-id")
+        camp_id = request.form.get("location-id")
 
 
         trip_day = TripDay.query.get(day_id)
-        if trip_day.campground:
+        if trip_day.camp_id:
             flash("A campground is already assigned, if you would like to replace it, please delete current campground.", "danger")
 
-        trip_day.campground_id = campground_id
+        trip_day.camp_id = camp_id
         db.session.add(trip_day)
 
-        u_campground = UnassignedTripCampground.query.filter(and_(UnassignedTripCampground.campground==campground_id, UnassignedTripCampground.trip==trip_id)).first()
+        u_camp = UTripCamp.query.filter(and_(UTripCamp.location_id==camp_id, UTripCamp.trip_id==trip_id)).first()
         
-        db.session.delete(u_campground)
+        db.session.delete(u_camp)
         db.session.commit()
     else:
          flash("Please select a day.", "danger")
@@ -387,11 +371,11 @@ def delete_campground(trip_id):
     if not g.user:
         flash("Please Login or Create an Account")
         return redirect("/login")
-    ucampground_id = request.form.get("ucampground-id")
+    ucamp_id = request.form.get("ucampground-id")
 
-    ucampground = UnassignedTripCampground.query.filter(and_(UnassignedTripCampground.campground==ucampground_id, UnassignedTripCampground.trip==trip_id)).first()
+    ucamp = UTripCamp.query.filter(and_(UTripCamp.location_id==ucamp_id, UTripCamp.trip_id==trip_id)).first()
 
-    db.session.delete(ucampground)
+    db.session.delete(ucamp)
     db.session.commit()
 
     return redirect(f"/trips/{trip_id}")
@@ -401,17 +385,17 @@ def unassign_campground(trip_id):
     if not g.user:
         flash("Please Login or Create an Account")
         return redirect("/login")
-    campground_id = request.form.get("campground-id")
+    camp_id = request.form.get("campground-id")
     day_id = request.form.get("day-id")
 
     trip_day = TripDay.query.get(day_id)
-    trip_day.campground = None
+    trip_day.camp_id = None
 
-    ucampground = UnassignedTripCampground(
-        campground = campground_id,
-        trip = trip_day.trip_id
+    ucamp = UTripCamp(
+        location_id = camp_id,
+        trip_id = trip_day.trip_id
     )
-    db.session.add(ucampground)
+    db.session.add(ucamp)
     db.session.commit()
     return redirect(f"/trips/{trip_id}")
 
@@ -423,7 +407,7 @@ def assign_activity(trip_id):
     
     trip_day_id = request.form.get("act-day")
     if trip_day_id:
-        u_act = UnassignedTripActivities.query.get(request.form.get("uact-id"))
+        u_act = UTripAct.query.get(request.form.get("uact-id"))
         
         new_day_activity = DayActivity(
             trip_day_id = request.form.get("act-day"),
@@ -450,10 +434,10 @@ def unassign_activity(trip_id):
     day_act_id = request.form.get("day-act-id")
     day_act = DayActivity.query.get(day_act_id)
 
-    uact = UnassignedTripActivities(
+    uact = UTripAct(
          act_id = day_act.act_id,
          location_id = day_act.location.id,
-         trip = trip_id
+         trip_id = trip_id
     )
 
     db.session.delete(day_act)
@@ -468,7 +452,7 @@ def delete_activity(trip_id):
         return redirect("/login")
     uact_id = request.form.get("uact-id")
 
-    uact = UnassignedTripActivities.query.get(uact_id)
+    uact = UTripAct.query.get(uact_id)
 
     db.session.delete(uact)
     db.session.commit()
