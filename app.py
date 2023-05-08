@@ -265,6 +265,28 @@ def show_location_details(location_id):
 	
     return render_template("/trip/location-details.html", location=location_details, session=session)
 
+
+@app.route("/locations/<location_id>/activity/<int:activity_id>")
+def show_activity_location_details(location_id, activity_id):
+    if not g.user:
+            flash("Please Login or Create an Account")
+            return redirect("/login")
+    
+    location_details = get_location_details(location_id)
+	
+    return render_template("/trip/location-details.html", location=location_details, session=session, option=f"act{activity_id}")
+
+
+@app.route("/locations/<location_id>/campground")
+def show_campground_location_details(location_id):
+    if not g.user:
+            flash("Please Login or Create an Account")
+            return redirect("/login")
+    
+    location_details = get_location_details(location_id)
+	
+    return render_template("/trip/location-details.html", location=location_details, session=session, option="campgrounds")
+
 ############# Add Campground to Trip
 @app.route("/trips/<int:trip_id>/campgrounds/<location_id>/add", methods=["POST"])
 def add_campground(trip_id, location_id):
@@ -314,9 +336,9 @@ def activity_locations(trip_id, activity_id):
     if not g.user:
             flash("Please Login or Create an Account")
             return redirect("/login")
-    # activity = request.args.get("activity")
+    activity_name = Activity.query.get(activity_id).name
 
-    return render_template("trip/activity-locations.html", trip_id=trip_id, activity_id=activity_id)
+    return render_template("trip/activity-locations.html", trip_id=trip_id, activity_name=activity_name, activity_id=activity_id)
 
 ############### Activity location page
 @app.route("/trips/<int:trip_id>/act<int:activity_id>/<location_id>/add", methods=["POST"])
