@@ -6,12 +6,13 @@
 
 <div class="container" id="results-container">
 	<div class="card">
-		<h2 class="card-title">Where Do You Want to Stay?</h2>
 		<div class="card-body">
+			<h2 class="card-title">Where Do You Want to Stay?</h2>
+			<a href="/trips/{{ trip_id }}/activities" class="btn btn-secondary">Skip</a>
 			<ul class="list-group list-group-flush" id="results-list">
 			</ul>
+			<a href="/trips/{{ trip_id }}/activities" class="btn btn-secondary">Next</a>
 		</div>
-		<a href="/trips/{{ trip_id }}/activities" class="btn btn-secondary">Next</a>
 	</div>
 </div>
 <script> let tripId= "{{ trip_id }}"; </script>

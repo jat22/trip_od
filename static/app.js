@@ -99,7 +99,7 @@ $(document).ready(function(){
 		campgrounds.forEach(campground =>
 			$("#results-list").append(
 				`<li class="list-group-item">
-					<a href="/locations/${campground.id}">${campground.name}</a>
+					<a href="/locations/${campground.id}/campground">${campground.name}</a>
 					<form action="/trips/${tripId}/campgrounds/${campground.id}/add" method="POST">
 						<button type="submit" class="btn btn-sm btn-info">Add To Trip</button>
 					</form>
@@ -119,16 +119,12 @@ $(document).ready(function(){
 
 		activities.forEach(function(activity){
 			$("#results-list").append(
-				`<li>
-					<div class="card">
-						<div class="card-body">
-							<form action="/trips/${tripId}/activity/${activity.id}">
-								<button type="submit" class="btn btn-link">
-									<h5 class="card-title">${activity.name}</h5>
-								</button>
-							</form>
-						</div>
-					</div>
+				`<li class="list-group-item">
+					<form action="/trips/${tripId}/activity/${activity.id}">
+						<button type="submit" class="btn btn-link">
+							<h5 class="card-title">${activity.name}</h5>
+						</button>
+					</form>
 				</li>`
 			);
 
@@ -139,11 +135,12 @@ $(document).ready(function(){
 		const activities = JSON.parse(localStorage.getItem(actOptions));
 
 		const locations = activities.find(activity => activity.id == activityId).locations;
+
 		console.log(locations)
 		locations.forEach(function(location){
 			$("#activity-locations").append(
-				`<li>
-					<a href="/locations/${location.id}">${location.name}</a>
+				`<li class="list-group-item">
+					<a href="/locations/${location.id}/activity/${activityId}">${location.name}</a>
 					<form action="/trips/${tripId}/act${activityId}/${location.id}/add" method="POST">
 						<button class="btn btn-sm btn-secondary" type="submit">Add to activity to Trip</button>
 				</li>`
