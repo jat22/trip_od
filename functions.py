@@ -21,6 +21,8 @@ TOURS = "tours"
 ################# REC API SEARCH FUNCTIONS ############################
 def resource_search(endpoint, query="", limit="", offset="", full="true", state="", activity="", lat="", long="", radius="", sort=""):
     
+    """ multi purpose search of recreation.gov api """
+
     resp = requests.get(f"{REC_BASE_URL}/{endpoint}",
 		params={
 			"apikey" : REC_API_KEY,
@@ -38,6 +40,9 @@ def resource_search(endpoint, query="", limit="", offset="", full="true", state=
     return resp.json()
 
 def location_detail_search(location_id):
+
+    """ location (facility or recarea) search of api """
+
     api_type = location_id[:3]
     api_id = location_id[3:]
 
@@ -57,6 +62,8 @@ def location_detail_search(location_id):
 
 ######################### TOMTOM API GEOLOCATION SEARCH #######################
 def geolocation_search(city, state):
+    """ given a city/state, TomTom api is searched for location information"""
+
     resp = requests.get(f"{GEOCODE_BASE_URL}",
                         params = {
                             "key" : TOMTOM_KEY,
@@ -68,6 +75,8 @@ def geolocation_search(city, state):
     return resp.json()
 
 def get_coordinates(city, state):
+    """ given a city and state, lat/long coordinates are returned."""
+
     data = geolocation_search(city, state)
     coordinates = [result.get("position") for result in data.get("results")]
     return coordinates
@@ -77,6 +86,8 @@ def get_coordinates(city, state):
 
 ############################ MAIN SEARCH FUNCTION ###########################
 def search_by_location(city, state, latitude, longitude, radius="50"):
+    """ give geo location information, cleaned data about acitivities and campgrounds returned"""
+
     lat = latitude
     long = longitude
     if not lat and not long:
@@ -95,6 +106,7 @@ def search_by_location(city, state, latitude, longitude, radius="50"):
     return results
 
 def get_location_details(location_id):
+    """ given a specific location (facility or recarea) id, cleaned data is returned"""
     data = location_detail_search(location_id)
     details = clean_location_data(data)
     
@@ -103,7 +115,7 @@ def get_location_details(location_id):
 
 ######################## SEARCH HELPERS ##################################    
 def get_activities_campgrounds(lat, long, radius):
-    
+    """ given geo location data, activity and campground data is returned in a dicitonary"""
     facilities = resource_search(FACILITIES, lat=lat, long=long, radius=radius)["RECDATA"]
     clean_facilities = clean_resources("Facility", facilities)
 
@@ -140,6 +152,10 @@ def get_activities_campgrounds(lat, long, radius):
 
 ############################### FILETER AND CLEAN #########################
 def filter_campgrounds(facilities):
+    """ given a list of facilities, a list of campgrounds is returned;
+        (all campgrounds are facilities, all facilities are not campgrounds)
+    """
+
     campgrounds = []
 
     for fac in facilities:
@@ -150,6 +166,9 @@ def filter_campgrounds(facilities):
     return campgrounds
 
 def clean_resources(type, resource_list):
+    """ given a list of resources, of a particular type (facility or recarea)
+        a list with cleaned data is returned
+    """
     if type == "Facility":
         typ_abr = "fac"
     if type == "RecArea":
@@ -167,6 +186,8 @@ def clean_resources(type, resource_list):
     return resources
 
 def clean_location_data(resp_data):
+    """give data on a single location (facility or recarea), clean data is returned"""
+
     type = resp_data["type"]
     data = resp_data["data"]
     
@@ -197,6 +218,9 @@ def clean_location_data(resp_data):
 
 
 def make_date_dict(date):
+    """ given a datatime object, a dictionary of with data information is returned in 
+        a format that is usable for display purposes.
+    """
     date_dict = {
         "dow" : date.strftime("%a"),
         "month" : date.strftime("%b"),
@@ -208,6 +232,8 @@ def make_date_dict(date):
     return date_dict
 
 def trip_dates(start, end):
+    """given a start date and an end date (as datetime objects), a list of date dictionaries in that range are returned"""
+
     date_range = [start + timedelta(days = x) for x in range((end-start).days + 1)]
 
     trip_dates = [make_date_dict(date) for date in date_range]
@@ -215,10 +241,15 @@ def trip_dates(start, end):
     return trip_dates
 
 def get_all_activities():
+    """ retreives a list of all activities from recreation.gov api """
+
     data = resource_search("activities")["RECDATA"]
     return name_id_only(data, "Activity")
 
 def name_id_only(list, type):
+    """ cleaning helper function that given a list of resources, it returns only the name and id of those resources.
+    """
+
     info = [{
 		"id" : data.get(f"{type}ID"), 
 		"name" : data.get(f"{type}Name").lower()
@@ -227,4 +258,5 @@ def name_id_only(list, type):
     return info
 
 def display_date(date):
+    """ given a datatime object, returns a date as Month, day,"""
     return date.strftime("%b %-d, %Y")
