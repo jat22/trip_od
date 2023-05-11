@@ -150,7 +150,7 @@ def get_activities_campgrounds(lat, long, radius):
 
 
 
-############################### FILETER AND CLEAN #########################
+############################### FILTER AND CLEAN #########################
 def filter_campgrounds(facilities):
     """ given a list of facilities, a list of campgrounds is returned;
         (all campgrounds are facilities, all facilities are not campgrounds)

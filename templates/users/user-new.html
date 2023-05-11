@@ -1,25 +1,44 @@
-{% extends 'base.html' %}
+{% extends 'form-template.html' %}
 
 {% block title %}Create Account{% endblock %}
 
-{% block content %}
-<div class="container">
-	<h3>Create An Account</h3>
-</div>
 
-<div class="container">
-	<form action="/users/new", method="POST">
-		{{ form.hidden_tag() }}
 
-		{% for field in form if field.widget.input_type != 'hidden' %}
-			{% for error in field.errors %}
-				<span class="text-danger">{{ error }}</span>
-			{% endfor %}
-			{{ field.label }}
-			{{ field(class="form-control") }}
-		{% endfor %}
-		<button type="submit" class="btn btn-primary">Submit</button>
-	</form>
-</div>
+{% block header %}Create An Account{% endblock %}
 
+{% block form %}
+<form action="/users/new", method="POST">
+	{{ form.hidden_tag() }}
+	<div class="row">
+		<div class="col-4">
+			{{ form.username.label }}
+			{{ form.username(class="form-control")}}
+		</div>
+		<div class="col-8">
+			{{ form.email.label }}
+			{{ form.email(class="form-control")}}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-6">
+			{{ form.first_name.label }}
+			{{ form.first_name(class="form-control")}}
+		</div>
+		<div class="col-6">
+			{{ form.last_name.label }}
+			{{ form.last_name(class="form-control")}}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			{{ form.password.label }}
+			{{ form.password(class="form-control") }}
+		</div>
+	</div>
+	<div class="row" style="margin-top:20px;">
+		<div class="col">
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</div>
+	</div>
+</form>
 {% endblock %}

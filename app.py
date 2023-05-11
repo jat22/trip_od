@@ -2,6 +2,7 @@ from flask import Flask, redirect, render_template, url_for, request, flash, ses
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
+import config
 
 
 from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, bcrypt, Activity
@@ -10,7 +11,7 @@ from functions import search_by_location, get_location_details, display_date
 
 app = Flask(__name__)
 app.app_context().push()
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///rec_trips'
+app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
@@ -56,6 +57,9 @@ def add_user_to_g():
 def show_home():
     """show home page"""
 
+    if g.user:
+        return redirect(f"/trips")
+
     return render_template("home.html")
 
 
@@ -73,7 +77,7 @@ def login():
             do_login(user)
             return redirect('/')
         flash("Password/User incorrect", "danger")
-    return render_template('form-simple.html', form=form, title="Login", action="/login", submit_button = "Login", back_action="/", method="POST")
+    return render_template('/users/login.html', form=form, title="Login", action="/login", submit_button = "Login", back_action="/", method="POST")
 
 @app.route('/logout')
 def logout():
@@ -107,7 +111,7 @@ def signup():
             return render_template("/users/user-new.html", form=form)
         
         do_login(User.query.get(username))
-        return redirect(f"/users/{username}")
+        return redirect(f"/trips")
     
     else:
         return render_template("/users/user-new.html", form = form)
@@ -486,8 +490,8 @@ def search():
     results = search_by_location(
         city = request.args.get("city"),
         state = request.args.get("state"),
-        lat = request.args.get("latitude"),
-        long = request.args.get("longitude"),
+        latitude = request.args.get("latitude"),
+        longitude = request.args.get("longitude"),
         radius = request.args.get("radius")
         )
 

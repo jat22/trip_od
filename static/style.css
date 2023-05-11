@@ -1,3 +1,10 @@
 body {
 	background-color: lightslategray;
+	background-image: url("sunset.jpeg");
+	background-size: cover;
+	background-repeat: no-repeat
+}
+
+.primary-container{
+	max-width: 50%;
 }
