@@ -6,7 +6,7 @@ import config
 
 
 from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, bcrypt, Activity
-from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm
+from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, DescriptionUpdateForm, TripUpdateForm
 from functions import search_by_location, get_location_details, display_date
 
 app = Flask(__name__)
@@ -163,11 +163,11 @@ def show_a_trip(trip_id):
     if not g.user:
             flash("Please Login or Create an Account")
             return redirect("/login")
-    
     trip = Trip.query.get(trip_id)
+    desc_form = DescriptionUpdateForm(obj=trip)
     trip_days = db.session.query(TripDay).filter(TripDay.trip_id==trip_id).order_by(TripDay.date).all()
 
-    return render_template("/trip/trip-details.html", trip = trip, days=trip_days)
+    return render_template("/trip/trip-details.html", trip = trip, days=trip_days, form=desc_form)
 
 
 @app.route("/trips/create", methods=["GET", "POST"])
@@ -204,7 +204,7 @@ def create_trip():
         
         return redirect(f"/trips/{new_trip.id}/where")
     
-    return render_template("form-simple.html", form=form, title="New Trip", action="/trips/create", submit_button="Create", back_action="/", method="POST")
+    return render_template("/trip/create-trip.html", form=form)
 
 
 @app.route("/trips/<int:trip_id>/where", methods=["GET"])
@@ -438,6 +438,32 @@ def show_mytrips():
 
     return render_template("trip/mytrips.html", trips=trips, display_date=display_date)
 
+@app.route("/trips/<int:trip_id>/update", methods=["GET", "POST"])
+def update_trip_info(trip_id):
+    if not g.user:
+        flash("Please Login or Create an Account")
+        return redirect("/login")
+    
+    trip = Trip.query.get(trip_id)
+
+    desc_form = DescriptionUpdateForm(obj=trip)
+    trip_form = TripUpdateForm()
+
+    if desc_form.validate_on_submit():
+        trip.description = desc_form.description.data
+        db.session.commit()
+        return redirect(f"/trips/{trip_id}")
+
+    if trip_form.validate_on_submit():
+        trip.name = trip_form.name.data
+        trip.start_date = trip_form.start_date.data
+        trip.end_date = trip_form.end_date.data
+        db.session.commit()
+        return redirect(f"/trips/{trip_id}")
+    
+    return render_template("/trips/update.html", form=trip_form)
+    
+
 
 ############################# LOCATION VIEW FUNCTIONS #########################
 
@@ -497,7 +523,7 @@ def search():
 
     trip = Trip.query.get(request.args.get("tripId"))
     trip.lat = results['search_geolocation']['lat']
-    trip.logn = results['search_geolocation']['long']
+    trip.long = results['search_geolocation']['long']
     trip.radius = results['search_geolocation']['radius']
     db.session.commit()
 
@@ -516,5 +542,6 @@ def get_trip_options():
     radius = ""
 
     results = search_by_location("", "", lat, long, radius)
-    
+    import pdb
+    pdb.set_trace()
     return jsonify(results)

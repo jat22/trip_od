@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "basic.html" %}
 
 {% block title %}MyTrips{% endblock %}
 
@@ -7,11 +7,11 @@
 	<h1>My Adventures OutDoors</h1>
 	<a href="/trips/create" class="btn btn-secondary">New Trip</a>
 </div>
-<div class="container" style="max-width:50%;">
+<div class="container">
 	{% for trip in trips %}
-	<div class="card">
+	<div class="card trip-card" style="margin-top:20px;">
 		<div class="card-body">
-			<a href="/trips/{{ trip.id }}">
+			<a href="/trips/{{ trip.id }}" class="link-color">
 				<h2 class="card-title">{{ trip.name }}</h2>
 				<h4 class="card-subtitle">
 					{{ display_date(trip.start_date) }} to {{ display_date(trip.end_date) }}

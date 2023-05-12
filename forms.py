@@ -24,7 +24,7 @@ class LoginForm(FlaskForm):
 
 class CreateTripForm(FlaskForm):
     name = StringField("Trip Name", validators=[DataRequired()])
-    description = StringField("Description")
+    description = TextAreaField("Description")
     start_date = DateField("First Day")
     end_date = DateField("Last Day")
     
@@ -41,3 +41,12 @@ class LocationSearchForm(FlaskForm):
     lat = StringField("Latitude")
     long = StringField("Longitude")
     radius = IntegerField("Radius")
+
+class DescriptionUpdateForm(FlaskForm):
+    description = TextAreaField()
+
+class TripUpdateForm(FlaskForm):
+    name = StringField("Trip Name", validators=[DataRequired()])
+    description = TextAreaField("Description")
+    start_date = DateField("First Day")
+    end_date = DateField("Last Day")

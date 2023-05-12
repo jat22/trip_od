@@ -1,4 +1,4 @@
-{% extends 'form-template.html' %}
+{% extends 'basic.html' %}
 
 {% block title %}Create Account{% endblock %}
 
@@ -6,33 +6,33 @@
 
 {% block header %}Create An Account{% endblock %}
 
-{% block form %}
+{% block content %}
 <form action="/users/new", method="POST">
 	{{ form.hidden_tag() }}
 	<div class="row">
 		<div class="col-4">
 			{{ form.username.label }}
-			{{ form.username(class="form-control")}}
+			{{ form.username(class="form-control input-bg")}}
 		</div>
 		<div class="col-8">
 			{{ form.email.label }}
-			{{ form.email(class="form-control")}}
+			{{ form.email(class="form-control input-bg")}}
 		</div>
 	</div>
 	<div class="row">
 		<div class="col-6">
 			{{ form.first_name.label }}
-			{{ form.first_name(class="form-control")}}
+			{{ form.first_name(class="form-control input-bg")}}
 		</div>
 		<div class="col-6">
 			{{ form.last_name.label }}
-			{{ form.last_name(class="form-control")}}
+			{{ form.last_name(class="form-control input-bg")}}
 		</div>
 	</div>
 	<div class="row">
 		<div class="col">
 			{{ form.password.label }}
-			{{ form.password(class="form-control") }}
+			{{ form.password(class="form-control input-bg") }}
 		</div>
 	</div>
 	<div class="row" style="margin-top:20px;">

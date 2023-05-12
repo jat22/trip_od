@@ -1,5 +1,5 @@
 body {
-	background-color: lightslategray;
+	/* background-color: lightslategray; */
 	background-image: url("sunset.jpeg");
 	background-size: cover;
 	background-repeat: no-repeat
@@ -7,4 +7,28 @@ body {
 
 .primary-container{
 	max-width: 50%;
+}
+
+.trip-card{
+	background-color: rgba(86,135,167, .5);
+}
+
+.trip-components{
+	background-color: rgba(86,135,167, .75);
+}
+
+.link-color{
+	color: #263B06;
+}
+
+.input-bg{
+	background-color: lightgray;
+}
+
+.input-bg:focus{
+	background-color:lightgray;
+}
+
+.trip-title-container{
+	background-color:rgba(86,135,167, .80)
 }

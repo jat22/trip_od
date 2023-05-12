@@ -1,19 +1,23 @@
-{% extends '/form-template.html' %}
+{% extends 'basic.html' %}
 
 {% block title %}Login{% endblock %}
 
 {% block header %}Log into Your Adventures{% endblock %}
 
-{% block form %}
+{% block content %}
 <form action="/login" method="POST" style="margin-bottom: 20px;">
 	{{ form.hidden_tag() }}
-	{% for field in form if field.widget.input_type != 'hidden' %}
-		{% for error in field.errors %}
-			<span class="text-danger">{{ error }}</span>
-		{% endfor %}
-		{{ field.label }}
-		{{ field(class="form-control") }}
-	{% endfor %}
+	<div class="row">
+		<div class="col-4">
+			{{ form.username.label }}
+			{{ form.username(class="form-control input-bg")}}
+		</div>
+		<div class="col-8">
+			{{ form.password.label}}
+			{{ form.password(class="form-control input-bg") }}
+		</div>
+	</div>
+	
 	<button type="submit" class="btn btn-secondary" style="margin-top:20px;">Sign In</button>
 	
 </form>
