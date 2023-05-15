@@ -11,10 +11,11 @@ class CreateAccountForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=20)])
 
 class EditUserForm(FlaskForm):
+    username = StringField("Username", render_kw={"disabled": True})
     email = StringField('Email', validators=[DataRequired()])
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
-    current_password = PasswordField('Current Password(required)', validators=[DataRequired(), Length(min=8, max=20)])
+    password = PasswordField('Current Password(required)', validators=[DataRequired(), Length(min=8, max=20)])
     new_password = PasswordField('New Password')
     pw_confirm = PasswordField("Confirm New Password")
 

@@ -1,25 +1,33 @@
-{% extends "base.html" %}
+{% extends "basic.html" %}
 
 {% block title %}AdventureOD{% endblock %}
+
+{% block header %}Discover Your Next Adventure OutDoors{% endblock %}
 
 {% block content %}
 
 <div class="container text-center">
-	<h1>Find Your Next Adventure OutDoors</h1>
-	<div class="row text-center" style="margin-top: 50px">
-		<div class="col-3"></div>
-		<div class="col-2">
-			<a href="/users/new" class="btn btn-secondary btn-lg" role="button">Sign-up</a>
+	<div class="row" style="margin-top: 50px;">
+		<div class="col">
+			<a href="/users/new" class="btn btn-secondary btn-lg" role="button" style="width:100%; margin-top: 50px;">
+				Sign-up
+			</a>
 		</div>
-		<div class="col-2">
-			<a href="/users/login" class="btn btn-secondary btn-lg" role="button">Login</a>
-		</div>
-		<div class="col-2 text-center">
-			<a href="/explore" class="btn btn-secondary btn-lg" role="button">Explore</a>
-		</div>
-		<div class="col-3"></div>
 	</div>
-	
+	<div class="row">
+		<div class="col">
+			<a href="/users/login" class="btn btn-secondary btn-lg" role="button" style="width:100%; margin-top: 50px;">
+				Login
+			</a>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<a href="/explore" class="btn btn-secondary btn-lg" role="button" style="width:100%; margin-top: 50px;">
+				Explore
+			</a>
+		</div>
+	</div>
 </div>
 
 {% endblock %}

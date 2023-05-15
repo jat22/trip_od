@@ -1,5 +1,5 @@
 from app import app
-from models import db, bcrypt, Trip, User, Location, Link, Activity, DayActivity, TripDay
+from models import db, Trip, User, Location, Link, TripDay, DayActivity, UTripCamp, UTripAct, Activity
 import datetime
 
 db.drop_all()
@@ -7,31 +7,30 @@ db.create_all()
 
 Activity.update_activities()
 
-user1 = User(
+user1 = User.signup(
     username = "user1",
     email = "user1@email.com",
-    password = bcrypt.generate_password_hash("user12345").decode('UTF-8'),
 	first_name = "User",
-    last_name = "One"
+    last_name = "One",
+    password = "user12345"
 )
 
-user2 = User(
+user2 = User.signup(
     username = "user2",
     email = "user2@email.com",
-    password = bcrypt.generate_password_hash("user22345").decode('UTF-8'),
 	first_name = "User",
-    last_name = "Two"
+    last_name = "Two",
+    password = "user22345"
 )
 
-user3 = User(
+user3 = User.signup(
     username = "user3",
     email = "user3@email.com",
-    password = bcrypt.generate_password_hash("user32345").decode('UTF-8'),
 	first_name = "User",
-    last_name = "Three"
+    last_name = "Three",
+    password = "user32345"
 )
 
-db.session.add_all([user1, user2, user3])
 db.session.commit()
 
 trip1 = Trip.create_trip(

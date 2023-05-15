@@ -11,7 +11,7 @@ from functions import search_by_location, get_location_details, display_date
 
 app = Flask(__name__)
 app.app_context().push()
-app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///rec_trips"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
@@ -136,7 +136,7 @@ def edit_user(username):
     edit_form = EditUserForm(obj=g.user)
 
     if edit_form.validate_on_submit():
-        if User.authenticate(g.user.username, edit_form.current_password.data):
+        if User.authenticate(g.user.username, edit_form.password.data):
             g.user.email = edit_form.email.data
             g.user.first_name = edit_form.first_name.data
             g.user.last_name = edit_form.last_name.data
@@ -151,7 +151,7 @@ def edit_user(username):
                 return redirect(f"/users/{g.user.username}/edit")
         db.session.commit()
         return redirect(f"/users/{g.user.username}")
-    return render_template("/users/edit-user.html", edit_form=edit_form, user=g.user)
+    return render_template("/users/edit-user.html", form=edit_form, user=g.user)
 
 
 
@@ -163,6 +163,7 @@ def show_a_trip(trip_id):
     if not g.user:
             flash("Please Login or Create an Account")
             return redirect("/login")
+    session[CURR_TRIP] = trip_id
     trip = Trip.query.get(trip_id)
     desc_form = DescriptionUpdateForm(obj=trip)
     trip_days = db.session.query(TripDay).filter(TripDay.trip_id==trip_id).order_by(TripDay.date).all()
@@ -447,7 +448,7 @@ def update_trip_info(trip_id):
     trip = Trip.query.get(trip_id)
 
     desc_form = DescriptionUpdateForm(obj=trip)
-    trip_form = TripUpdateForm()
+    trip_form = TripUpdateForm(obj=trip)
 
     if desc_form.validate_on_submit():
         trip.description = desc_form.description.data
@@ -461,8 +462,22 @@ def update_trip_info(trip_id):
         db.session.commit()
         return redirect(f"/trips/{trip_id}")
     
-    return render_template("/trips/update.html", form=trip_form)
-    
+    return render_template("/trip/update.html", form=trip_form, trip_id=trip.id)
+
+@app.route("/trips/<int:trip_id>/confirm-delete")
+def confirm_trip_delete(trip_id):
+    trip = Trip.query.get(trip_id)
+    form = TripUpdateForm(obj=trip)
+    return render_template("/trip/confirm-delete.html", trip=trip, form=form)
+
+@app.route("/trips/<int:trip_id>/delete")
+def delete_trip(trip_id):
+    trip = Trip.query.get(trip_id)
+
+    db.session.delete(trip)
+    db.session.commit()
+
+    return redirect("/trips")
 
 
 ############################# LOCATION VIEW FUNCTIONS #########################
@@ -489,8 +504,9 @@ def show_activity_location_details(location_id, activity_id):
             return redirect("/login")
     
     location_details = get_location_details(location_id)
-	
-    return render_template("/trip/location-details.html", location=location_details, session=session, option=f"act{activity_id}")
+    activity = Activity.query.get(activity_id)
+
+    return render_template("/trip/location-details.html", location=location_details, session=session, activity=activity, option=f"act{activity_id}")
 
 
 @app.route("/locations/<location_id>/campground")

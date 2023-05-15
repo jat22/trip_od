@@ -4,19 +4,25 @@
 
 {% block page %}
 
-<div class="container">
+<div class="container" style="margin-bottom: 50px">
 	<h1>{{ location["name"] }}</h1>
 	
 	{% if session["curr_trip"] %}
 		{% if option %}
 		<form action="/trips/{{ session['curr_trip'] }}/{{ option }}/{{ location['id'] }}/add" method="POST">
 			<input type="hidden" value="{{ location['id'] }}">
-			<button type="submit" class="btn btn-sm btn-info">Add To Trip</button>
+			<button type="submit" class="btn btn-sm btn-info">
+				{% if activity %}
+				Add {{ activity.name }} To Trip
+				{% else %}
+				Add Campground To Trip
+				{% endif %}
+			</button>
 		</form>
 		{% endif %}
 	{% endif %}
 
-	<div class="card result-item">
+	<div class="card result-item" style="margin-top:20px;">
 		<div class="card-body">
 			<h4 class="card-title">Contact Info</h4>
 			<h6>Email:

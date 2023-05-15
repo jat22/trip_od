@@ -18,7 +18,7 @@ class User(db.Model):
 	password = db.Column(db.Text, nullable=False)
 	first_name = db.Column(db.Text)
 	last_name = db.Column(db.Text)
-	trips = db.relationship("Trip")
+	trips = db.relationship("Trip", cascade="all, delete")
 	
 	def __repr__(self):
 		return f"<User:{self.username}>"
@@ -58,10 +58,10 @@ class Trip(db.Model):
 	long = db.Column(db.Text)
 	description = db.Column(db.Text)
 	username = db.Column(db.ForeignKey("users.username", ondelete="CASCADE"))
-	days = db.Relationship("TripDay", backref="trip")
+	days = db.Relationship("TripDay", backref="trip", cascade="all, delete")
 	u_camps = db.Relationship("Location",
-				  secondary="u_camps")
-	u_acts = db.Relationship("UTripAct")
+				  secondary="u_camps", cascade="all, delete")
+	u_acts = db.Relationship("UTripAct", cascade="all, delete")
 	
 
 	def __repr__(self):
@@ -111,11 +111,11 @@ class Location(db.Model):
 	lat = db.Column(db.Text)
 	long = db.Column(db.Text)
 	links = db.Relationship("Link")
-	day_acts = db.Relationship("DayActivity", backref="location")
-	u_acts = db.Relationship("UTripAct", backref="location")
-	trip_day = db.Relationship("TripDay", backref="location")
-	u_camps = db.Relationship("UTripCamp", backref="location")
-	trip_day = db.Relationship("TripDay", backref="camp")
+	day_acts = db.Relationship("DayActivity", backref="location", cascade="all, delete")
+	u_acts = db.Relationship("UTripAct", backref="location", cascade="all, delete")
+	trip_day = db.Relationship("TripDay", backref="location", cascade="all, delete")
+	u_camps = db.Relationship("UTripCamp", backref="location", cascade="all, delete")
+	trip_day = db.Relationship("TripDay", backref="camp", cascade="all, delete")
 
 	def __repr__(self):
 		return f"<Location #{self.id}: {self.name}>"
@@ -201,7 +201,7 @@ class DayActivity(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	trip_day_id = db.Column(db.ForeignKey("trip_days.id", ondelete="CASCADE"), nullable=False)
 	act_id = db.Column(db.ForeignKey("activities.id"))
-	location_id = db.Column(db.ForeignKey("locations.id"))
+	location_id = db.Column(db.ForeignKey("locations.id", ondelete="CASCADE"))
 	trip_day = db.Relationship("TripDay", backref="activity")
 
 

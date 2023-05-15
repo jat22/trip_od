@@ -18,7 +18,7 @@
 									{{ days[-1]["month"] }} {{ days[-1]["day"] }}, 
 									{{ days[-1]["year"] }}
 								</h5>
-								<a style="margin-top:10px;" href="trips/{{ trip.id }}/update" class="btn btn-secondary btn-sm" role="button">Edit</a>
+								<a style="margin-top:10px;" href="/trips/{{ trip.id }}/update" class="btn btn-secondary btn-sm" role="button">Edit</a>
 							</div>
 							<div class="col-8">
 								<form action="/trips/{{ trip.id }}/update" method="POST">

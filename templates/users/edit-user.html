@@ -1,25 +1,19 @@
-{% extends 'base.html' %}
+{% extends '/users/base-user-form.html' %}
 
 {% block title %}Edit Profile{% endblock %}
 
-{% block content %}
-
-<div class="container">
-	<h2>Update User Information</h2>
-	<form action="/users/{{ user.username }}/edit" method="POST">
-		{{ edit_form.hidden_tag() }}
-		{% for field in edit_form if field.widget.input_type != 'hidden' %}
-			{% for error in field.errors %}
-				<span class="text-danger">{{ error }}</span>
-			{% endfor %}
-			{{ field.label }}
-			{{ field(class="form-control") }}
-		{% endfor %}
-		<button type="submit" class="btn btn-secondary">Update</button>
-		<a href="/users/{{ user.username }}" class="btn btn-dark" role="button">Cancel</a>
-	</form>
-</div>
+{% block header %}Update Your Info{% endblock %}
 
 
-
+{% block new_password %}
+	<div class="row">
+		<div class="col-6">
+			{{ form.new_password.label}}
+			{{ form.new_password(class="form-control input-bg") }}
+		</div>
+		<div class="col-6">
+			{{ form.pw_confirm.label }}
+			{{ form.pw_confirm(class="form-control input-bg") }}
+		</div>
+	</div>
 {% endblock %}
