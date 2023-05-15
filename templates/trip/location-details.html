@@ -2,51 +2,51 @@
 
 {% block title %}{{ location["name"] }} Details{% endblock %}
 
-{% block content %}
+{% block page %}
 
 <div class="container">
-	<div class="card">
-		<div class="card-body">
-			<h2 class="card-title">{{ location["name"] }}</h2>
-			
-			{% if session["curr_trip"] %}
-				{% if option %}
-				<form action="/trips/{{ session['curr_trip'] }}/{{ option }}/{{ location['id'] }}/add" method="POST">
-					<input type="hidden" value="{{ location['id'] }}">
-					<button type="submit" class="btn btn-sm btn-info">Add To Trip</button>
-				</form>
-				{% endif %}
-			{% endif %}
+	<h1>{{ location["name"] }}</h1>
+	
+	{% if session["curr_trip"] %}
+		{% if option %}
+		<form action="/trips/{{ session['curr_trip'] }}/{{ option }}/{{ location['id'] }}/add" method="POST">
+			<input type="hidden" value="{{ location['id'] }}">
+			<button type="submit" class="btn btn-sm btn-info">Add To Trip</button>
+		</form>
+		{% endif %}
+	{% endif %}
 
-			<div class="card">
-				<div class="card-body">
-					<h4 class="card-title">Contact Info</h4>
-					<h6>Email: {{ location["email"] }}</h6>
-					<h6>Phone: {{ location["phone"] }}</h6>
-					<h6>{{ location["address"] }}</h6>
-					<h6>{{ location["city"] }}, {{ location["state"] }} {{ location["zip"] }}</h6>
-				</div>
-			</div>
-			<div class="card">
-				<div class="card-body">
-					<h4 class="card-title">Links</h4>
-					{% for link in location["links"] %}
-					<span>| <a href="{{ link['url'] }}"">{{ link['title'] }}</a> |</span>
-					{% endfor %}
-				</div>
-			</div>
-			<div class="card">
-				<div class="card-body">
-					<h4 class="card-title">Directions</h4>
-					<p>{{ location["directions"]| safe }}</p>
-				</div>
-			</div>
-			<div class="card">
-				<div class="card-body">
-					<h4 class="card-title">Description</h4>
-					<p>{{ location["description"] | safe }}</p>
-				</div>
-			</div>
+	<div class="card result-item">
+		<div class="card-body">
+			<h4 class="card-title">Contact Info</h4>
+			<h6>Email:
+				<a class="link-color" href="mailto:{{ location['email'] }}">
+				{{ location["email"] }}
+				</a>
+			</h6>
+			<h6>Phone: {{ location["phone"] }}</h6>
+			<h6>{{ location["address"] }}</h6>
+			<h6>{{ location["city"] }}, {{ location["state"] }} {{ location["zip"] }}</h6>
+		</div>
+	</div>
+	<div class="card result-item">
+		<div class="card-body">
+			<h4 class="card-title">Links</h4>
+			{% for link in location["links"] %}
+			<span>| <a class="link-color" href="{{ link['url'] }}"">{{ link['title'] }}</a> |</span>
+			{% endfor %}
+		</div>
+	</div>
+	<div class="card result-item">
+		<div class="card-body">
+			<h4 class="card-title">Directions</h4>
+			<p>{{ location["directions"]| safe }}</p>
+		</div>
+	</div>
+	<div class="card result-item">
+		<div class="card-body">
+			<h4 class="card-title">Description</h4>
+			<p>{{ location["description"] | safe }}</p>
 		</div>
 	</div>
 </div>

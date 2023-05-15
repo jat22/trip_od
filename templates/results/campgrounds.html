@@ -1,19 +1,27 @@
-{% extends 'base.html' %}
+{% extends '/results/results-base.html' %}
 
-{% block title %}Stay{% endblock %}
+{% block title %}Campgrounds{% endblock %}
 
-{% block content %}
 
-<div class="container" id="results-container">
-	<div class="card">
-		<div class="card-body">
-			<h2 class="card-title">Where Do You Want to Stay?</h2>
-			<a href="/trips/{{ trip_id }}/activities" class="btn btn-secondary">Skip</a>
-			<ul class="list-group list-group-flush" id="results-list">
-			</ul>
-			<a href="/trips/{{ trip_id }}/activities" class="btn btn-secondary">Next</a>
-		</div>
-	</div>
-</div>
-<script> let tripId= "{{ trip_id }}"; </script>
+
+
+{% block header %}
+Find Your Basecamp
 {% endblock %}
+
+{% block sub_header %}
+Explore campgrounds in the area and add to your trip
+{% endblock %}
+
+{% block secondary_nav_top %}
+<a href='/trips/{{ trip_id }}/activities' class="btn btn-secondary">
+	Find Activities
+</a>
+{% endblock %}
+
+{% block secondary_nav_bottom %}
+<a href='/trips/{{ trip_id }}/activities' class="btn btn-secondary">
+	Find Activities
+</a>
+{% endblock %}
+

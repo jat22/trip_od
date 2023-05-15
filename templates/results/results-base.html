@@ -1,16 +1,29 @@
-{% extend "base.html" %}
+
+{% extends 'basic.html' %}
+
+{% block title %}{% endblock %}
+
 
 {% block content %}
-	{% block header %}{% endblock %}
-	<div class="container">
-		<div class="card">
-			<div class="card-body">
-				<ul class="list-group list-group-flush" id="results-list">
-				</ul> 
-			</div>
-		</div>
+	
+	<div>
+		{% block secondary_nav_top %}{% endblock %}
+		<a href='/trips/{{ trip_id }}' class="btn btn-secondary">
+			Go to Trip
+		</a>
 	</div>
-	{% block next_link %}{% endblock %}
+	<div style="margin:10px 0px 10px 0px">
+		<ul class="list-group list-group-flush results-list" style="margin-top:10px;">
+		</ul>
+	</div>
+	<div style="margin-bottom:50px;">
+		{% block secondary_nav_bottom%}{% endblock %}
+		<a href='/trips/{{ trip_id }}' class="btn btn-secondary">
+			Go to Trip
+		</a>
+	</div>
+</div>
+{% block add_script %}{% endblock %}
+<script> let tripId= "{{ trip_id }}"; </script>
 {% endblock %}
 
-{% block script %}{% endblock %}

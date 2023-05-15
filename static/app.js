@@ -5,9 +5,11 @@ const $latLongSelector = $('#lat-long');
 
 const $cityField = $("#city-field");
 const $stateField = $("#state-field");
+const $cityStateRow = $("#city-state-row");
 const $latField = $("#lat-field");
 const $longField = $("#long-field");
-const $radiusField = $("#radius-field")
+const $latLongRow = $("#lat-long-row");
+const $radiusField = $("#radius-field");
 
 const $searchButton = $("#search-btn");
 
@@ -18,20 +20,21 @@ const actOptions = "actOptions"
 
 function toggleSearchType(){
 	if($cityStateSelector.is(' :checked')){
-		$cityField.show();
-		$stateField.show();
-		$latField.hide().val("");
-		$longField.hide().val("");
+		$cityStateRow.show();
+		$latLongRow.hide();
+		$latField.val("");
+		$longField.val("");
 	}
 	if($latLongSelector.is(' :checked')){
-		$cityField.hide().val("");
-		$stateField.hide().val("");
-		$latField.show();
-		$longField.show();
+		$cityStateRow.hide();
+		$cityField.val("");
+		$stateField.val("");
+		$latLongRow.show();
 	}
 }
 
 $searchParams.on('click', toggleSearchType);
+$(document).ready(toggleSearchType())
 
 async function executeSearch(event){
 	event.preventDefault();
@@ -97,12 +100,22 @@ $(document).ready(function(){
 
 		console.log(campgrounds)
 		campgrounds.forEach(campground =>
-			$("#results-list").append(
-				`<li class="list-group-item">
-					<a href="/locations/${campground.id}/campground">${campground.name}</a>
-					<form action="/trips/${tripId}/campgrounds/${campground.id}/add" method="POST">
-						<button type="submit" class="btn btn-sm btn-info">Add To Trip</button>
-					</form>
+			$(".results-list").append(
+				`<li class="list-group-item result-item">
+					<div class="row">
+						<div class="col-8">
+							<a class="link-color" href="/locations/${campground.id}/campground">
+								${campground.name}
+							</a>
+						</div>
+						<div class="col-4 d-flex justify-content-end">
+							<form action="/trips/${tripId}/campgrounds/${campground.id}/add" method="POST">
+								<button type="submit" class="btn btn-sm btn-info">
+									Add To Trip
+								</button>
+							</form>
+						</div>
+					</div>
 				</li>`
 			)
 		)
@@ -118,13 +131,15 @@ $(document).ready(function(){
 		console.log(activities)
 
 		activities.forEach(function(activity){
-			$("#results-list").append(
-				`<li class="list-group-item">
-					<form action="/trips/${tripId}/activity/${activity.id}">
-						<button type="submit" class="btn btn-link">
-							<h5 class="card-title">${activity.name}</h5>
-						</button>
-					</form>
+			$(".results-list").append(
+				`<li class="list-group-item result-item">
+					<div class="row">
+						<div class="col-8">
+							<a class="link-color" href="/trips/${tripId}/activity/${activity.id}">
+								${activity.name}
+							</a>
+						</div>
+					</div>
 				</li>`
 			);
 
@@ -138,11 +153,22 @@ $(document).ready(function(){
 
 		console.log(locations)
 		locations.forEach(function(location){
-			$("#activity-locations").append(
-				`<li class="list-group-item">
-					<a href="/locations/${location.id}/activity/${activityId}">${location.name}</a>
-					<form action="/trips/${tripId}/act${activityId}/${location.id}/add" method="POST">
-						<button class="btn btn-sm btn-secondary" type="submit">Add to activity to Trip</button>
+			$(".results-list").append(
+				`<li class="list-group-item result-item">
+					<div class="row">
+						<div class="col-8">
+							<a class="link-color" href="/locations/${location.id}/activity/${activityId}">
+								${location.name}
+							</a>
+						</div>
+						<div class="col-4 d-flex justify-content-end">
+							<form action="/trips/${tripId}/act${activityId}/${location.id}/add" method="POST">
+								<button class="btn btn-sm btn-info" type="submit">
+									Add to Trip
+								</button>
+							</form>
+						</div>
+					</div>
 				</li>`
 			)})
 	}

@@ -1,18 +1,27 @@
-{% extends "base.html" %}
+{% extends '/results/results-base.html' %}
 
-{% block title %}What To Do?{% endblock %}
+{% block title %}Activities{% endblock %}
 
-{% block content %}
-<div class="container" id="results-container">
-	<div class="card">
-		<div class="card-body">
-			<h2 class="card-title">What Do You Want to Do?</h2>
-			<a href="/trips/{{ trip_id }}" class="btn btn-secondary">Skip</a>
-			<ul class="list-group list-group-flush" id="results-list">
-			</ul>
-			<a href="/trips/{{ trip_id }}" class="btn btn-secondary">Next</a>
-		</div>
-	</div>
-</div>
-<script> let tripId= "{{ trip_id }}"; </script>
+
+
+
+{% block header %}
+Explore your Adventure Options!
 {% endblock %}
+
+{% block sub_header %}
+Get more info on activities
+{% endblock %}
+
+{% block secondary_nav_top %}
+<a href='/trips/{{ trip_id }}/campgrounds' class="btn btn-secondary">
+	Go Back to Campgrounds
+</a>
+{% endblock %}
+
+{% block secondary_nav_bottom %}
+<a href='/trips/{{ trip_id }}/campgrounds' class="btn btn-secondary">
+	Go Back to Campgrounds
+</a>
+{% endblock %}
+

@@ -18,11 +18,11 @@ body {
 }
 
 .link-color{
-	color: #263B06;
+	color: #dfad44;
 }
 
 .input-bg{
-	background-color: lightgray;
+	background-color: rgb(182, 181, 181);
 }
 
 .input-bg:focus{
@@ -31,4 +31,12 @@ body {
 
 .trip-title-container{
 	background-color:rgba(86,135,167, .80)
+}
+
+.result-item{
+	background-color: rgba(86,135,167, .60);
+}
+
+.results-background{
+	background-image: url("green-trail.jpeg")
 }

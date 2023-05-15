@@ -542,6 +542,5 @@ def get_trip_options():
     radius = ""
 
     results = search_by_location("", "", lat, long, radius)
-    import pdb
-    pdb.set_trace()
+
     return jsonify(results)

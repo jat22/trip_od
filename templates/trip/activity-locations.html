@@ -1,11 +1,29 @@
-{% extends 'base.html' %}
+{% extends '/results/results-base.html' %}
 
 {% block title %}{{ activity_name }}{% endblock %}
 
 
-{% block content %}
+{% block header %}
+Explore Options for {{ activity_name }}
+{% endblock %}
 
-<div class="container" id="results-container">
+{% block sub_header %}
+Click on a location to learn more about it
+{% endblock %}
+
+{% block secondary_nav_top %}
+<a href="/trips/{{ trip_id }}/activities" class="btn btn-secondary">
+	Back to All Activities
+</a>
+{% endblock %}
+
+{% block secondary_nav_bottom %}
+<a href="/trips/{{ trip_id }}/activities" class="btn btn-secondary">
+	Back to All Activities
+</a>
+{% endblock %}
+
+<!-- <div class="container" id="results-container">
 	<div class="card">
 		
 		<div class="card-body">
@@ -17,8 +35,7 @@
 		</div>
 		
 	</div>
-</div>
+</div> -->
+{% block add_script %}<script>let activityId = "{{ activity_id }}";</script>{% endblock %}
 
-<script> let activityId = "{{ activity_id }}"; let tripId="{{ trip_id }}"</script>
 
-{% endblock %}

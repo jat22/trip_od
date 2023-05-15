@@ -176,10 +176,10 @@ def clean_resources(type, resource_list):
 
     resources = [{
         "id" : typ_abr + res[f"{type}ID"],
-        "name" : res[f"{type}Name"],
+        "name" : res[f"{type}Name"].title(),
         "lat" : res[f"{type}Latitude"],
         "long" : res[f"{type}Longitude"],
-        "activities" : [{"id": act["ActivityID"], "name" : act["ActivityName"]} for act in res["ACTIVITY"]]
+        "activities" : [{"id": act["ActivityID"], "name" : act["ActivityName"].title()} for act in res["ACTIVITY"]]
 		}
     	for res in resource_list]
     
@@ -198,7 +198,7 @@ def clean_location_data(resp_data):
 
     details = {
         "id" : id_type + data[f"{type}ID"],
-    	"name" : data[f"{type}Name"],
+    	"name" : data[f"{type}Name"].title(),
         "email" : data[f"{type}Email"],
         "phone" : data[f"{type}Phone"],
         "description" : data[f"{type}Description"],
@@ -252,7 +252,7 @@ def name_id_only(list, type):
 
     info = [{
 		"id" : data.get(f"{type}ID"), 
-		"name" : data.get(f"{type}Name").lower()
+		"name" : data.get(f"{type}Name").title()
 		} 
 		for data in list]
     return info
