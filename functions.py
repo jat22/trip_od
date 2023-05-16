@@ -234,11 +234,15 @@ def make_date_dict(date):
 def trip_dates(start, end):
     """given a start date and an end date (as datetime objects), a list of date dictionaries in that range are returned"""
 
-    date_range = [start + timedelta(days = x) for x in range((end-start).days + 1)]
+    date_range = make_date_range(start,end)
 
     trip_dates = [make_date_dict(date) for date in date_range]
 
     return trip_dates
+
+def make_date_range(start, end):
+    date_range = [start + timedelta(days = x) for x in range((end-start).days + 1)]
+    return date_range
 
 def get_all_activities():
     """ retreives a list of all activities from recreation.gov api """
@@ -260,3 +264,4 @@ def name_id_only(list, type):
 def display_date(date):
     """ given a datatime object, returns a date as Month, day,"""
     return date.strftime("%b %-d, %Y")
+

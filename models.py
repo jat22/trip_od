@@ -1,7 +1,8 @@
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 
-from functions import get_all_activities, trip_dates
+from functions import get_all_activities, trip_dates, make_date_range
+from datetime import timedelta
 
 bcrypt = Bcrypt()
 db = SQLAlchemy()
@@ -93,6 +94,23 @@ class Trip(db.Model):
 			db.session.commit()
 		
 		return trip
+	
+	@classmethod
+	def update(cls, trip, name, description, start_date, end_date):
+		trip_days = trip.days
+		if trip.start_date != start_date and trip.start_date > start_date:
+			TripDay.add(start_date, (trip.start_date - timedelta(days=1)), trip.id)
+		if trip.start_date != start_date and trip.start_date < start_date:
+			TripDay.delete(trip.start_date, (start_date - timedelta(days=1)), trip_days)
+		if trip.end_date != end_date and trip.end_date > end_date:
+			TripDay.delete((end_date + timedelta(days=1)), trip.end_date, trip_days)
+		if trip.end_date != end_date and trip.end_date < end_date:
+			TripDay.add((trip.end_date + timedelta(days=1)), end_date, trip.id)
+		trip.name = name
+		trip.description = description
+		trip.start_date = start_date
+		trip.end_date = end_date
+		db.session.commit()
 
 
 class Location(db.Model):
@@ -169,6 +187,29 @@ class TripDay(db.Model):
 	def __repr__(self):
 		return f"<TripDay Trip#{self.trip_id} date: {self.date}>"
 
+	@classmethod
+	def add(cls, start_date, end_date, trip_id):
+		new_trip_days = trip_dates(start_date, end_date)
+		for d in new_trip_days:
+			new_day = TripDay(
+				trip_id = trip_id,
+				date = d["datetime"],
+				dow = d["dow"],
+				year = d["year"],
+				month = d["month"],
+				day = d["day"]
+			)
+			db.session.add(new_day)
+			db.session.commit()
+
+	@classmethod
+	def delete(cls, start_date, end_date, trip_days):
+		del_days = make_date_range(start_date, end_date)
+		for day in trip_days:
+			if day.date in del_days:
+				db.session.delete(day)
+				db.session.commit()
+
 class Activity(db.Model):
 	__tablename__ = "activities"
 	
@@ -199,9 +240,9 @@ class DayActivity(db.Model):
 	__tablename__ = "day_acts"
 
 	id = db.Column(db.Integer, primary_key=True)
-	trip_day_id = db.Column(db.ForeignKey("trip_days.id", ondelete="CASCADE"), nullable=False)
+	trip_day_id = db.Column(db.ForeignKey("trip_days.id", ondelete="CASCADE"),  nullable=True)
 	act_id = db.Column(db.ForeignKey("activities.id"))
-	location_id = db.Column(db.ForeignKey("locations.id", ondelete="CASCADE"))
+	location_id = db.Column(db.ForeignKey("locations.id"), nullable=False)
 	trip_day = db.Relationship("TripDay", backref="activity")
 
 
@@ -209,14 +250,14 @@ class UTripCamp(db.Model):
 	__tablename__ = "u_camps"
 
 	id = db.Column(db.Integer, primary_key=True)
-	location_id = db.Column(db.ForeignKey("locations.id"))
-	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"))
+	location_id = db.Column(db.ForeignKey("locations.id"), nullable=False)
+	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"), nullable=False)
 
 class UTripAct(db.Model):
 	__tablename__ = "u_acts"
 
 	id = db.Column(db.Integer, primary_key=True)
-	act_id = db.Column(db.ForeignKey("activities.id"))
-	location_id = db.Column(db.ForeignKey("locations.id"))
-	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"))
+	act_id = db.Column(db.ForeignKey("activities.id"), nullable=False)
+	location_id = db.Column(db.ForeignKey("locations.id"), nullable=False)
+	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"), nullable=False)
 

@@ -447,19 +447,22 @@ def update_trip_info(trip_id):
     
     trip = Trip.query.get(trip_id)
 
-    desc_form = DescriptionUpdateForm(obj=trip)
+    # desc_form = DescriptionUpdateForm(obj=trip)
     trip_form = TripUpdateForm(obj=trip)
 
-    if desc_form.validate_on_submit():
-        trip.description = desc_form.description.data
-        db.session.commit()
-        return redirect(f"/trips/{trip_id}")
+    # if desc_form.validate_on_submit():
+    #     trip.description = desc_form.description.data
+    #     db.session.commit()
+    #     return redirect(f"/trips/{trip_id}")
 
     if trip_form.validate_on_submit():
-        trip.name = trip_form.name.data
-        trip.start_date = trip_form.start_date.data
-        trip.end_date = trip_form.end_date.data
-        db.session.commit()
+        Trip.update(
+            trip = trip,
+            name = trip_form.name.data,
+            description = trip_form.description.data,
+            start_date = trip_form.start_date.data,
+            end_date = trip_form.end_date.data,
+        )
         return redirect(f"/trips/{trip_id}")
     
     return render_template("/trip/update.html", form=trip_form, trip_id=trip.id)
