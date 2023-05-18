@@ -2,7 +2,8 @@ body {
 	/* background-color: lightslategray; */
 	background-image: url("sunset.jpeg");
 	background-size: cover;
-	background-repeat: no-repeat
+	background-repeat: no-repeat;
+	background-attachment: fixed;
 }
 
 .primary-container{

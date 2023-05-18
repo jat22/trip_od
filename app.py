@@ -11,12 +11,12 @@ from functions import search_by_location, get_location_details, display_date
 
 app = Flask(__name__)
 app.app_context().push()
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///rec_trips"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-app.config['SQLALCHEMY_ECHO'] = True
+# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///rec_trips"
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+# app.config['SQLALCHEMY_ECHO'] = True
 
-app.config['SECRET_KEY'] = "secrets"
+# app.config['SECRET_KEY'] = "secrets"
 
 debug = DebugToolbarExtension(app)
 
