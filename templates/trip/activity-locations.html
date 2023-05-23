@@ -23,6 +23,7 @@ Click on a location to learn more about it
 </a>
 {% endblock %}
 
-{% block add_script %}<script>let activityId = "{{ activity_id }}";</script>{% endblock %}
+{% block add_script %}<script>let activityId = "{{ activity_id }}"; let baseUrl = "{{ BASE_URL }}" ; </script>
+{% endblock %}
 
 

@@ -83,7 +83,7 @@ $(".more-button").on("click", updateOptions)
 
 $(document).ready(function(){
 
-	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/where`) > -1){
+	if(window.location.href.indexOf(`${baseUrl}/trips/${tripId}/where`) > -1){
 		states = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado", "Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]
 
 		states.forEach( state =>
@@ -91,7 +91,7 @@ $(document).ready(function(){
 		)
 	}
 
-	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/campgrounds`) > -1){
+	if(window.location.href.indexOf(`${baseUrl}/trips/${tripId}/campgrounds`) > -1){
 		if(tripId != localStorage.getItem(currTrip)){
 			updateOptions(tripId)
 		}	
@@ -121,7 +121,7 @@ $(document).ready(function(){
 		)
 	}
 
-	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/activities`) > -1){
+	if(window.location.href.indexOf(`${baseUrl}/trips/${tripId}/activities`) > -1){
 		if(tripId != localStorage.getItem(currTrip)){
 			updateOptions(tripId)
 		}
@@ -145,7 +145,7 @@ $(document).ready(function(){
 
 		})
 	}
-	if(window.location.href.indexOf(`http://127.0.0.1:5000/trips/${tripId}/activity/${activityId}`) > -1){
+	if(window.location.href.indexOf(`${baseUrl}/trips/${tripId}/activity/${activityId}`) > -1){
 
 		const activities = JSON.parse(localStorage.getItem(actOptions));
 
