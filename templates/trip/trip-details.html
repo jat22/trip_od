@@ -71,7 +71,7 @@
 									</div>
 								</div>
 							</div>
-							{% if day.activity %}
+							{% if day.day_acts %}
 							<div class="card trip-card">
 								<div class="card-body">
 									<div class="row">
@@ -79,10 +79,10 @@
 											<h5 class="card-title">Activities</h5>
 										</div>
 									</div>
-									{% for act in  day.activity %}
+									{% for act in  day.day_acts %}
 									<div class="row" style="margin-bottom:2px;">
 										<div class="col-3">
-											<h6> {{ act.activities.name }}
+											<h6> {{ act.activity.name }}
 											</h6>
 										</div>
 										<div class="col-6">

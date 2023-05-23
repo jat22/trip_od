@@ -183,7 +183,8 @@ class TripDay(db.Model):
 	month = db.Column(db.Text)
 	day = db.Column(db.Text)
 	camp_id = db.Column(db.ForeignKey("locations.id"), nullable=True)
-
+	day_acts = db.Relationship("DayActivity", backref="trip_day", cascade="all, delete")
+	
 	def __repr__(self):
 		return f"<TripDay Trip#{self.trip_id} date: {self.date}>"
 
@@ -215,7 +216,7 @@ class Activity(db.Model):
 	
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.Text)
-	day_act = db.Relationship("DayActivity", backref="activities")
+	day_act = db.Relationship("DayActivity", backref="activity")
 	u_acts = db.Relationship("UTripAct", backref="activity")
 	
 	def __repr__(self):
@@ -240,11 +241,9 @@ class DayActivity(db.Model):
 	__tablename__ = "day_acts"
 
 	id = db.Column(db.Integer, primary_key=True)
-	trip_day_id = db.Column(db.ForeignKey("trip_days.id", ondelete="CASCADE"),  nullable=True)
+	trip_day_id = db.Column(db.ForeignKey("trip_days.id", ondelete="CASCADE"), nullable=False)
 	act_id = db.Column(db.ForeignKey("activities.id"))
 	location_id = db.Column(db.ForeignKey("locations.id"), nullable=False)
-	trip_day = db.Relationship("TripDay", backref="activity")
-
 
 class UTripCamp(db.Model):
 	__tablename__ = "u_camps"
