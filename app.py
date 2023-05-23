@@ -1,8 +1,7 @@
-from flask import Flask, redirect, render_template, url_for, request, flash, session, g, jsonify
-from flask_debugtoolbar import DebugToolbarExtension
+from flask import Flask, redirect, render_template, request, flash, session, g, jsonify
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-# import config
+import config
 
 
 from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, bcrypt, Activity
@@ -11,27 +10,16 @@ from functions import search_by_location, get_location_details, display_date
 
 app = Flask(__name__)
 app.app_context().push()
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///rec_trips"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-app.config['SQLALCHEMY_ECHO'] = True
+app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
 
-app.config['SECRET_KEY'] = "secrets"
-
-debug = DebugToolbarExtension(app)
+app.config['SECRET_KEY'] = config.SECRET_KEY
 
 connect_db(app)
-
-# db.create_all()
-
-# Activity.update_activities()
 
 CURR_USER = "curr_user"
 CURR_TRIP = "curr_trip"
 REC_BASE_URL = "https://ridb.recreation.gov/api/v1"
 GEOCODE_BASE_URL = "https://api.tomtom.com/search/2/geocode/"
-
-
 
 def do_login(user):
     """add user to session"""

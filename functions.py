@@ -1,20 +1,14 @@
-# from flask import Flask, redirect, render_template, jsonify
-# from flask_debugtoolbar import DebugToolbarExtension
-import requests, json, asyncio
-from keys import REC_API_KEY, MAPS_KEY, TOMTOM_KEY
-from datetime import timedelta, date, datetime
+
+import requests
+from keys import REC_API_KEY, TOMTOM_KEY
+from datetime import timedelta
 
 REC_BASE_URL = "https://ridb.recreation.gov/api/v1"
 GEOCODE_BASE_URL = "https://api.tomtom.com/search/2/structuredGeocode.json"
 
 ######### ENDPOINTS ##############
-ACTIVITIES = "activities"
-CAMPSITES = "campsites"
-EVENTS = "events"
 FACILITIES = "facilities"
-PERMIT = "permitentrances"
 RECAREAS = "recareas"
-TOURS = "tours"
 
 
 
