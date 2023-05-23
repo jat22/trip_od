@@ -79,11 +79,17 @@ class Trip(db.Model):
 		db.session.add(trip)
 		db.session.commit()
 
+		cls.create_trip_days(trip.id, start_date, end_date)
+		
+		return trip
+	
+	@classmethod
+	def create_trip_days(cls, trip_id, start_date, end_date):
 		trip_days = trip_dates(start_date, end_date)
 
 		for d in trip_days:
 			new_day = TripDay(
-                trip_id = trip.id,
+                trip_id = trip_id,
                 date = d["datetime"],
                 dow = d["dow"],
                 year = d["year"],
@@ -92,8 +98,6 @@ class Trip(db.Model):
             )
 			db.session.add(new_day)
 			db.session.commit()
-		
-		return trip
 	
 	@classmethod
 	def update(cls, trip, name, description, start_date, end_date):
