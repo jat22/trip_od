@@ -166,6 +166,8 @@ class Location(db.Model):
 			new_link = Link(**link)
 			db.session.add(new_link)
 			db.session.commit()
+		
+		return location
 
 
 class Link(db.Model):
