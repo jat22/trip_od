@@ -2,7 +2,7 @@ from flask import Flask, redirect, render_template, url_for, request, flash, ses
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-import config
+# import config
 
 
 from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, bcrypt, Activity
@@ -18,7 +18,7 @@ app.app_context().push()
 
 # app.config['SECRET_KEY'] = "secrets"
 
-debug = DebugToolbarExtension(app)
+# debug = DebugToolbarExtension(app)
 
 connect_db(app)
 
