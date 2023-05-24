@@ -80,7 +80,7 @@ def get_coordinates(city, state):
 
 ############################ MAIN SEARCH FUNCTION ###########################
 def search_by_location(city, state, latitude, longitude, radius="50"):
-    """ give geo location information, cleaned data about acitivities and campgrounds returned"""
+    """ given geo location information, cleaned data about acitivities and campgrounds returned"""
 
     lat = latitude
     long = longitude
@@ -180,7 +180,7 @@ def clean_resources(type, resource_list):
     return resources
 
 def clean_location_data(resp_data):
-    """give data on a single location (facility or recarea), clean data is returned"""
+    """given data on a single location (facility or recarea), clean data is returned"""
 
     type = resp_data["type"]
     data = resp_data["data"]
