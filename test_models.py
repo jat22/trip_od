@@ -1,13 +1,10 @@
 import os
 from unittest import TestCase
-from flask_bcrypt import Bcrypt
 from datetime import date
 
-from models import db, connect_db, User, Trip, Location, Link, TripDay, Activity, DayActivity, UTripCamp, UTripAct
+from models import db, connect_db, User, Trip, Location, TripDay
 
 os.environ["DATABASE_URL"] = 'postgresql:///rec_trip_test'
-
-bycrpt = Bcrypt()
 
 from app import app
 
