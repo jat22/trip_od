@@ -102,7 +102,7 @@ def signup():
         return redirect(f"/trips")
     
     else:
-        return render_template("/users/user-new.html", form = form)
+        return render_template("/users/user-new.html", form = form, baseUrl = BASE_URL)
 
 @app.route("/users/<username>")
 def user_profile(username):
