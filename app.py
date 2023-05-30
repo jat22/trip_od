@@ -56,7 +56,7 @@ def show_home():
 
 ################### USER VIEW FUNCTIONS #############################
 
-@app.route('/login', methods=["GET", "POST"])
+@app.route('/login', methods=["POST"])
 def login():
     """Show login page and login user"""
 
@@ -68,7 +68,7 @@ def login():
             do_login(user)
             return redirect('/')
         flash("Password/User incorrect", "danger")
-    return render_template('/users/login.html', form=form, title="Login", action="/login", submit_button = "Login", back_action="/", method="POST")
+    return render_template('/users/login.html', form=form)
 
 @app.route('/logout')
 def logout():
@@ -171,14 +171,15 @@ def create_trip():
             return redirect("/login")
 
     form = CreateTripForm()
-    
+
     if form.validate_on_submit():
         if not g.user:
             flash("Please Login or Create an Account")
             return redirect("/login")
-        
+
         start_date = form.start_date.data
         end_date = form.end_date.data
+
         if end_date >= start_date:
             new_trip = Trip.create_trip(
                     name = form.name.data,
