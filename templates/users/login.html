@@ -5,23 +5,29 @@
 {% block header %}Log into Your Adventures{% endblock %}
 
 {% block content %}
-<form action="/login" method="POST" style="margin-bottom: 20px;">
-	{{ form.hidden_tag() }}
-	<div class="row">
-		<div class="col-4">
-			{{ form.username.label }}
-			{{ form.username(class="form-control input-bg")}}
-		</div>
-		<div class="col-8">
-			{{ form.password.label}}
-			{{ form.password(class="form-control input-bg") }}
-		</div>
+{% block add %}{% endblock %}
+<div class="card" id="login-card" style="margin-top:20px">
+	<div class="card-body">
+		<h3 class="card-title">Login</h3>
+		<form action="/login" method="POST" style="margin-bottom: 20px;">
+			{{ form.hidden_tag() }}
+			<div class="row">
+				<div class="col-4">
+					{{ form.username.label }}
+					{{ form.username(class="form-control input-bg")}}
+				</div>
+				<div class="col-8">
+					{{ form.password.label}}
+					{{ form.password(class="form-control input-bg") }}
+				</div>
+			</div>
+			
+			<button type="submit" class="btn btn-secondary" style="margin-top:20px;">Sign In</button>
+			
+		</form>
+		<a href="/users/new">Create an Account</a>
 	</div>
 	
-	<button type="submit" class="btn btn-secondary" style="margin-top:20px;">Sign In</button>
-	
-</form>
-<a href="/users/new">Create an Account</a>
-
+</div>
 
 {% endblock %}

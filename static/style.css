@@ -1,10 +1,20 @@
 body {
 	/* background-color: lightslategray; */
-	background-image: url("sunset.jpeg");
+	background-image: url("activities.jpg");
+	background-color: rgba(0, 214, 186, 0.75);
+	background-blend-mode: overlay;
 	background-size: cover;
 	background-repeat: no-repeat;
 	background-attachment: fixed;
 }
+
+.carousel-inner img{
+	max-height: 250px;
+	margin:auto;
+	border-radius: 10px;
+}
+
+
 
 .primary-container{
 	max-width: 50%;
@@ -19,7 +29,7 @@ body {
 }
 
 .link-color{
-	color: #dfad44;
+	color: #286C7A;
 }
 
 .input-bg{

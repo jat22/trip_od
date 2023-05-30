@@ -49,7 +49,9 @@ def show_home():
     if g.user:
         return redirect(f"/trips")
 
-    return render_template("home.html")
+    form = LoginForm()
+
+    return render_template("home.html", form=form)
 
 
 ################### USER VIEW FUNCTIONS #############################
