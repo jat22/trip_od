@@ -4,3 +4,7 @@ keys.py
 __pycache__/
 planning/
 .env
+node_modules/
+.package.json
+package-lock.json
+package.json

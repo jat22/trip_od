@@ -40,6 +40,9 @@ def add_user_to_g():
     else:
         g.user = None
 
+@app.route('/testing')
+def show_draft():
+     return render_template('/ui-redesign/landing.html')
 
 
 @app.route("/")
@@ -51,7 +54,7 @@ def show_home():
 
     form = LoginForm()
 
-    return render_template("home.html", form=form)
+    return render_template("/ui-redesign/landing.html", form=form)
 
 
 ################### USER VIEW FUNCTIONS #############################
@@ -61,7 +64,10 @@ def login():
     """Show login page and login user"""
 
     form = LoginForm()
-
+    print(form.username.data)
+    print(form.password.data)
+    form.validate()
+    print(form.errors)
     if form.validate_on_submit():
         user = User.authenticate(form.username.data, form.password.data)
         if user:
