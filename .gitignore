@@ -4,4 +4,6 @@ keys.py
 __pycache__/
 planning/
 .env
-node_modeules/
+node_modules/
+package-lock.json
+package.json
