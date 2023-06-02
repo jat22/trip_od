@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block page %}
+<div class="container" style="max-width:75%">
+	<div class="container">
+		<div style="margin-bottom:20px;">
+			<h2>
+				{% block header %}{% endblock %}
+			</h2>
+			<h5>
+				{% block sub_header %}{% endblock %}
+			</h5>
+		</div>
+	
+		{% block content %}{% endblock %}
+	</div>
+{% endblock %}
+
+
+
+
+	

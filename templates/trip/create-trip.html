@@ -1,38 +1,47 @@
-{% extends "basic.html" %}
+{% extends "base.html" %}
 
-{% block title %}New Trip{% endblock %}
+{% block title %}New Adventure{% endblock %}
 
-{% block header %}Start a New Adventure{% endblock %}
-{% block content %}
-<form action="/trips/create" method="POST">
-	{{ form.hidden_tag() }}
-	<div class="row">
-		<div class="col">
-			{{ form.name.label }}
-			{{ form.name(class="form-control input-bg") }}
+{% block header %}Plan a New Adventure{% endblock %}
+	{% block content %}
+			<form class="page-form" action="/trips/create" method="POST">
+				{{ form.hidden_tag() }}
+				<div class="row">
+					<div class="col">
+						{{ form.name.label(class="text-text") }}
+						{{ form.name(class="form-control bg-background", placeholder="Trip Name") }}
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-6">
+						{{ form.start_date.label(class="text-text") }}
+						{{ form.start_date(class="form-control bg-background", placeholder="Start Date") }}
+					</div>
+					<div class="col-6">
+						{{ form.end_date.label(class="text-text") }}
+						{{ form.end_date(class="form-control bg-background", placeholder="End Date") }}
+					</div>
+				</div>
+				<div class="row">
+					<div class="col">
+						{{ form.description.label(class="text-text") }}
+						{{ form.description(class="form-control  bg-background", placeholder="Description/Notes") }}
+					</div>
+				</div>
+				<div class="row" style="margin-top:20px;">
+					<div class="col">
+						<button type="submit" class="btn btn-secondary">Create</button>
+						<a href="javascript:history.back()" class="btn btn-dark" role="button">Cancel</a>
+					</div>
+				</div>
+			</form>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-6">
-			{{ form.start_date.label }}
-			{{ form.start_date(class="form-control input-bg") }}
+	{% endblock %}
+	{% block bg_pics %}
+		<div class="row no-side-space">
+			<div class="col text-center no-side-space">
+				<img class="img-fluid home-img" src="https://cdn.pixabay.com/photo/2016/11/23/18/20/maps-1854199_1280.jpg" >
+			</div>
 		</div>
-		<div class="col-6">
-			{{ form.end_date.label }}
-			{{ form.end_date(class="form-control input-bg") }}
-		</div>
-	</div>
-	<div class="row">
-		<div class="col">
-			{{ form.description.label }}
-			{{ form.description(class="form-control input-bg") }}
-		</div>
-	</div>
-	<div class="row" style="margin-top:20px;">
-		<div class="col">
-			<button type="submit" class="btn btn-secondary">Create</button>
-			<a href="javascript:history.back()" class="btn btn-dark" role="button">Cancel</a>
-		</div>
-	</div>
-</form>
-{% endblock %}
+	{% endblock %}
