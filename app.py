@@ -14,6 +14,7 @@ app.app_context().push()
 app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
 
 app.config['SECRET_KEY'] = config.SECRET_KEY
+app.config['WTF_CSRF_SECRET_KEY'] = config.WTF_CSRF_SECRET_KEY
 
 connect_db(app)
 
