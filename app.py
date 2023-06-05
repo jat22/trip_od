@@ -2,7 +2,7 @@ from flask import Flask, redirect, render_template, request, flash, session, g, 
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 import config, random
-from flask_wtf.csrf import CSRFProtect
+
 
 
 from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, bcrypt, Activity
@@ -12,8 +12,7 @@ from background_img_urls import loc_bg_imgs, act_bg_imgs
 
 
 app = Flask(__name__)
-csrf = CSRFProtect()
-csrf.init_app(app)
+
 
 app.app_context().push()
 app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
