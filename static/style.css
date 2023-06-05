@@ -1,53 +1,94 @@
-body {
-	/* background-color: lightslategray; */
-	background-image: url("activities.jpg");
-	background-color: rgba(0, 214, 186, .75);
-	background-blend-mode: overlay;
+
+/* body {
+	background-image: url('mountain-range.jpeg');
 	background-size: cover;
 	background-repeat: no-repeat;
 	background-attachment: fixed;
+} */
+
+.logo{
+	font-family: 'Cabin Sketch', cursive !important;
+	font-size: 3rem !important;
+	font-weight: bold;
 }
 
-.carousel-inner img{
-	max-height: 250px;
-	margin:auto;
+.top-link{
+	font-family: 'Cabin Sketch', cursive !important;
+	font-size:1.25rem !important
+}
+
+.header-h1{
+	font-family: 'Cabin Sketch', cursive !important;
+	font-size: 5rem;
+}
+
+.cover-container{
+	padding-right: 0 !important;
+	padding-left: 0 !important;
+}
+
+.home-info-container{
+	position: absolute;
+	margin-top: 25px !important;
+}
+
+.page-form{
+	width:50% !important;
+	margin-top: 10px !important;
+	margin-left:25% !important;
+	margin-right:25% !important
+}
+
+.jumbo-container{
+	margin-top: 20px !important;
+}
+
+.no-bottom-margin{
+	margin-bottom: 0 !important;
+}
+
+.no-side-space{
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+}
+
+.img-container{
+	width:100% !important;
+	height:100px !important;
+	overflow: hidden;
+}
+
+.link-img{
+	max-width: 150px !important;
 	border-radius: 10px;
 }
 
-
-
-.primary-container{
-	max-width: 50%;
+.trip-img{
+	max-width: 100px !important;
+	border-radius: 5px;
 }
 
-.trip-card{
-	background-color: rgba(86,135,167, .5);
+.trip-card:hover {
+	background-color: rgba(135, 203, 185,0.5) !important;
 }
 
-.trip-components{
-	background-color: rgba(86,135,167, .75);
+.result-item:hover{
+	background-color: rgba(135, 203, 185,0.5) !important;
 }
 
-.link-color{
-	color: #286C7A;
+.trip-link{
+	display: inline-block !important;
+	text-decoration: none !important;
 }
 
-.input-bg{
-	background-color: rgb(182, 181, 181);
-}
+/* .attribute-container {
+	position: relative;
+	bottom: 0;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+} */
 
-.input-bg:focus{
-	background-color:lightgray;
-}
-
-.trip-title-container{
-	background-color:rgba(86,135,167, .80)
-}
-
-.result-item{
-	background-color: rgba(86,135,167, .60);
-}
-
-.results-background{
-	background-image: url("green-trail.jpeg")
-}

@@ -7,7 +7,7 @@ import config, random
 from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, bcrypt, Activity
 from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, DescriptionUpdateForm, TripUpdateForm
 from functions import search_by_location, get_location_details, display_date
-from background_url import loc_bg_imgs, act_bg_imgs
+from background_img_urls import loc_bg_imgs, act_bg_imgs
 
 app = Flask(__name__)
 app.app_context().push()
