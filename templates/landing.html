@@ -10,9 +10,9 @@
 {% endblock %}
 		{% block content %}
 			<form class="page-form" action="/login" method="POST">
-				{{ form.hidden_tag() }}
 				<div class="row">
 					<div class="col-4">
+						{{ form.hidden_tag() }}
 						{{ form.username(class="form-control bg-secondary", placeholder="Username") }}
 					</div>
 					<div class="col-8">
