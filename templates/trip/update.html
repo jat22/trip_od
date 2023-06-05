@@ -1,10 +1,10 @@
-{% extends "basic.html" %}
+{% extends "base.html" %}
 
-{% block title %}New Trip{% endblock %}
+{% block title %}Update Trip{% endblock %}
 
-{% block header %}Start a New Adventure{% endblock %}
+{% block header %}Update Trip Details{% endblock %}
 {% block content %}
-<form action="/trips/{{ trip_id }}/update" method="POST">
+<form class="page-form" action="/trips/{{ trip_id }}/update" method="POST">
 	{{ form.hidden_tag() }}
 	<div class="row">
 		<div class="col">

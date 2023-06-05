@@ -1,4 +1,4 @@
-{% extends 'basic.html' %}
+{% extends 'base.html' %}
 
 {% block title %}{% endblock %}
 
@@ -6,7 +6,7 @@
 {% block header %}{% endblock %}
 
 {% block content %}
-<form action="", method="POST">
+<form class="page-form" action="", method="POST">
 	{{ form.hidden_tag() }}
 	<div class="row">
 		<div class="col-4">
