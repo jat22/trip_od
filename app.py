@@ -258,7 +258,7 @@ def show_activitiy_options(trip_id):
         flash("Please Login or Create an Account")
         return redirect("/login")
 
-    return render_template("/results/activities.html", trip_id=trip_id, base_url='BASE_URL', bg_img1=act_bg_imgs[random.randint(0,9)], bg_img2=act_bg_imgs[random.randint(0,9)], bg_img3=act_bg_imgs[random.randint(0,9)])
+    return render_template("/results/activities.html", trip_id=trip_id, base_url=BASE_URL, bg_img1=act_bg_imgs[random.randint(0,9)], bg_img2=act_bg_imgs[random.randint(0,9)], bg_img3=act_bg_imgs[random.randint(0,9)])
 
 @app.route("/trips/<int:trip_id>/activity/<int:activity_id>")
 def activity_locations(trip_id, activity_id):
