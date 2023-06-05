@@ -2,12 +2,12 @@
 
 {% block title %}{{ trip.name }}{% endblock %}
 
-{% block page %}
+{% block content %}
 <div class=" container" style="margin-bottom: 50px;">
 	<div class="row">
 		<div class="col">
 			<div class="container">
-				<div class="card  trip-title-container">
+				<div class="card  trip-title-container bg-secondary bg-opacity-50">
 					<div class="card-body">
 						<div class="row">
 							<div class="col-4">
@@ -29,7 +29,7 @@
 											Update
 										</button>
 									</h5>
-									{{ form.description(class="form-control input-bg", style="width:90%")}}
+									{{ form.description(class="form-control input-bg ", style="width:90%")}}
 								</form>
 									
 								<p></p>
@@ -45,9 +45,9 @@
 			<div class="container" style="padding:0px 0px 0px 12px;">
 				<ul class="list-group">
 					{% for day in days %}
-						<li style="margin-top: 3px;" class="list-group-item trip-components">
+						<li style="margin-top: 3px;" class="list-group-item trip-components bg-secondary bg-opacity-50">
 							<h5>{{ day["dow"] }}, {{ day["month"] }} {{ day["day"] }}</h5>
-							<div class="card trip-card">
+							<div class="card trip-card bg-secondary bg-opacity-50">
 								<div class="card-body">
 									<div class="row">
 										<div class="col-3">
@@ -72,7 +72,7 @@
 								</div>
 							</div>
 							{% if day.day_acts %}
-							<div class="card trip-card">
+							<div class="card trip-card bg-secondary bg-opacity-50">
 								<div class="card-body">
 									<div class="row">
 										<div class="col text-center">
@@ -108,7 +108,7 @@
 		</div>
 		<div class="col-5" style="padding:0px 12px 0px 0px;">
 			<div class="container" style="padding:0px 12px 0px 0px;">
-				<div class="card trip-components">
+				<div class="card bg-secondary bg-opacity-50 trip-components">
 					<div class="card-body">
 						<div class="row">
 							<div class="col-7">
@@ -122,7 +122,7 @@
 						</div>
 						<ul class="list-group">
 						{% for camp in trip.u_camps %}
-							<li class="list-group-item trip-components">
+							<li class="list-group-item trip-components bg-secondary bg-opacity-50">
 								<div class="row">
 									<div class="col">
 										<a class="link-color" href="/locations/{{ camp.id }}">{{ camp.name }}</a>
@@ -157,7 +157,7 @@
 				</div>
 			</div>
 			<div class="container" style="padding:0px 12px 0px 0px;">
-				<div class="card trip-components" >
+				<div class="card trip-components bg-secondary bg-opacity-50" >
 					<div class="card-body">
 						<div class="row">
 							<div class="col-8">
@@ -169,7 +169,7 @@
 						</div>
 						<ul class="list-group" >
 						{% for act in trip.u_acts %}
-							<li class="list-group-item trip-components">
+							<li class="list-group-item trip-components bg-secondary bg-opacity-50">
 								<div class="row">
 									<h6>
 										{{ act.activity.name }} @ 
@@ -209,5 +209,18 @@
 		</div>
 	</div>	
 </div>
-<script>let tripId = "{{ trip.id }}"</script>
+</div>
+<script>let tripId = "{{ trip.id }}";</script>
 {% endblock %} 
+	{% block bg_pics %}
+		<div class="row no-side-space">
+			<div class="col text-center no-side-space">
+				<img class="img-fluid home-img" src="https://cdn.pixabay.com/photo/2016/11/21/12/21/dawn-1845018_1280.jpg" >
+			</div>
+		</div>
+		<div class="row no-side-space">
+			<div class="col text-center no-side-space">
+				<img class="img-fluid home-img" src="https://cdn.pixabay.com/photo/2017/06/17/03/17/gongga-snow-mountain-2411069_1280.jpg">
+			</div>
+		</div>
+	{% endblock %}

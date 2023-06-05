@@ -1,11 +1,11 @@
-{% extends "basic.html" %}
+{% extends "base.html" %}
 
 {% block title %}Where{% endblock %}
 
 {% block header %}Where Do You Want to Go?{% endblock %}
-{% block sub_header %}Seach by City/State or Latitude/Longitude{% endblock %}
+{% block subheader %}<h3 class="text-text">Seach by City/State or Latitude/Longitude</h3>{% endblock %}
 {% block content %}
-		<form>
+		<form class="page-form">
 			<div class="mb-3" id="search-params">
 
 				<div style="margin-top:30px;">
@@ -48,4 +48,11 @@
 	let tripId= "{{ trip_id }}"; 
 	let baseUrl = "{{ base_url }}"; 
 </script>
+{% endblock %}
+{% block bg_pics %}
+		<div class="row no-side-space">
+			<div class="col text-center no-side-space">
+				<img class="img-fluid home-img" src="https://cdn.pixabay.com/photo/2019/10/08/18/03/car-4535650_1280.jpg" >
+			</div>
+		</div>
 {% endblock %}

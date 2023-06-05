@@ -258,4 +258,3 @@ def name_id_only(list, type):
 def display_date(date):
     """ given a datatime object, returns a date as Month, day,"""
     return date.strftime("%b %-d, %Y")
-

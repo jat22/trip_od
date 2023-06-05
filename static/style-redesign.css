@@ -17,6 +17,11 @@
 	font-size:1.25rem !important
 }
 
+.header-h1{
+	font-family: 'Cabin Sketch', cursive !important;
+	font-size: 5rem;
+}
+
 .cover-container{
 	padding-right: 0 !important;
 	padding-left: 0 !important;
@@ -27,7 +32,7 @@
 	margin-top: 25px !important;
 }
 
-.login-form{
+.page-form{
 	width:50% !important;
 	margin-top: 10px !important;
 	margin-left:25% !important;
@@ -58,6 +63,24 @@
 .link-img{
 	max-width: 150px !important;
 	border-radius: 10px;
+}
+
+.trip-img{
+	max-width: 100px !important;
+	border-radius: 5px;
+}
+
+.trip-card:hover {
+	background-color: rgba(135, 203, 185,0.5) !important;
+}
+
+.result-item:hover{
+	background-color: rgba(135, 203, 185,0.5) !important;
+}
+
+.trip-link{
+	display: inline-block !important;
+	text-decoration: none !important;
 }
 
 /* .attribute-container {

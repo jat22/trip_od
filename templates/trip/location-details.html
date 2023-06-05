@@ -2,11 +2,8 @@
 
 {% block title %}{{ location["name"] }} Details{% endblock %}
 
-{% block page %}
-
-<div class="container" style="margin-bottom: 50px">
-	<h1>{{ location["name"] }}</h1>
-	
+{% block header %}{{ location["name"] }}{% endblock %}
+{% block subheader %}
 	{% if session["curr_trip"] %}
 		{% if option %}
 		<form action="/trips/{{ session['curr_trip'] }}/{{ option }}/{{ location['id'] }}/add" method="POST">
@@ -18,11 +15,19 @@
 				Add Campground To Trip
 				{% endif %}
 			</button>
+			<a class="btn btn-sm btn-light" href="/trips/{{ session['curr_trip'] }}/campgrounds">Back</a>
 		</form>
 		{% endif %}
 	{% endif %}
 
-	<div class="card result-item" style="margin-top:20px;">
+{% endblock %}
+{% block content %}
+
+<div class="container" style="margin-bottom: 50px">
+	
+	
+
+	<div class="card result-item bg-secondary bg-opacity-50" style="margin-top:20px;">
 		<div class="card-body">
 			<h4 class="card-title">Contact Info</h4>
 			<h6>Email:
@@ -35,26 +40,39 @@
 			<h6>{{ location["city"] }}, {{ location["state"] }} {{ location["zip"] }}</h6>
 		</div>
 	</div>
-	<div class="card result-item">
+	<div class="card result-item bg-secondary bg-opacity-50">
 		<div class="card-body">
 			<h4 class="card-title">Links</h4>
 			{% for link in location["links"] %}
-			<span>| <a class="link-color" href="{{ link['url'] }}"">{{ link['title'] }}</a> |</span>
+			<span>| <a class="text-dark" target="_blank" href="{{ link['url'] }}"">{{ link['title'] }}</a> |</span>
 			{% endfor %}
 		</div>
 	</div>
-	<div class="card result-item">
+	<div class="card result-item bg-secondary bg-opacity-50">
 		<div class="card-body">
 			<h4 class="card-title">Directions</h4>
 			<p>{{ location["directions"]| safe }}</p>
 		</div>
 	</div>
-	<div class="card result-item">
+	<div class="card result-item bg-secondary bg-opacity-50">
 		<div class="card-body">
 			<h4 class="card-title">Description</h4>
 			<p>{{ location["description"] | safe }}</p>
 		</div>
 	</div>
 </div>
+</div>
 
+{% endblock %}
+{% block bg_pics %}
+		<div class="row no-side-space">
+			<div class="col text-center no-side-space">
+				<img class="img-fluid home-img" src="{{ bg_img1 }}" >
+			</div>
+		</div>
+		<div class="row no-side-space">
+			<div class="col text-center no-side-space">
+				<img class="img-fluid home-img" src="{{ bg_img2 }}" >
+			</div>
+		</div>
 {% endblock %}

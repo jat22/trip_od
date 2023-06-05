@@ -1,12 +1,13 @@
 from flask import Flask, redirect, render_template, request, flash, session, g, jsonify
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-import config
+import config, random
 
 
 from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, bcrypt, Activity
 from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, DescriptionUpdateForm, TripUpdateForm
 from functions import search_by_location, get_location_details, display_date
+from background_url import loc_bg_imgs, act_bg_imgs
 
 app = Flask(__name__)
 app.app_context().push()
@@ -54,7 +55,7 @@ def show_home():
 
     form = LoginForm()
 
-    return render_template("/ui-redesign/landing.html", form=form)
+    return render_template("landing.html", form=form)
 
 
 ################### USER VIEW FUNCTIONS #############################
@@ -257,7 +258,7 @@ def show_activitiy_options(trip_id):
         flash("Please Login or Create an Account")
         return redirect("/login")
 
-    return render_template("/results/activities.html", trip_id=trip_id, base_url=BASE_URL)
+    return render_template("/results/activities.html", trip_id=trip_id, base_url='BASE_URL', bg_img1=act_bg_imgs[random.randint(0,9)], bg_img2=act_bg_imgs[random.randint(0,9)], bg_img3=act_bg_imgs[random.randint(0,9)])
 
 @app.route("/trips/<int:trip_id>/activity/<int:activity_id>")
 def activity_locations(trip_id, activity_id):
@@ -269,7 +270,7 @@ def activity_locations(trip_id, activity_id):
         return redirect("/login")
     activity_name = Activity.query.get(activity_id).name
 
-    return render_template("trip/activity-locations.html", trip_id=trip_id, activity_name=activity_name, activity_id=activity_id, base_url=BASE_URL)
+    return render_template("trip/activity-locations.html", trip_id=trip_id, activity_name=activity_name, activity_id=activity_id, bg_img1=act_bg_imgs[random.randint(0,9)], bg_img2=act_bg_imgs[random.randint(0,9)], bg_img3=act_bg_imgs[random.randint(0,9)])
 
 
 @app.route("/trips/<int:trip_id>/act<int:activity_id>/<location_id>/add", methods=["POST"])
@@ -491,13 +492,13 @@ def show_location_details(location_id):
             return redirect("/login")
     
     location_details = get_location_details(location_id)
-	
-    return render_template("/trip/location-details.html", location=location_details, session=session)
+
+    return render_template("/trip/location-details.html", location=location_details, session=session, bg_img1=loc_bg_imgs[random.randint(0,9)], bg_img2=loc_bg_imgs[random.randint(0,9)])
 
 
 @app.route("/locations/<location_id>/activity/<int:activity_id>")
 def show_activity_location_details(location_id, activity_id):
-    """ display location details that is atached to a particular activity """
+    """ display location details that is attached to a particular activity """
 
     if not g.user:
             flash("Please Login or Create an Account")
@@ -506,7 +507,7 @@ def show_activity_location_details(location_id, activity_id):
     location_details = get_location_details(location_id)
     activity = Activity.query.get(activity_id)
 
-    return render_template("/trip/location-details.html", location=location_details, session=session, activity=activity, option=f"act{activity_id}")
+    return render_template("/trip/location-details.html", location=location_details, session=session, activity=activity, option=f"act{activity_id}", bg_img1=loc_bg_imgs[random.randint(0,9)], bg_img2=loc_bg_imgs[random.randint(0,9)])
 
 
 @app.route("/locations/<location_id>/campground")
@@ -518,8 +519,8 @@ def show_campground_location_details(location_id):
             return redirect("/login")
     
     location_details = get_location_details(location_id)
-	
-    return render_template("/trip/location-details.html", location=location_details, session=session, option="campgrounds")
+
+    return render_template("/trip/location-details.html", location=location_details, session=session, option="campgrounds", bg_img1=loc_bg_imgs[random.randint(0,9)], bg_img2=loc_bg_imgs[random.randint(0,9)])
 
 
 ################### SEACH APIs ##########################

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}AdventureOD{% endblock %}
+
+
+{% block header %}Discover The OutDoors{% endblock %}	
+{% block subheader %} 
+	<p class="lead text-text">Login to see your adventures and plan new ones.</p>
+	<p class="text-text">Don't have an account? <a class="text-secondary" href="/users/new">Create Account</a></p>
+{% endblock %}
+		{% block content %}
+			<form class="page-form" action="/login" method="POST">
+				{{ form.hidden_tag() }}
+				<div class="row">
+					<div class="col-4">
+						{{ form.username(class="form-control bg-secondary", placeholder="Username") }}
+					</div>
+					<div class="col-8">
+						{{ form.password(class="form-control bg-background", placeholder="Password") }}
+					</div>
+				</div>
+				<button type="submit" class="btn btn-secondary" style="margin-top:20px;">Sign In</button>
+			</form>
+			<div class="row no-side-space" style="margin-top:50px">
+				<div class="col-2"></div>
+				<div class="col-8">
+					<div class="card bg-secondary bg-opacity-50">
+						<div class="card-body">
+							<div class="text-center">
+								<h2 class="card-title text-dark">"In every walk with nature one receives far more than he seeks"</h2>
+							</div>
+							<div class="text-end">
+								<h4 class="card-subtitle">- John Muir</h4>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-2"></div>
+			</div>
+			<div class="row no-side-space" style="margin-top:50px">
+				<div class="col-2"></div>
+				<div class="col-8">
+					<div class="card bg-secondary bg-opacity-50">
+						<div class="card-body">
+							<div class="text-center">
+								<h2 class="card-title text-dark">"One touch of nature makes the whole world kin."</h2>
+							</div>
+							<div class="text-end">
+								<h4 class="card-subtitle">- William Shakespeare</h4>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-2"></div>
+			</div>
+			<div class="row no-side-space" style="margin-top:50px">
+				<div class="col-3"></div>
+				<div class="col-6">
+					<div class="card bg-secondary bg-opacity-50">
+						<div class="card-body">
+							<div class="text-center">
+								<h2 class="card-title text-dark">"Live in the sunshine, swim in the sea, drink the wild air."</h2>
+							</div>
+							<div class="text-end">
+								<h4 class="card-subtitle">-  Ralph Waldo Emerson</h4>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-3"></div>
+			</div>
+			<div class="row no-side-space" style="margin-top: 75px;">
+				<div class="col">
+					<div class="jumbotron-fluid text-center no-side-space">
+						<h1 class="text-text">More Resrouces:</h1>
+						<h3 class="text-text">Become an expert adventurer!</h3>	
+						<div class="container" style="margin-top:20px">
+							<div class="row">
+								<div class="col">
+									<a href="https://www.alltrails.com/" target="_blank"><img class="link-img" src="https://cdn-assets.alltrails.com/assets/images/homepage/og-meta-images/rectangle-logo.jpg" alt="All Trails"></a>
+								</div>
+								<div class="col">
+									<a href="https://www.nps.gov/index.htm" target="_blank"><img class="link-img" src="https://findyourpark.com/sites/default/files/styles/custom_350/public/nps-logo-about.png?itok=EQryMzeI&timestamp=1490900187" alt="National Park Service"></a>
+								</div>
+								<div class="col">
+									<a href="https://www.recreation.gov/" target="_blank"><img class="link-img" src="https://www.fws.gov/sites/default/files/2022-01/6-Recreation.govlogo_0.jpg" alt="Recreation.gov"></a>
+								</div>
+								<div class="col">
+									<a href="https://thetrek.co/" target="_blank"><img class="link-img" src="https://photos.thetrek.co/wp-content/uploads/2016/12/trek-green-stickers-wide.png" alt="The Trek"></a>
+								</div>
+							</div>
+							<div class="row" style="margin-top:40px;">
+								<div class="col">
+									<a href="https://www.nols.edu/en/" target="_blank"><img class="link-img" src="https://info.nols.edu/hubfs/Blog/2016/December/nols-logomark-medium.jpg" alt="NOLS"></a>
+								</div>
+								<div class="col">
+									<a href="https://www.outwardbound.org/" target="_blank"><img class="link-img" src="https://www.outwardbound.org/media/images/ob-fb-logo-2.png" alt="Outward Bound"></a>
+								</div>
+								<div class="col">
+									<a href="https://www.outdoors.org/" target="_blank"><img class="link-img" src="https://www.outdoors.org/wp-content/uploads/2021/11/search-logo-placeholder.png" alt="Appalachian Mountain Club"></a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% endblock %}
+	
+	{% block bg_pics %}
+		<div class="row no-side-space">
+			<div class="col text-center no-side-space">
+				<img class="img-fluid home-img" src="https://cdn.pixabay.com/photo/2016/11/21/12/21/dawn-1845018_1280.jpg" >
+			</div>
+		</div>
+		<div class="row no-side-space">
+			<div class="col text-center no-side-space">
+				<img class="img-fluid home-img" src="https://cdn.pixabay.com/photo/2017/06/17/03/17/gongga-snow-mountain-2411069_1280.jpg">
+			</div>
+		</div>
+	{% endblock %}

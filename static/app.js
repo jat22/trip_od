@@ -101,10 +101,10 @@ $(document).ready(function(){
 		console.log(campgrounds)
 		campgrounds.forEach(campground =>
 			$(".results-list").append(
-				`<li class="list-group-item result-item">
+				`<li class="list-group-item result-item bg-secondary bg-opacity-50">
 					<div class="row">
 						<div class="col-8">
-							<a class="link-color" href="/locations/${campground.id}/campground">
+							<a class="text-dark" href="/locations/${campground.id}/campground">
 								${campground.name}
 							</a>
 						</div>
@@ -132,10 +132,10 @@ $(document).ready(function(){
 
 		activities.forEach(function(activity){
 			$(".results-list").append(
-				`<li class="list-group-item result-item">
+				`<li class="list-group-item result-item bg-secondary bg-opacity-50">
 					<div class="row">
 						<div class="col-8">
-							<a class="link-color" href="/trips/${tripId}/activity/${activity.id}">
+							<a class="link-dark " href="/trips/${tripId}/activity/${activity.id}">
 								${activity.name}
 							</a>
 						</div>
@@ -154,7 +154,7 @@ $(document).ready(function(){
 		console.log(locations)
 		locations.forEach(function(location){
 			$(".results-list").append(
-				`<li class="list-group-item result-item">
+				`<li class="list-group-item result-item bg-secondary bg-opacity-50">
 					<div class="row">
 						<div class="col-8">
 							<a class="link-color" href="/locations/${location.id}/activity/${activityId}">
