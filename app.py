@@ -53,14 +53,12 @@ def show_home():
     if g.user:
         return redirect(f"/trips")
 
-    form = LoginForm()
-
-    return render_template("landing.html", form=form)
+    return redirect('/login')
 
 
 ################### USER VIEW FUNCTIONS #############################
 
-@app.route('/login', methods=["POST"])
+@app.route('/login', methods=["POST", "GET"])
 def login():
     """Show login page and login user"""
 
@@ -75,7 +73,7 @@ def login():
             do_login(user)
             return redirect('/')
         flash("Password/User incorrect", "danger")
-    return redirect('/')
+    return render_template('/landing.html', form=form)
 
 @app.route('/logout')
 def logout():
