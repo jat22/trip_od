@@ -154,7 +154,7 @@ $(document).ready(function(){
 		console.log(locations)
 		locations.forEach(function(location){
 			$(".results-list").append(
-				`<li class="list-group-item result-item">
+				`<li class="list-group-item result-item bg-secondary bg-opacity-50">
 					<div class="row">
 						<div class="col-8">
 							<a class="link-color" href="/locations/${location.id}/activity/${activityId}">

@@ -275,7 +275,7 @@ def activity_locations(trip_id, activity_id):
         return redirect("/login")
     activity_name = Activity.query.get(activity_id).name
 
-    return render_template("trip/activity-locations.html", trip_id=trip_id, activity_name=activity_name, activity_id=activity_id)
+    return render_template("trip/activity-locations.html", trip_id=trip_id, activity_name=activity_name, activity_id=activity_id, bg_img1=act_bg_imgs[random.randint(0,9)], bg_img2=act_bg_imgs[random.randint(0,9)], bg_img3=act_bg_imgs[random.randint(0,9)])
 
 
 @app.route("/trips/<int:trip_id>/act<int:activity_id>/<location_id>/add", methods=["POST"])
