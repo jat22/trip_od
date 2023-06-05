@@ -7,7 +7,7 @@
 
 {% block content %}
 <form class="page-form" action="", method="POST">
-	{{ form.hidden_tag() }}
+	{{ form.csrf_token }}
 	<div class="row">
 		<div class="col-4">
 			{{ form.username.label }}

@@ -5,7 +5,7 @@
 {% block header %}Update Trip Details{% endblock %}
 {% block content %}
 <form class="page-form" action="/trips/{{ trip_id }}/update" method="POST">
-	{{ form.hidden_tag() }}
+	{{ form.csrf_token }}
 	<div class="row">
 		<div class="col">
 			{{ form.name.label }}

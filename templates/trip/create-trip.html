@@ -5,7 +5,7 @@
 {% block header %}Plan a New Adventure{% endblock %}
 	{% block content %}
 			<form class="page-form" action="/trips/create" method="POST">
-				{{ form.hidden_tag() }}
+				{{ form.csrf_token }}
 				<div class="row">
 					<div class="col">
 						{{ form.name.label(class="text-text") }}

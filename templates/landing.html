@@ -12,7 +12,7 @@
 			<form class="page-form" action="/login" method="POST">
 				<div class="row">
 					<div class="col-4">
-						{{ form.hidden_tag() }}
+						{{ form.csrf_token }}
 						{{ form.username(class="form-control bg-secondary", placeholder="Username") }}
 					</div>
 					<div class="col-8">
