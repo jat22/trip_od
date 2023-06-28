@@ -15,29 +15,34 @@
 			<span class="navbar-toggler-icon"></span>
 		  </button>
 		  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-			<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-			  <li class="nav-item">
-				<a class="nav-link" href="/login">Sign In</a>
-			  </li>
-			  <li class="nav-item dropdown">
+			<ul class="navbar-nav mb-2 mb-lg-0">
 				{% if user %}
-				<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-				  {{user.username}}
-				</a>
-				<ul class="dropdown-menu">
-				  <li><a class="dropdown-item" href="/users/{{ user.username }}">Profile</a></li>
-				  <li><a class="dropdown-item" href="/users/{{ user.username }}/trips">My Adventures</a></li>
-				  <li><a class="dropdown-item" href="/trips/create">Plan</a></li>
-				  <li><hr class="dropdown-divider"></li>
-				  <li><a class="dropdown-item" href="/logout">Log Out</a></li>
-				</ul>
-			  </li>
-			  {% endif %}
+				<li class="nav-item dropdown">
+				  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+					{{user.username}}
+				  </a>
+				  <ul class="dropdown-menu">
+					<li><a class="dropdown-item" href="/users/{{ user.username }}">Profile</a></li>
+					<li><a class="dropdown-item" href="/users/{{ user.username }}/trips">My Adventures</a></li>
+					<li><a class="dropdown-item" href="/trips/create">Plan</a></li>
+					<li><hr class="dropdown-divider"></li>
+					<li><a class="dropdown-item" href="/logout">Log Out</a></li>
+				  </ul>
+				</li>
+				{% else %}
+				<li class="nav-item">
+				  <a class="nav-link" href="/login">Sign In</a>
+				</li>
+				{% endif %}
 			</ul>
 		  </div>
 		</div>
 	</nav>
 	
+	{% for category, message in get_flashed_messages(with_categories=True) %}
+			<div class="alert alert-{{ category }} no-side-space text-center" style="margin:0; padding:0;">{{ message }}</div>
+	{% endfor %}
+
 	{% block content %}{% endblock %}
 
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>

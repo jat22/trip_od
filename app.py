@@ -75,6 +75,7 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
+        print("form validated")
         user = User.authenticate(form.username.data, form.password.data)
         if user:
             do_login(user)

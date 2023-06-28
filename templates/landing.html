@@ -7,20 +7,24 @@
 <div class="px-4 py-5 my-5 text-center" id="landing-hero">
 	<h1 class="display-5 fw-bold">Discover Your Next Adventure</h1>
 	<div class="col-lg-6 mx-auto">
-	  <p class="lead mb-4">Find outdoor activities and places to camp on US public lands. <a href="/users/new">Create an account</a> to plan and save a trip itenary.</p>
-	  <form action="/search">
-		<div class="row">
-			<div class="col-6">
-				<input class="form-control" id="activity" type="text" placeholder="What do you want to do?">
+		{% if user %}
+			<p class="lead mb-4">Find outdoor activities and places to camp on US public lands. Then plan your next trip!
+		{% else %}
+	  		<p class="lead mb-4">Find outdoor activities and places to camp on US public lands. <a href="/login">Log In</a> or <a href="/users/new">Create an Account</a> to plan and save a trip itenary.</p>
+		{% endif %}
+	  	<form action="/search">
+			<div class="row">
+				<div class="col-6">
+					<input class="form-control" id="activity" type="text" placeholder="What do you want to do?">
+				</div>
+				<div class="col-4">
+					<input class="form-control" id="location" type="text" placeholder="Where"">
+				</div>
+				<div class="col-2">
+					<button class="btn btn-outline-secondary">Search</button>
+				</div>
 			</div>
-			<div class="col-4">
-				<input class="form-control" id="location" type="text" placeholder="Where"">
-			</div>
-			<div class="col-2">
-				<button class="btn btn-outline-secondary">Search</button>
-			</div>
-		</div>
-	  </form>
+	  	</form>
 	</div>
 </div>
 
