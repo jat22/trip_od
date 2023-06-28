@@ -58,12 +58,12 @@ def add_user_to_g():
 def show_home():
     """show home page"""
 
-    if g.user:
-        return redirect(f"/trips")
+    # if g.user:
+    #     return redirect(f"/trips")
 
-    form = LoginForm()
+    # form = LoginForm()
 
-    return render_template("landing.html", form=form)
+    return render_template("landing.html", user=g.user)
 
 
 ################### USER VIEW FUNCTIONS #############################
@@ -80,7 +80,7 @@ def login():
             do_login(user)
             return redirect('/')
         flash("Password/User incorrect", "danger")
-    return render_template('/users/login.html', form=form, title="Login", action="/login", submit_button = "Login", back_action="/", method="POST")
+    return render_template('/forms/login.html', form=form)
 
 @app.route('/logout')
 def logout():

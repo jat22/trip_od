@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<h1 class="display-5 text-center mt-5">Login</h1>
+<div class="d-flex justify-content-center mt-5">
+	
+	<form  action="/login" method="POST">
+		<div class="row">
+			<div class="col-4">
+				{{ form.username.label }}
+				{{ form.username(class="form-control input-bg")}}
+			</div>
+			<div class="col-8">
+				{{ form.password.label }}
+				{{ form.password(class="form-control input-bg")}}
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col">
+				<button type="submit" class="btn btn-primary">Submit</button>
+			</div>
+		</div>
+	</form>
+</div>
+
+{% endblock %}

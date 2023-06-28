@@ -1,0 +1,16 @@
+{% extends "/trip/update.html" %}
+
+{% block confirm_delete %}
+
+	<div class="card text-center" style="margin-top: 20px; padding:20px 0px 20px 0px; background-color: rgba(255,80,0,.5) ">
+		<form action="/trips/{{ trip.id }}/delete" method="DELETE">
+			<h2 class="card-title">ARE YOU SURE YOU WANT TO DELETE THIS TRIP?</h2>
+			<h4>This action cannot be undone.</h4>
+			<button type="submit" class="btn btn-danger">Delete Trip</button>
+			<a href="/trips/{{ trip.id }}/update" class="btn btn-dark">Cancel</a>
+		</form>
+	</div>
+
+
+
+{% endblock %} 

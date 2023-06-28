@@ -1,0 +1,39 @@
+{% extends '/results/results-base.html' %}
+
+{% block title %}Activities{% endblock %}
+
+
+
+
+{% block header %}
+Explore your Adventure Options!
+{% endblock %}
+
+{% block secondary_nav_top %}
+<a href='/trips/{{ trip_id }}/campgrounds' class="btn btn-secondary">
+	Go Back to Campgrounds
+</a>
+{% endblock %}
+
+{% block secondary_nav_bottom %}
+<a href='/trips/{{ trip_id }}/campgrounds' class="btn btn-secondary">
+	Go Back to Campgrounds
+</a>
+{% endblock %}
+{% block bg_pics %}
+		<div class="row no-side-space">
+			<div class="col text-center no-side-space">
+				<img class="img-fluid home-img" src="{{ bg_img1 }}" >
+			</div>
+		</div>
+		<div class="row no-side-space">
+			<div class="col text-center no-side-space">
+				<img class="img-fluid home-img" src="{{ bg_img2 }}">
+			</div>
+		</div>
+		<div class="row no-side-space">
+			<div class="col text-center no-side-space">
+				<img class="img-fluid home-img" src="{{ bg_img3 }}">
+			</div>
+		</div>
+	{% endblock %}

@@ -1,0 +1,29 @@
+/* #landing-hero{
+	background-image: url("https://cdn.pixabay.com/photo/2016/11/14/03/26/cliff-1822484_1280.jpg");
+	min-height: 400px;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+#secondary-hero{
+	background-image: url("https://cdn.pixabay.com/photo/2017/06/17/03/17/gongga-snow-mountain-2411069_1280.jpg");
+} */
+
+
+#img-col{
+	width: 5%;
+}
+#name-col{
+	width:40%;
+}
+#parent-col{
+	width:30%
+}
+#loc-col{
+	width:20%
+}
+
+#result-img{
+	width: 2rem;
+	height: 2rem;
+}
