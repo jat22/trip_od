@@ -1,0 +1,68 @@
+
+GET /landing
+	DESCRIPTION:
+		enter search critera of activity and location. click search button to execute search
+		Ideal:
+			provides suggestion list based on input (i.e. typeing "hi" would show list including "hiking")
+	INPUTS:
+		- activities
+			- activity name/keyword
+		- location
+			-IDEAL:
+				city/state
+				zip code
+				name keywords
+			-BASIC:
+				city/state
+	ACTION:
+		Search Button ==> search() ==> /search/results
+
+GET /search/results
+	DESCRIPTION:
+		displays results of search for a single activity based on location (recarea or facility)
+		Ideal:
+			show tours based on search (requires research)
+			filter by faciltiy type
+	DISPLAY:
+		list of locations(recareas or facility)
+			picture
+			name
+			parent organization
+			location(city/state)
+	ACTION:
+		Click on a result ==> location/{locatoin_id}
+
+GET /locations/{location_id}
+	DESCRIPTION:
+		shows details of a particular location
+		button to add to a trip if current user (button disabled if user doesn't have any existing) trips)
+		button to create new trip if current user
+	DATA NEEDED:
+		Facility/RecArea
+			name
+			location
+			description
+			List of Campgrounds/facilities that are linked to details
+			List of activities
+		Trips:
+			List of trips for the current user
+	ACTION:
+		click "add" button ==> shows pop-up form:
+			select a trip from user.trips
+			multi-select activities (from list of activities at location)
+			ACTION:
+				click submit ==> POST /users/{username}/trips/{id}/add
+				or
+				click cancel ==> close pop-up form
+		
+POST /users/{username}/trips/{id}/add
+	DESCRIPTION:
+		process adding item to trip
+	DATA NEEDED:
+		location name
+		selected activities
+		location function - campground or recarea/facility
+	ACTION:
+		create/adds unssignedItem to unassigned table
+		redirects ==> search/results
+

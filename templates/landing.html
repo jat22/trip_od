@@ -13,11 +13,23 @@
 	  		<p class="lead mb-4">Find outdoor activities and places to camp on US public lands. <a href="/login">Log In</a> or <a href="/users/new">Create an Account</a> to plan and save a trip itenary.</p>
 		{% endif %}
 	  	<form action="/search">
+			<div class="container mb-2">
+				<span>Search By:</span>
+					<input class="btn-check m-0" type="radio" id="park-name-radio" name="park-name-radio">
+					<label class="btn btn-outline-secondary btn-sm m-0" for="park-name-radio">
+						Recreation Area
+					</label>
+					<span>OR</span>
+					<input class="btn-check m-0" type="radio" id="city-state-radio" name="city-state-radio">
+					<label class="btn btn-secondary btn-sm m-0" for="city-state-radio">
+						City/State
+					</label>
+			</div>
 			<div class="row">
 				<div class="col-6">
 					<input class="form-control" id="activity" type="text" placeholder="What do you want to do?">
 				</div>
-				<div class="col-4">
+				<div class="col-4">		
 					<input class="form-control" id="location" type="text" placeholder="Where"">
 				</div>
 				<div class="col-2">

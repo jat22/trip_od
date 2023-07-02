@@ -1,0 +1,25 @@
+ACTIVITIES
+	/activities
+		query
+		limit
+		offset
+	/{activityId}
+	/recareas/{recAreaId}/activities
+		query
+		limit
+		offset
+	/recareas/{recAreaId}/activities/{activityId}
+	/facilities/{facilityId}/activities
+		query
+		limit
+		offset
+	/facilities/{facilityId}/activities/{activityId}
+
+	{
+      "ActivityID": 11,
+      "ActivityParentID": 0,
+      "ActivityName": "FISHING",
+      "ActivityLevel": 0
+    }
+
+
