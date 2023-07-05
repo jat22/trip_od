@@ -2,12 +2,12 @@ from flask import Flask, redirect, render_template, url_for, request, flash, ses
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-import config, random
+import config, random, json
 
-
+from data import states
 from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, bcrypt, Activity
 from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, DescriptionUpdateForm, TripUpdateForm
-from functions import search_by_location, get_location_details, display_date
+from functions import search_by_location, get_location_details, display_date, get_location_options, search_by_poi
 from background_url import loc_bg_imgs, act_bg_imgs
 
 app = Flask(__name__)
@@ -63,7 +63,7 @@ def show_home():
 
     # form = LoginForm()
 
-    return render_template("landing.html", user=g.user)
+    return render_template("landing.html", user=g.user, states=states)
 
 
 ################### USER VIEW FUNCTIONS #############################
@@ -531,9 +531,38 @@ def show_campground_location_details(location_id):
 
 ################### SEACH APIs ##########################
 
+@app.route("/search")
+def search():
+    data = json.loads(request.args.get('data'))
+    print(data)
+
+    if data.poi:
+        results = search_by_poi(data.term, data.poi)
+
+    else:
+        results = search_by_location(data.lat, data.lon, data.term)
+    # search_term = data.get("term")
+    # lat = data.get('lat')
+    # lon = data.get('lon')
+
+    # if location_type == "city-state":
+    #     results = search_city_state(
+    #         city
+    #     )
+    
+    # if location_type == "recarea":
+    return "Hello"
+
+@app.route("/api/geolocation")
+def get_location():
+    city = request.args.get("city")
+    state = request.args.get("state")
+    location_options = get_location_options(city, state)
+
+    return jsonify(location_options)
 
 @app.route("/api/search")
-def search():
+def search_():
     """ main search function using location input from user """
 
     results = search_by_location(

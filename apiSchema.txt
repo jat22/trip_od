@@ -23,3 +23,15 @@ ACTIVITIES
     }
 
 
+Input:
+	{
+		location: name or city/state,
+		activity: name
+	}
+
+Search Results:
+{
+	LocationName,
+	Parent Org,
+	City/Stat
+}

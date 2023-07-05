@@ -72,14 +72,29 @@ def geolocation_search(city, state):
                             "countrySubdivision" : state,
 							"entityTypeSet" : "Municipality"
                         })
-    return resp.json()
+    
 
-def get_coordinates(city, state):
+
+    return resp.json().get("results")
+
+def get_location_options(city, state):
     """ given a city and state, lat/long coordinates are returned."""
 
     data = geolocation_search(city, state)
-    coordinates = [result.get("position") for result in data.get("results")]
-    return coordinates
+
+    location_options = [
+        {
+            "city" : city.get("address").get("municipality"), 
+            "state" : city.get("address").get("countrySubdivision"), 
+            "cords" : 
+            {
+                "lat" : city.get("position").get("lat"), 
+                "lon" : city.get("position").get("lon")
+            }
+        } 
+        for city in data]
+
+    return location_options
 
 
 
