@@ -60,7 +60,7 @@ async function handleSearch(e){
 			doSearch(searchData);
 		} else{
 			resp.data.forEach((city) => {
-				$cityOptions.append(
+				$cityOptionList.append(
 					`<li class="list-group-item list-group-item-action" data-lon="${city.cords.lon}" data-lat="${city.cords.lat}">
 						${city.city}, ${city.state}
 					</li>`

@@ -534,13 +534,19 @@ def show_campground_location_details(location_id):
 @app.route("/search")
 def search():
     data = json.loads(request.args.get('data'))
-
+    
     if data.get("poi"):
         results = search_by_poi(data["term"], data["poi"])
     else:
-        results = search_by_location(data["lat"], data["lon"], data["term"])
-    print(results)
-    return render_template("searchResults.html", results=results)
+        results = search_by_location(data["term"], data["lat"], data["lon"])
+
+    fac_types = []
+    for r in results:
+        if r["type"] not in fac_types:
+            fac_types.append(r["type"])  
+    results_json = json.dumps(results)
+
+    return render_template("searchResults.html", results=results, results_json=results_json, fac_types=fac_types)
 
 
 @app.route("/api/geolocation")

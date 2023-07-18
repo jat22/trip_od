@@ -132,7 +132,7 @@ def clean_fac_search (data):
     return [
 				{
 					"id" : f"fac{f['FacilityID']}",
-					"type" : "facility",
+					"type" : f["FacilityTypeDescription"],
 					"name" : f["FacilityName"],
 					"city" : f["FACILITYADDRESS"][0].get("City") if len(f["FACILITYADDRESS"]) > 0 else None,
 					"state" : f["FACILITYADDRESS"][0].get("AddressStateCode") if len(f["FACILITYADDRESS"]) > 0 else None,
@@ -143,7 +143,7 @@ def clean_recarea_search (data):
    	return [
 				{
 					"id" : f"rec{r['RecAreaID']}",
-					"type" : "recarea",
+					"type" : "Recreation Area",
 					"name" : r["RecAreaName"],
 					"city" : r["RECAREAADDRESS"][0].get("City") if len(r["RECAREAADDRESS"]) > 0 else None,
 					"state" : r["RECAREAADDRESS"][0].get("AddressStateCode") if len(r["RECAREAADDRESS"]) > 0 else None

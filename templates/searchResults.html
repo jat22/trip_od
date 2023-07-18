@@ -22,14 +22,15 @@
 		<button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 			Facility Type
 		</button>
-		<ul class="dropdown-menu">
-		<li><a class="dropdown-item" href="#">Day User</a></li>
-		<li><a class="dropdown-item" href="#">Backcountry</a></li>
-		<li><a class="dropdown-item" href="#">Camping</a></li>
+		<ul class="dropdown-menu" id="fac-type-menu">
+			<li><a class="dropdown-item" href="#">All</a></li>
+			{% for fac_type in fac_types %}
+			<li><a class="dropdown-item" href="#">{{fac_type}}</a></li>
+			{% endfor %}
 		</ul>
 	</div>
 	<table class="table table-hover mt-3" id="search-results-table">
-		<tbody>
+		<tbody id="results-tbody">
 			{% for result in results %}
 			<tr onclick="window.location='/poi/{{ result.id }}';" >
 				<td class="img-col align-middle">
@@ -42,7 +43,10 @@
 		</tbody>
 	  </table>
 </div>
-
+{% endblock %}
+{% block scripts %}
+<script> const results = {{ results | tojson }}; </script>
+<script src="/static/searchResults.js"></script>
 {% endblock %}
 
 <!-- 
