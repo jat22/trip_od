@@ -7,7 +7,7 @@ import config, random, json
 from data import states
 from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, bcrypt, Activity
 from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, DescriptionUpdateForm, TripUpdateForm
-from functions import search_by_location, get_location_details, display_date, get_location_options, search_by_poi
+from functions import search_by_location, get_location_details, display_date, get_location_options, search_by_poi, search_by_location
 from background_url import loc_bg_imgs, act_bg_imgs
 
 app = Flask(__name__)
@@ -534,24 +534,14 @@ def show_campground_location_details(location_id):
 @app.route("/search")
 def search():
     data = json.loads(request.args.get('data'))
-    print(data)
 
-    if data.poi:
-        results = search_by_poi(data.term, data.poi)
-
+    if data.get("poi"):
+        results = search_by_poi(data["term"], data["poi"])
     else:
-        results = search_by_location(data.lat, data.lon, data.term)
-    # search_term = data.get("term")
-    # lat = data.get('lat')
-    # lon = data.get('lon')
+        results = search_by_location(data["lat"], data["lon"], data["term"])
+    print(results)
+    return render_template("searchResults.html", results=results)
 
-    # if location_type == "city-state":
-    #     results = search_city_state(
-    #         city
-    #     )
-    
-    # if location_type == "recarea":
-    return "Hello"
 
 @app.route("/api/geolocation")
 def get_location():

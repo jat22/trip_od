@@ -19,7 +19,7 @@ TOURS = "tours"
 
 
 ################# REC API SEARCH FUNCTIONS ############################
-def resource_search(endpoint, query="", limit="", offset="", full="true", state="", activity="", lat="", long="", radius="", sort=""):
+def resource_search(endpoint, query="", limit="", offset="", full="true", state="", activity="", lat="", lon="", radius="", sort=""):
     
     """ multi purpose search of recreation.gov api """
 
@@ -33,11 +33,11 @@ def resource_search(endpoint, query="", limit="", offset="", full="true", state=
 			"state" : state,
 			"activity" : activity,
 			"latitude": lat,
-			"longitude" : long,
+			"longitude" : lon,
 			"radius" : radius,
 			"sort" : sort
 		})
-    return resp.json()
+    return resp.json()["RECDATA"]
 
 def location_detail_search(location_id):
 
@@ -100,25 +100,82 @@ def get_location_options(city, state):
 
 
 ############################ MAIN SEARCH FUNCTION ###########################
-def search_by_location(city, state, latitude, longitude, radius="50"):
-    """ give geo location information, cleaned data about acitivities and campgrounds returned"""
 
-    lat = latitude
-    long = longitude
-    if not lat and not long:
-        coords = get_coordinates(city, state)
-        lat = coords[0].get("lat")
-        long = coords[0].get("lon")
+def search_by_location(activity, lat, lon):
+	facilities = resource_search(FACILITIES, 
+                            	activity=activity, 
+                                lat=lat, 
+                                lon=lon,
+                                full="true")
     
-    activities_campgrounds = get_activities_campgrounds(lat, long, radius)
+	recareas = resource_search(RECAREAS, 
+								activity=activity, 
+								lat=lat, 
+								lon=lon,
+								full="true")
+	
+	return make_poi_list(facilities, recareas)
 
-    results = {
-        		"search_geolocation" : {"lat" : lat, "long" : long, "radius" : radius},
-                "activities" : activities_campgrounds["activities"],
-                "campgrounds" : activities_campgrounds["campgrounds"]
-	}
+def search_by_poi(activity, keyword):
+    facilities = resource_search(FACILITIES, 
+                            	activity=activity,
+                                query=keyword, 
+                                full="true")
+    recareas = resource_search(RECAREAS, 
+                               	activity=activity,
+                                query=keyword, 
+                                full="true")
+    
+    return make_poi_list(facilities, recareas)
 
-    return results
+def clean_fac_search (data):
+    return [
+				{
+					"id" : f"fac{f['FacilityID']}",
+					"type" : "facility",
+					"name" : f["FacilityName"],
+					"city" : f["FACILITYADDRESS"][0].get("City") if len(f["FACILITYADDRESS"]) > 0 else None,
+					"state" : f["FACILITYADDRESS"][0].get("AddressStateCode") if len(f["FACILITYADDRESS"]) > 0 else None,
+				} 
+            for f in data]
+        
+def clean_recarea_search (data):
+   	return [
+				{
+					"id" : f"rec{r['RecAreaID']}",
+					"type" : "recarea",
+					"name" : r["RecAreaName"],
+					"city" : r["RECAREAADDRESS"][0].get("City") if len(r["RECAREAADDRESS"]) > 0 else None,
+					"state" : r["RECAREAADDRESS"][0].get("AddressStateCode") if len(r["RECAREAADDRESS"]) > 0 else None
+				} 
+            for r in data]
+
+def make_poi_list(facilities, recareas):
+    facility_list = clean_fac_search(facilities)
+    recarea_list = clean_recarea_search(recareas)
+     
+    return [*facility_list, *recarea_list]
+
+
+# def search_by_location(city, state, latitude, longitude, radius="50"):
+#     """ give geo location information, cleaned data about acitivities and campgrounds returned"""
+
+#     lat = latitude
+#     long = longitude
+#     if not lat and not long:
+#         coords = get_coordinates(city, state)
+#         lat = coords[0].get("lat")
+#         long = coords[0].get("lon")
+    
+#     activities_campgrounds = get_activities_campgrounds(lat, long, radius)
+
+#     results = {
+#         		"search_geolocation" : {"lat" : lat, "long" : long, "radius" : radius},
+#                 "activities" : activities_campgrounds["activities"],
+#                 "campgrounds" : activities_campgrounds["campgrounds"]
+# 	}
+
+#     return results
 
 def get_location_details(location_id):
     """ given a specific location (facility or recarea) id, cleaned data is returned"""

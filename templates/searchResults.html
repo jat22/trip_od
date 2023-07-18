@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+
+<div class="container mt-2">
+	<h1 class="display-5">Search Results</h1>
+</div>
+<div class="container-sm mt-3">
+	<div class="btn-group">
+		<button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+		  Activities
+		</button>
+		<ul class="dropdown-menu">
+		  <li><a class="dropdown-item" href="#">Hiking</a></li>
+		  <li><a class="dropdown-item" href="#">Swimming</a></li>
+		  <li><a class="dropdown-item" href="#">Boating</a></li>
+		</ul>
+	</div>
+	<div class="btn-group">
+		<button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+			Facility Type
+		</button>
+		<ul class="dropdown-menu">
+		<li><a class="dropdown-item" href="#">Day User</a></li>
+		<li><a class="dropdown-item" href="#">Backcountry</a></li>
+		<li><a class="dropdown-item" href="#">Camping</a></li>
+		</ul>
+	</div>
+	<table class="table table-hover mt-3" id="search-results-table">
+		<tbody>
+			{% for result in results %}
+			<tr onclick="window.location='/poi/{{ result.id }}';" >
+				<td class="img-col align-middle">
+					<img class="result-img" src="https://cdn.pixabay.com/photo/2020/06/14/17/57/mountains-5298769_1280.jpg">
+				</td>
+				<td class="name-col align-middle">{{ result.name }}</td>
+				<td class="loc-col align-middle">{{ result.city}}, {{ result.state }}</td> 
+			</tr>
+			{% endfor %}
+		</tbody>
+	  </table>
+</div>
+
+{% endblock %}
+
+<!-- 
+<tr onclick="window.location='';">
+	<td id="img-col" class="align-middle">
+		<img id="result-img" src="https://cdn.pixabay.com/photo/2020/06/14/17/57/mountains-5298769_1280.jpg">
+	</td>
+	<td id="name-col" class="align-middle">Great Smoky Mountains</td>
+	<td id="parent-col" class="align-middle">National Park Service</td>
+	<td id="loc-col" class="align-middle">Tennesse/North Carolina</td>
+</tr>
+<tr onclick="window.location='';">
+	<td id="img-col" class="align-middle">
+		<img id="result-img" src="https://cdn.pixabay.com/photo/2020/06/14/17/57/mountains-5298769_1280.jpg">
+	</td>
+	<td id="name-col" class="align-middle">Baxter State Park</td>
+	<td id="parent-col" class="align-middle">State of Maine</td>
+	<td id="loc-col" class="align-middle">Millinocket, ME</td>
+</tr>
+<tr onclick="window.location='';">
+	<td id="img-col" class="align-middle">
+		<img id="result-img" src="https://cdn.pixabay.com/photo/2020/06/14/17/57/mountains-5298769_1280.jpg">
+	</td>
+	<td id="name-col" class="align-middle">Zion National Park</td>
+	<td id="parent-col" class="align-middle">National Park Service</td>
+	<td id="loc-col" class="align-middle">Utah</td>
+</tr> -->

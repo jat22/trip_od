@@ -1,43 +1,17 @@
-body {
-	/* background-color: lightslategray; */
-	background-image: url("sunset.jpeg");
-	background-size: cover;
-	background-repeat: no-repeat;
-	background-attachment: fixed;
+.img-col{
+	width: 5%;
+}
+.name-col{
+	width:40%;
+}
+.parent-col{
+	width:30%
+}
+.loc-col{
+	width:20%
 }
 
-.primary-container{
-	max-width: 50%;
-}
-
-.trip-card{
-	background-color: rgba(86,135,167, .5);
-}
-
-.trip-components{
-	background-color: rgba(86,135,167, .75);
-}
-
-.link-color{
-	color: #dfad44;
-}
-
-.input-bg{
-	background-color: rgb(182, 181, 181);
-}
-
-.input-bg:focus{
-	background-color:lightgray;
-}
-
-.trip-title-container{
-	background-color:rgba(86,135,167, .80)
-}
-
-.result-item{
-	background-color: rgba(86,135,167, .60);
-}
-
-.results-background{
-	background-image: url("green-trail.jpeg")
+.result-img{
+	width: 2rem;
+	height: 2rem;
 }

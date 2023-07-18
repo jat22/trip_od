@@ -52,7 +52,6 @@ async function handleSearch(e){
 		
 		
 		if(exactMatch.length === 1){
-			console.log(exactMatch)
 			const searchData = {
 				term : $term.val(),
 				lat : exactMatch[0].cords.lat,
