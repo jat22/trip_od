@@ -7,7 +7,7 @@ import config, random, json
 from data import states
 from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, bcrypt, Activity
 from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, DescriptionUpdateForm, TripUpdateForm
-from functions import search_by_location, get_location_details, display_date, get_location_options, search_by_poi, search_by_location
+from functions import search_by_location, get_poi_details, display_date, get_location_options, search_by_poi, search_by_location
 from background_url import loc_bg_imgs, act_bg_imgs
 
 app = Flask(__name__)
@@ -207,7 +207,7 @@ def create_trip():
 
         session[CURR_TRIP] = new_trip.id
         
-        return redirect(f"/trips/{new_trip.id}/where")
+        return redirect(f"/trips/{new_trip.id}")
     
     return render_template("/trip/create-trip.html", form=form)
 
@@ -489,17 +489,25 @@ def delete_trip(trip_id):
 
 ############################# LOCATION VIEW FUNCTIONS #########################
 
-@app.route("/locations/<location_id>")
-def show_location_details(location_id):
-    """ display details of a particular location """
+@app.route("/poi/<id>")
+def show_poi_details(id):
+    poi_details = get_poi_details(id)
 
-    if not g.user:
-            flash("Please Login or Create an Account")
-            return redirect("/login")
+    return render_template("results/poi-details.html", details = poi_details)
+
+
+
+# @app.route("/locations/<location_id>")
+# def show_location_details(location_id):
+#     """ display details of a particular location """
+
+#     if not g.user:
+#             flash("Please Login or Create an Account")
+#             return redirect("/login")
     
-    location_details = get_location_details(location_id)
+#     location_details = get_location_details(location_id)
 
-    return render_template("/trip/location-details.html", location=location_details, session=session, bg_img1=loc_bg_imgs[random.randint(0,9)], bg_img2=loc_bg_imgs[random.randint(0,9)])
+#     return render_template("/trip/location-details.html", location=location_details, session=session, bg_img1=loc_bg_imgs[random.randint(0,9)], bg_img2=loc_bg_imgs[random.randint(0,9)])
 
 
 @app.route("/locations/<location_id>/activity/<int:activity_id>")

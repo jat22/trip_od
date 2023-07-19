@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}{{ details.name }}{% endblock %}
+
+{% block content %}
+<!-- <div class="position-fixed top-0 start-0 d-flex align-items-center justify-content-center d-none pop-up-form" style="height: 100vh; width: 100vw;">
+	<div class="col-3"></div>
+	<div class="col-6">
+		<div class="container card bg-info bg-opacity-75">
+			<div class="card-body">
+				<h3>Add to a Trip</h3>
+				<form>
+					<div class="mb-3">
+						<select class="form-select" name="trip-name">
+							<option value="trip1" selected>Select A Trip</option>
+							<option value="trip1">Trip One</option>
+							<option value="trip2">Trip Two</option>
+							<option value="trip3">Trip Three</option>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label for="act-select">Select Activities (hold cmd to select multiple)</label>
+						<select name="act-select" id="act-select" class="form-select" multiple aria-label="Default select example">
+							<option value="1">Hiking</option>
+							<option value="2">Kayaking</option>
+							<option value="3">Swimming</option>
+							<option value="1">Boating</option>
+							<option value="2">Fishing</option>
+							<option value="3">Campping</option>
+							<option value="1">Day Use</option>
+							<option value="2">Picnic</option>
+							<option value="3">Photography</option>
+						  </select>
+						
+					</div>
+					<button class="btn btn-secondary btn-sm">Submit</button>
+					<button class="btn btn-outlin btn-sm">Cancel</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="col-3"></div>
+</div> -->
+<div class="container mt-2">
+	<h1 class="display-3">{{ details.name }}</h1>
+	{% if details.city and details.state %}
+	<h5>
+		{{ details.city }}, {{ details.state }}; Coordinates{{ details.lat }}, {{ details.long }}
+	</h5>
+	{% else %}
+	<h5>
+		Coordinates {{ details.lat }}, {{ details.long }}
+	</h5>
+	{% endif %}
+	<!-- <button id="add-to-trip-btn" class="btn btn-sm btn-secondary">Add</button> -->
+</div>
+<div class="container mt-3">
+	<div class="row">
+		<div class="col-4">
+			<div class="row">
+				<img class="align-middle mt-1" src="{{ details.pic }}" width="100%" alt="{{ details.name }}">
+			</div>
+			<div class="row mt-2">
+				<h4>Activities</h4>
+				<ul class="list-unstyled">
+					{% for act in details.activities %}
+						<li>{{ act }}</li>
+					{% endfor %}
+				</ul>
+			</div>
+			<div class="row">
+				<h4>Links</h4>
+				<ul class="list-unstyled">
+					{% for link in details.links %}
+						<li><a href="{{ link.url }}">{{ link.title }}</a></li>
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+		<div class="col-8">
+			<h2 class="display-5">Description</h1>
+			<p>
+				{{ details.description | safe}}
+			</p>
+			<h2 class="display-5">Contact Information</h2>
+				<p>Phone: <br>{{ details.phone }}</p>
+				<p>Email:<br>{{ details.email }}</p>
+				{% if details.address %}
+				<p>
+					Address: <br>
+					{{ details.address }}<br>
+					{{ details.city }}, {{ details.state }} {{ details.zip }}
+				</p>
+				{% endif %}
+			</h2>
+		</div>
+	<div class="row mt-3">
+	</div>
+</div>
+</div>
+{% endblock %}

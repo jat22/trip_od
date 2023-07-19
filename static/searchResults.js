@@ -1,6 +1,6 @@
 const $typeMenu = $("#fac-type-menu")
 const $searchResults = $("#results-tbody")
-
+const $sortButton = $("#sort-button")
 
 
 function handleSelect(e) {
@@ -21,7 +21,7 @@ function handleSelect(e) {
 			)
 		}
 	}
-
+	$sortButton.text(filterType)
 	$searchResults.removeClass("d-none")
 }
 $typeMenu.on("click", handleSelect)

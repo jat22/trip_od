@@ -63,10 +63,17 @@
 <div class="position-fixed top-0 start-0 d-flex align-items-center justify-content-center d-none pop-up-form" style="height: 100vh; width: 100vw;">
 	<div class="col-3"></div>
 	<div class="col-6">
-		<div class="container card bg-info bg-opacity-75">
+		<div class="container card">
 			<div class="card-body">
-				<h3>Confirm City</h3>
-				<ul class="list-group" id="city-options">
+				<div class="row">
+					<div class="col-11">
+						<h3 class="mt-2">Confirm City</h3>
+					</div>
+					<div class="col-1">
+						<button class="btn btn-secondary opacity-75 btn-sm" id="close-btn">X</button>
+					</div>
+				</div>
+				<ul class="list-group mb-3 mt-3" id="city-options">
 				</ul>
 			</div>
 		</div>

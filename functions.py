@@ -177,7 +177,7 @@ def make_poi_list(facilities, recareas):
 
 #     return results
 
-def get_location_details(location_id):
+def get_poi_details(location_id):
     """ given a specific location (facility or recarea) id, cleaned data is returned"""
     data = location_detail_search(location_id)
     details = clean_location_data(data)
@@ -264,28 +264,55 @@ def clean_location_data(resp_data):
     data = resp_data["data"]
     
     if type == "Facility" :
-        id_type = "fac"
-    if type == "RecArea" :
-        id_type = "rec"
+        details = {
+            "id" : "fac" + data[f"{type}ID"],
+            "name" : data[f"{type}Name"].title(),
+            "type" : "facility",
+            "subtype" : data["FacilityTypeDescription"],
+            "email" : data[f"{type}Email"],
+            "phone" : data[f"{type}Phone"],
+            "description" : data[f"{type}Description"],
+            "directions" : data[f"{type}Directions"],
+            "address" : data.get(f"{type.upper()}ADDRESS")[0][f"{type}StreetAddress1"],
+            "city" : data.get(f"{type.upper()}ADDRESS")[0]["City"],
+            "state" : data.get(f"{type.upper()}ADDRESS")[0]["AddressStateCode"],
+            "zip" : data.get(f"{type.upper()}ADDRESS")[0]["PostalCode"],
+            "lat" : data[f"{type}Latitude"],
+            "long" : data[f"{type}Longitude"],
+            "links" : [{"title" : link["Title"], 
+                        "url" : link["URL"],
+                        "location_id" : "fac" + data[f"{type}ID"]} 
+                        for link in data["LINK"]],
+            "pic" : data["MEDIA"][0]["URL"] if len(data["MEDIA"]) > 0 else "",
+            "activities" :[act["ActivityName"] for act in data["ACTIVITY"]]
+	    }
 
-    details = {
-        "id" : id_type + data[f"{type}ID"],
-    	"name" : data[f"{type}Name"].title(),
-        "email" : data[f"{type}Email"],
-        "phone" : data[f"{type}Phone"],
-        "description" : data[f"{type}Description"],
-        "directions" : data[f"{type}Directions"],
-        "address" : data.get(f"{type.upper()}ADDRESS")[0][f"{type}StreetAddress1"],
-        "city" : data.get(f"{type.upper()}ADDRESS")[0]["City"],
-        "state" : data.get(f"{type.upper()}ADDRESS")[0]["AddressStateCode"],
-        "zip" : data.get(f"{type.upper()}ADDRESS")[0]["PostalCode"],
-        "lat" : data[f"{type}Latitude"],
-        "long" : data[f"{type}Longitude"],
-        "links" : [{"title" : link["Title"], 
-                    "url" : link["URL"],
-                    "location_id" : id_type + data[f"{type}ID"]} 
-                    for link in data["LINK"]]
-	}
+
+    if type == "RecArea" :
+        details = {
+            "id" : "rec" + data[f"{type}ID"],
+            "name" : data[f"{type}Name"].title(),
+            "type" : "recarea",
+            "email" : data[f"{type}Email"],
+            "phone" : data[f"{type}Phone"],
+            "description" : data[f"{type}Description"],
+            "directions" : data[f"{type}Directions"],
+            "address" : data.get(f"{type.upper()}ADDRESS")[0][f"{type}StreetAddress1"],
+            "city" : data.get(f"{type.upper()}ADDRESS")[0]["City"],
+            "state" : data.get(f"{type.upper()}ADDRESS")[0]["AddressStateCode"],
+            "zip" : data.get(f"{type.upper()}ADDRESS")[0]["PostalCode"],
+            "lat" : data[f"{type}Latitude"],
+            "long" : data[f"{type}Longitude"],
+            "links" : [{"title" : link["Title"], 
+                        "url" : link["URL"],
+                        "location_id" : "fac" + data[f"{type}ID"]} 
+                        for link in data["LINK"]],
+            "pic" : data["MEDIA"][0]["URL"] if len(data["MEDIA"]) > 0 else "",
+            "activities" :[act["ActivityName"] for act in data["ACTIVITY"]]
+        }
+
+    print("#################################")
+    print(details)
     return details
 
 

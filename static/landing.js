@@ -10,10 +10,12 @@ const $poi = $("#poi")
 const $cityStateRadio = $("#city-state-radio");
 const $popUpForm = $(".pop-up-form");
 const $cityOptionList = $("#city-options");
+const $closeBtn	 = $("#close-btn");
 
-$locationRadioBtns.on("click", handleRadio)
-$searchButton.on("click", handleSearch)
-$cityOptionList.on("click", handleSelectCity)
+$locationRadioBtns.on("click", handleRadio);
+$searchButton.on("click", handleSearch);
+$cityOptionList.on("click", handleSelectCity);
+$closeBtn.on("click", hanldeClose)
 
 function doSearch(data){
 	const searchData = JSON.stringify(data);
@@ -49,7 +51,6 @@ async function handleSearch(e){
 					&& 
 					city.state.toLowerCase() === $state.val().toLowerCase())
 				)
-		
 		
 		if(exactMatch.length === 1){
 			const searchData = {
@@ -88,4 +89,9 @@ function handleSelectCity(e){
 		};
 
 	doSearch(searchData)
+}
+
+function hanldeClose(e){
+	$popUpForm.addClass("d-none");
+	$cityOptionList.empty();
 }
