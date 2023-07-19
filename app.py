@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 import config, random, json
 
 from data import states
-from models import connect_db, db, User, Trip, Location, TripDay, DayActivity, UTripAct, UTripCamp, bcrypt, Activity
+from models import connect_db, db, User, Trip, POI, TripDay, DayActivity, TripPoiActivity, bcrypt, Activity
 from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, DescriptionUpdateForm, TripUpdateForm
 from functions import search_by_location, get_poi_details, display_date, get_location_options, search_by_poi, search_by_location
 from background_url import loc_bg_imgs, act_bg_imgs
@@ -233,27 +233,27 @@ def show_campgrounds(trip_id):
     return render_template("/results/campgrounds.html", trip_id=trip_id)
 
 
-@app.route("/trips/<int:trip_id>/campgrounds/<location_id>/add", methods=["POST"])
-def add_campground(trip_id, location_id):
-    """add a campground to the current trip"""
+# @app.route("/trips/<int:trip_id>/campgrounds/<location_id>/add", methods=["POST"])
+# def add_campground(trip_id, location_id):
+#     """add a campground to the current trip"""
 
-    if not g.user:
-            flash("Please Login or Create an Account")
-            return redirect("/login")
+#     if not g.user:
+#             flash("Please Login or Create an Account")
+#             return redirect("/login")
     
-    if not Location.query.get(location_id):
-        camp_data = get_location_details(location_id)
-        Location.create_location(**camp_data)
+#     if not Location.query.get(location_id):
+#         camp_data = get_location_details(location_id)
+#         Location.create_location(**camp_data)
 
-    new_ucamp = UTripCamp(
-        location_id = location_id,
-        trip_id = trip_id
-    )
-    db.session.add(new_ucamp)
-    db.session.commit()
-    flash(f"{new_ucamp.location.name} added to your trip", "success")
+#     new_ucamp = UTripCamp(
+#         location_id = location_id,
+#         trip_id = trip_id
+#     )
+#     db.session.add(new_ucamp)
+#     db.session.commit()
+#     flash(f"{new_ucamp.location.name} added to your trip", "success")
 
-    return redirect(f"/trips/{trip_id}/campgrounds")
+#     return redirect(f"/trips/{trip_id}/campgrounds")
 
 
 @app.route("/trips/<int:trip_id>/activities")
@@ -279,29 +279,29 @@ def activity_locations(trip_id, activity_id):
     return render_template("trip/activity-locations.html", trip_id=trip_id, activity_name=activity_name, activity_id=activity_id, bg_img1=act_bg_imgs[random.randint(0,9)], bg_img2=act_bg_imgs[random.randint(0,9)], bg_img3=act_bg_imgs[random.randint(0,9)])
 
 
-@app.route("/trips/<int:trip_id>/act<int:activity_id>/<location_id>/add", methods=["POST"])
-def add_activity_to_trip(trip_id, activity_id, location_id):
-    """adds a particular activity, attached to a particular location to the current trip"""
+# @app.route("/trips/<int:trip_id>/act<int:activity_id>/<location_id>/add", methods=["POST"])
+# def add_activity_to_trip(trip_id, activity_id, location_id):
+#     """adds a particular activity, attached to a particular location to the current trip"""
 
-    if not g.user:
-        flash("Please Login or Create an Account")
-        return redirect("/login")
+#     if not g.user:
+#         flash("Please Login or Create an Account")
+#         return redirect("/login")
 
-    if not Location.query.get(location_id):
-        location_data = get_location_details(location_id)
-        Location.create_location(**location_data)
+#     if not Location.query.get(location_id):
+#         location_data = get_location_details(location_id)
+#         Location.create_location(**location_data)
 
-    new_uact = UTripAct(
-        act_id = activity_id,
-        location_id = location_id,
-        trip_id = trip_id
-    )
-    db.session.add(new_uact)
-    db.session.commit()
+#     new_uact = UTripAct(
+#         act_id = activity_id,
+#         location_id = location_id,
+#         trip_id = trip_id
+#     )
+#     db.session.add(new_uact)
+#     db.session.commit()
 
-    flash(f"Activity added to your trip", "success")
+#     flash(f"Activity added to your trip", "success")
 
-    return redirect(f"/trips/{trip_id}/activities")
+#     return redirect(f"/trips/{trip_id}/activities")
 
 
 
@@ -510,31 +510,31 @@ def show_poi_details(id):
 #     return render_template("/trip/location-details.html", location=location_details, session=session, bg_img1=loc_bg_imgs[random.randint(0,9)], bg_img2=loc_bg_imgs[random.randint(0,9)])
 
 
-@app.route("/locations/<location_id>/activity/<int:activity_id>")
-def show_activity_location_details(location_id, activity_id):
-    """ display location details that is attached to a particular activity """
+# @app.route("/locations/<location_id>/activity/<int:activity_id>")
+# def show_activity_location_details(location_id, activity_id):
+#     """ display location details that is attached to a particular activity """
 
-    if not g.user:
-            flash("Please Login or Create an Account")
-            return redirect("/login")
+#     if not g.user:
+#             flash("Please Login or Create an Account")
+#             return redirect("/login")
     
-    location_details = get_location_details(location_id)
-    activity = Activity.query.get(activity_id)
+#     location_details = get_location_details(location_id)
+#     activity = Activity.query.get(activity_id)
 
-    return render_template("/trip/location-details.html", location=location_details, session=session, activity=activity, option=f"act{activity_id}", bg_img1=loc_bg_imgs[random.randint(0,9)], bg_img2=loc_bg_imgs[random.randint(0,9)])
+#     return render_template("/trip/location-details.html", location=location_details, session=session, activity=activity, option=f"act{activity_id}", bg_img1=loc_bg_imgs[random.randint(0,9)], bg_img2=loc_bg_imgs[random.randint(0,9)])
 
 
-@app.route("/locations/<location_id>/campground")
-def show_campground_location_details(location_id):
-    """ display location details associcated with a particular campground """
+# @app.route("/locations/<location_id>/campground")
+# def show_campground_location_details(location_id):
+#     """ display location details associcated with a particular campground """
 
-    if not g.user:
-            flash("Please Login or Create an Account")
-            return redirect("/login")
+#     if not g.user:
+#             flash("Please Login or Create an Account")
+#             return redirect("/login")
     
-    location_details = get_location_details(location_id)
+#     location_details = get_location_details(location_id)
 
-    return render_template("/trip/location-details.html", location=location_details, session=session, option="campgrounds", bg_img1=loc_bg_imgs[random.randint(0,9)], bg_img2=loc_bg_imgs[random.randint(0,9)])
+#     return render_template("/trip/location-details.html", location=location_details, session=session, option="campgrounds", bg_img1=loc_bg_imgs[random.randint(0,9)], bg_img2=loc_bg_imgs[random.randint(0,9)])
 
 
 ################### SEACH APIs ##########################
