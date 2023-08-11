@@ -1,11 +1,13 @@
 from flask import Flask, redirect, render_template, url_for, request, flash, session, g, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy import and_
+from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime, timedelta
 import config, random, json
 
 from data import states
-from models import connect_db, db, User, Trip, POI, TripDay, DayActivity, TripPoiActivity, bcrypt, Activity
+from models import connect_db, db, User, Trip, POI, TripDay, Activity, TripDayPoiAct, bcrypt
 from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, DescriptionUpdateForm, TripUpdateForm
 from functions import search_by_location, get_poi_details, display_date, get_location_options, search_by_poi, search_by_location
 from background_url import loc_bg_imgs, act_bg_imgs
@@ -15,7 +17,7 @@ app.app_context().push()
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///rec_trips"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-app.config['SQLALCHEMY_ECHO'] = True
+# app.config['SQLALCHEMY_ECHO'] = True
 
 app.config['SECRET_KEY'] = "secrets"
 
@@ -169,10 +171,12 @@ def show_a_trip(trip_id):
             return redirect("/login")
     session[CURR_TRIP] = trip_id
     trip = Trip.query.get(trip_id)
-    desc_form = DescriptionUpdateForm(obj=trip)
-    trip_days = db.session.query(TripDay).filter(TripDay.trip_id==trip_id).order_by(TripDay.date).all()
+    days = db.session.query(TripDay).filter(TripDay.trip_id==trip_id).order_by(TripDay.date).all()
 
-    return render_template("/trip/trip-details.html", trip = trip, days=trip_days, form=desc_form)
+    desc_form = DescriptionUpdateForm(obj=trip)
+
+
+    return render_template("/trip/trip-details.html", trip = trip, days=days, form=desc_form)
 
 
 @app.route("/trips/create", methods=["GET", "POST"])
@@ -198,7 +202,7 @@ def create_trip():
                     name = form.name.data,
                     start_date = start_date,
                     end_date = end_date,
-                    description = form.description.data,
+                    notes = form.description.data,
                     username = g.user.username
              )
         else:
@@ -256,27 +260,27 @@ def show_campgrounds(trip_id):
 #     return redirect(f"/trips/{trip_id}/campgrounds")
 
 
-@app.route("/trips/<int:trip_id>/activities")
-def show_activitiy_options(trip_id):
-    """ display activity template; data is rendered by JS"""
+# @app.route("/trips/<int:trip_id>/activities")
+# def show_activitiy_options(trip_id):
+#     """ display activity template; data is rendered by JS"""
 
-    if not g.user:
-        flash("Please Login or Create an Account")
-        return redirect("/login")
+#     if not g.user:
+#         flash("Please Login or Create an Account")
+#         return redirect("/login")
 
-    return render_template("/results/activities.html", trip_id=trip_id, base_url='BASE_URL', bg_img1=act_bg_imgs[random.randint(0,9)], bg_img2=act_bg_imgs[random.randint(0,9)], bg_img3=act_bg_imgs[random.randint(0,9)])
+#     return render_template("/results/activities.html", trip_id=trip_id, base_url='BASE_URL', bg_img1=act_bg_imgs[random.randint(0,9)], bg_img2=act_bg_imgs[random.randint(0,9)], bg_img3=act_bg_imgs[random.randint(0,9)])
 
-@app.route("/trips/<int:trip_id>/activity/<int:activity_id>")
-def activity_locations(trip_id, activity_id):
-    """ dispaly template for activities available at a particular location,
-    data rendered by JS"""
+# @app.route("/trips/<int:trip_id>/activity/<int:activity_id>")
+# def activity_locations(trip_id, activity_id):
+#     """ dispaly template for activities available at a particular location,
+#     data rendered by JS"""
 
-    if not g.user:
-        flash("Please Login or Create an Account")
-        return redirect("/login")
-    activity_name = Activity.query.get(activity_id).name
+#     if not g.user:
+#         flash("Please Login or Create an Account")
+#         return redirect("/login")
+#     activity_name = Activity.query.get(activity_id).name
 
-    return render_template("trip/activity-locations.html", trip_id=trip_id, activity_name=activity_name, activity_id=activity_id, bg_img1=act_bg_imgs[random.randint(0,9)], bg_img2=act_bg_imgs[random.randint(0,9)], bg_img3=act_bg_imgs[random.randint(0,9)])
+#     return render_template("trip/activity-locations.html", trip_id=trip_id, activity_name=activity_name, activity_id=activity_id, bg_img1=act_bg_imgs[random.randint(0,9)], bg_img2=act_bg_imgs[random.randint(0,9)], bg_img3=act_bg_imgs[random.randint(0,9)])
 
 
 # @app.route("/trips/<int:trip_id>/act<int:activity_id>/<location_id>/add", methods=["POST"])
@@ -303,8 +307,6 @@ def activity_locations(trip_id, activity_id):
 
 #     return redirect(f"/trips/{trip_id}/activities")
 
-
-
 @app.route("/trips/<int:trip_id>/campground/assign", methods=["POST"])
 def assign_campground(trip_id):
     """ assign a particular campground to a particular day """
@@ -313,27 +315,51 @@ def assign_campground(trip_id):
             flash("Please Login or Create an Account")
             return redirect("/login")
 
-    day_id = request.form.get("camp-day")
-    if day_id:
-        camp_id = request.form.get("location-id")
+    from_date = datetime.strptime(
+        request.form.get("from-date"), '%Y-%m-%d')
+    
+    to_date = datetime.strptime(
+        request.form.get("to-date"), '%Y-%m-%d')
+    
+    trip = Trip.query.get(trip_id)
 
+    date_diff = to_date - from_date
+    date_range = [(from_date + timedelta(days=i)).strftime('%Y-%m-%d') 
+                  for i in range(date_diff.days + 1)]
 
-        trip_day = TripDay.query.get(day_id)
-        if trip_day.camp_id:
-            flash("A campground is already assigned, if you would like to replace it, please delete current campground.", "danger")
+    poi_name = request.form.get("poi-name")
+    poi_id = POI.query.filter(POI.name == poi_name).first().id
 
-        trip_day.camp_id = camp_id
-        db.session.add(trip_day)
+    for day in trip.days:
+        print(str(day.date), date_range[0])
+        if str(day.date) in date_range:
+            day.addStay(poi_id)
+    db.session.commit()
 
-        u_camp = UTripCamp.query.filter(and_(UTripCamp.location_id==camp_id, UTripCamp.trip_id==trip_id)).first()
-        
-        db.session.delete(u_camp)
-        db.session.commit()
-    else:
-         flash("Please select a day.", "danger")
+    # TripDay.add_stay(trip_id, from_date, to_date, poi_name)
 
     return redirect(f"/trips/{trip_id}")
 
+    # if day_id:
+    #     camp_id = request.form.get("location-id")
+
+    #     trip_day = TripDay.query.get(day_id)
+    #     if trip_day.camp_id:
+    #         flash("A campground is already assigned, if you would like to replace it, please delete current campground.", "danger")
+
+    #     trip_day.stay = camp_id
+    #     db.session.add(trip_day)
+
+        # u_camp = UTripCamp.query.filter(and_(UTripCamp.location_id==camp_id, UTripCamp.trip_id==trip_id)).first()
+        
+        # db.session.delete(u_camp)
+        # db.session.commit()
+    # else:
+    #      flash("Please select a day.", "danger")
+
+    
+
+#### CHANGES ENTIRELY
 @app.route("/trips/<int:trip_id>/campground/delete", methods=["POST"])
 def delete_campground(trip_id):
     """ remove a campground from a trip entirely """
@@ -350,6 +376,7 @@ def delete_campground(trip_id):
 
     return redirect(f"/trips/{trip_id}")
 
+############CHANGES A LOT
 @app.route("/trips/<int:trip_id>/campground/unassign", methods=["POST"])
 def unassign_campground(trip_id):
     """ unassign a campground from a particular day, but leave attached to the trip """
@@ -359,7 +386,7 @@ def unassign_campground(trip_id):
         return redirect("/login")
 
     trip_day = TripDay.query.get(request.form.get("day-id"))
-    trip_day.camp_id = None
+    trip_day.stay = None
 
     ucamp = UTripCamp(
         location_id = request.form.get("campground-id"),
@@ -369,6 +396,8 @@ def unassign_campground(trip_id):
     db.session.commit()
     return redirect(f"/trips/{trip_id}")
 
+
+### UPDATE WITH UI #############
 @app.route("/trips/<int:trip_id>/activity/assign", methods=["POST"])
 def assign_activity(trip_id):
     """ assign an activity(with a location) to a particular day """
@@ -395,6 +424,8 @@ def assign_activity(trip_id):
         flash("Please select a date.", "danger")
 
     return redirect(f"/trips/{trip_id}")
+
+
 
 @app.route("/trips/<int:trip_id>/activity/unassign", methods=["POST"])
 def unassign_activity(trip_id):
@@ -431,6 +462,10 @@ def delete_activity(trip_id):
 
     return redirect(f"/trips/{trip_id}")
 
+#############################################
+#############################################
+############################################
+
 @app.route("/trips")
 def show_mytrips():
     """ display a list of all of the current user's trips """
@@ -463,7 +498,7 @@ def update_trip_info(trip_id):
         Trip.update(
             trip = trip,
             name = trip_form.name.data,
-            description = trip_form.description.data,
+            notes = trip_form.description.data,
             start_date = trip_form.start_date.data,
             end_date = trip_form.end_date.data,
         )

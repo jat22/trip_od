@@ -37,6 +37,7 @@ def resource_search(endpoint, query="", limit="", offset="", full="true", state=
 			"radius" : radius,
 			"sort" : sort
 		})
+    print(resp.json()["RECDATA"])
     return resp.json()["RECDATA"]
 
 def location_detail_search(location_id):
@@ -346,7 +347,7 @@ def make_date_range(start, end):
 def get_all_activities():
     """ retreives a list of all activities from recreation.gov api """
 
-    data = resource_search("activities")["RECDATA"]
+    data = resource_search("activities")
     return name_id_only(data, "Activity")
 
 def name_id_only(list, type):

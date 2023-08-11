@@ -5,8 +5,31 @@ $visitTab = $("#visit-tab");
 $visitTable = $("#visit-table")
 $doTab = $("#do-tab")
 $doTable = $("#do-table")
+$possTable = $("#poss-table")
+$addModal = $('#add-modal')
 allTables = [$stayTable, $visitTable, $doTable]
 allTabs = [$stayTab, $visitTab, $doTab]
+
+$stayTable.on("click", function(e){
+	e.preventDefault();
+	renderModal(e);
+})
+$('#close-btn').on('click', hanldeClose)
+function hanldeClose(e){
+	$addModal.addClass("d-none");
+	$('#modal-title').empty();
+}
+
+function renderModal(e){
+	let title = $(e.target).text();
+	$('#modal-title').append(
+		`<h3 class="mt-2">Stay At ${title}</h3>`
+	);
+	$('#stay-assign-form').append(`
+		<input type='hidden' name='poi-name' value='${title}'>
+	`)
+	$addModal.removeClass("d-none")
+}
 
 $possTabs.on("click", function(e){
 	e.preventDefault();

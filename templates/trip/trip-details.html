@@ -6,183 +6,168 @@
 <div class="container mt-2">
 
 </div>
-<div class="container-fluid">
+<div class="container-fluid mb-5">
 	<div class="row">
 		<div class="col-1"></div>
 		<div class="col pl-0">
 			<h1 class="display-3">{{ trip.name }}</h1>
 		</div>
+	</div>
 	<div class="row">
 		<div class="col-1"></div>
 		<div class="col-7">
-			<div class="row border mt-3" style="background-color: lightgray">
-				<div class="row pt-2" >
+			{% for day in days %}
+			<div class="row" id="day-{{ day.id }}">
+				<div class="row border mt-3" style="background-color: lightgray">
 					<div class="col-2">
-						<h5>Day1</h5>
+						<h5>Day {{ loop.index }}</h5>
 					</div>
 					<div class="col-7"></div>
 					<div class="col-3">
-						<h5>June 23rd</h5>
+						<h5>{{ day.dow }}, {{ day.month }} {{ day.day }}</h5>
 					</div>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-2">
 					<h5>Stay</h5>
-					<p><a href=''>Elk Meadow Lodge</a></p>
+					{% if day.stay %}
+					<p><a href="/poi/{{ day.stay.id }}">{{ day.stay.name }}</a></p>
+					{% else %}
+					<button class="btn btn-sm btn-secondary">Campsites</button>
+					{% endif %}
 				</div>
 				<div class="col-10">
 					<div class="row text-center pt-1">
 						<h5>Activities</h5>
 					</div>
+					{% for poi in day.pois %}
 					<div class="row">
 						<div class="col-4">
-							<a href="">Yellowstone National Park</a>
+							<a href="/poi/{{ poi.id }}">{{ poi.name }}</a>
 						</div>
 						<div class="col-3">
 							<ul class="list-unstyled">
-								<li>Hiking</li>
-								<li>Swimming</li>
+								{% for day_act in poi.day_acts %}
+									{% if day_act.day_id == day.id %}
+										<li>{{ day_act.activity.name }}</li>
+									{% endif %}
+								{% endfor %}
 							</ul>
 						</div>
 						<div class="col-5">
 							<textarea class="form-control" placeholder="Notes"></textarea>
 						</div>
 					</div>
+					{% endfor %}
 				</div>
 			</div>
-			<div class="row border mt-3" style="background-color: lightgray">
-				<div class="row pt-2" >
-					<div class="col-2">
-						<h5>Day2</h5>
-					</div>
-					<div class="col-7"></div>
-					<div class="col-3">
-						<h5>June 24th</h5>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-2">
-					<h5>Stay</h5>
-					<p><a href=''>Elk Meadow Lodge</a></p>
-				</div>
-				<div class="col-10">
-					<div class="row text-center pt-1">
-						<h5>Activities</h5>
-					</div>
-					<div class="row pb-2">
-						<div class="col-4">
-							<a href="">Yellowstone National Park</a>
-						</div>
-						<div class="col-3">
-							<ul class="list-unstyled">
-								<li>Horesback Riding</li>
-							</ul>
-						</div>
-						<div class="col-5">
-							<textarea class="form-control" placeholder="Notes"></textarea>
-						</div>
-					</div>
-					<div class="row pb-2">
-						<div class="col-4">
-							<a href="">Terrapin Lodge</a>
-						</div>
-						<div class="col-3">
-							<ul class="list-unstyled">
-								<li>Fancy Dinner</li>
-							</ul>
-						</div>
-						<div class="col-5">
-							<textarea class="form-control" placeholder="Notes"></textarea>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="col-3">
+			{% endfor%}
+		</div>	
+		<div class="col-3" id="poss_table">
 			<h2 class="display-5">Possibilities</h2>
 			<ul class="nav nav-tabs" id="possibility-tabs">
 				<li class="nav-item">
-				  <a class="nav-link active" id="stay-tab" aria-current="page" href="#">Stay</a>
+					<a class="nav-link active" id="stay-tab" aria-current="page" href="#">Stay</a>
 				</li>
 				<li class="nav-item" >
-				  <a class="nav-link" id="visit-tab" href="#">Visit</a>
+					<a class="nav-link" id="visit-tab" href="#">Visit</a>
 				</li>
-				<li class="nav-item">
-				  <a class="nav-link" id="do-tab" href="#">Do</a>
-				</li>
-			  </ul>
+			</ul>
 			<table class="table table-hover mt-3" id="stay-table">
+				<thead>
+					<td colspan="2" class="fw-bold">Places to Stay</td>
+				</thead>
 				<tbody>
-					<thead>
-						<td colspan="2" class="fw-bold">Places to Stay</td>
-					</thead>
-					{% for campground in trip.unassinged %}
-						<tr>
-							<td class="align-middle img-col">
-								Image
-							</td>
-							<td class="align-middle name-col">Campground Name</td>
+					{% for poss in trip.possibilities %}
+						{% if poss.type == "stay" %}
+						<tr id="{{ poss.poi_id }}">
+							<td id="name-col" class="align-middle">{{ poss.name }}</td>
 						</tr>
+						{% endif %}
 					{% endfor %}
 				</tbody>
-			  </table>
+				</table>
 			<table class="table table-hover mt-3 d-none" id="visit-table">
-					<thead>
-						<td colspan="2" class="fw-bold">Places to Visit</caption>
-					</thead>
+				<thead>
+					<td colspan="2" class="fw-bold">Places to Visit</caption>
+				</thead>
 				<tbody>
-					<tr onclick="window.location='';">
-						<td id="img-col" class="align-middle">
-							<img id="result-img" src="https://cdn.pixabay.com/photo/2020/06/14/17/57/mountains-5298769_1280.jpg">
-						</td>
-						<td id="name-col" class="align-middle">Great Smoky Mountains</td>
-					</tr>
-					<tr onclick="window.location='';">
-						<td id="img-col" class="align-middle">
-							<img id="result-img" src="https://cdn.pixabay.com/photo/2020/06/14/17/57/mountains-5298769_1280.jpg">
-						</td>
-						<td id="name-col" class="align-middle">Baxter State Park</td>
-					</tr>
-					<tr onclick="window.location='';">
-						<td id="img-col" class="align-middle">
-							<img id="result-img" src="https://cdn.pixabay.com/photo/2020/06/14/17/57/mountains-5298769_1280.jpg">
-						</td>
-						<td id="name-col" class="align-middle">Zion National Park</td>
-					</tr>
+					{% for poss in trip.possibilities %}
+						{% if poss.type == "visit" %}
+						<tr id="{{ poss.poi_id }}">
+							<td id="name-col" class="align-middle">{{ poss.name }}</td>
+						</tr>
+						{% endif %}
+					{% endfor %}
 				</tbody>
-			  </table>
-			  <table class="table table-hover mt-3 d-none" id="do-table">
-				<tbody>
-					<thead>
-						<td colspan="2" class="fw-bold">Things to Do</td>
-					</thead>
-					<tr onclick="window.location='';">
-						<td id="img-col" class="align-middle">
-							<img id="result-img" src="https://cdn.pixabay.com/photo/2020/06/14/17/57/mountains-5298769_1280.jpg">
-						</td>
-						<td id="name-col" class="align-middle">Hike to Morador</td>
-					</tr>
-					<tr onclick="window.location='';">
-						<td id="img-col" class="align-middle">
-							<img id="result-img" src="https://cdn.pixabay.com/photo/2020/06/14/17/57/mountains-5298769_1280.jpg">
-						</td>
-						<td id="name-col" class="align-middle">Visit Galactica</td>
-					</tr>
-					<tr onclick="window.location='';">
-						<td id="img-col" class="align-middle">
-							<img id="result-img" src="https://cdn.pixabay.com/photo/2020/06/14/17/57/mountains-5298769_1280.jpg">
-						</td>
-						<td id="name-col" class="align-middle">Frolick in the Shire</td>
-					</tr>
-				</tbody>
-			  </table>
+			</table>
 		</div>
 		<div class="col-1"></div>
 	</div>
-</div>
+
+	<div class="position-fixed top-0 start-0 d-flex align-items-center justify-content-center d-none pop-up-form" id="add-modal" style="height: 100vh; width: 100vw;">
+		<div class="col-3"></div>
+		<div class="col-6">
+			<div class="container card">
+				<div class="card-body">
+					<div class="row">
+						<div class="col-11" id="modal-title">
+						</div>
+						<div class="col-1">
+							<button class="btn btn-secondary opacity-75 btn-sm" id="close-btn">X</button>
+						</div>
+					</div>
+					<div id="modal-body">
+						<form action="/trips/{{ trip.id }}/campground/assign" method="POST" id="stay-assign-form">
+							<label for="from-date">
+								From:
+							</label>
+							<select class="form-select" name="from-date" id="from-date">
+								{% for day in trip.days %}
+								<option value="{{ day.date }}">Day {{ loop.index }}: {{ day.dow }}, {{ day.month }} {{ day.day }}</option>
+								{% endfor %}
+							</select>
+							<label for="to-date">
+								To:
+							</label>
+							<select class="form-select" name="to-date" id="to-date">
+								{% for day in trip.days %}
+								<option value="{{ day.date }}">Day {{ loop.index }}: {{ day.dow }}, {{ day.month }} {{ day.day }}</option>
+								{% endfor %}
+							</select>
+							<button type="submit" class="btn btn-sm btn-secondary mt-3">Add to Trip</button>
+						</form>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-3"></div>
+	</div>
+
+	<div class="position-fixed top-0 start-0 d-flex align-items-center justify-content-center d-none pop-up-form" id="add-modal" style="height: 100vh; width: 100vw;">
+		<div class="col-3"></div>
+		<div class="col-6">
+			<div class="container card">
+				<div class="card-body">
+					<div class="row">
+						<div class="col-11" id="modal-title">
+						</div>
+						<div class="col-1">
+							<button class="btn btn-secondary opacity-75 btn-sm" id="close-btn">X</button>
+						</div>
+					</div>
+					<div id="modal-body">
+						<ul class="list-group mb-3 mt-3" id="modal-body">
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-3"></div>
+	</div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/tripDetails.js"></script>
+<script src="/static/tripDetails.js"> </script>
 {% endblock %}

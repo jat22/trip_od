@@ -1,5 +1,6 @@
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_
 
 from functions import get_all_activities, trip_dates, make_date_range
 from datetime import timedelta
@@ -58,10 +59,10 @@ class Trip(db.Model):
 	notes = db.Column(db.Text)
 	username = db.Column(db.ForeignKey("users.username", ondelete="CASCADE"))
 	days = db.Relationship("TripDay", backref="trip", cascade="all, delete")
-	pois = db.Relationship("POI", secondary="trip_poi_activity", backref="trips")
-	# u_camps = db.Relationship("Location",
-	# 			  secondary="u_camps", cascade="all, delete")
-	# u_acts = db.Relationship("UTripAct", cascade="all, delete")
+	pois = db.Relationship("POI", secondary="trip_day_poi_act")
+	activities = db.Relationship("Activity",
+			      secondary="trip_day_poi_act")
+	possibilities = db.Relationship("Possibility", backref="trip")
 	
 
 	def __repr__(self):
@@ -121,14 +122,7 @@ class POI(db.Model):
 	subtype = db.Column(db.Text)
 	lat = db.Column(db.Text)
 	long = db.Column(db.Text)
-	activities = db.Relationship("Activity", secondary="trip_poi_activity", backref="pois")
-
-
-	# day_acts = db.Relationship("DayActivity", backref="location", cascade="all, delete")
-	# u_acts = db.Relationship("UTripAct", backref="location", cascade="all, delete")
-	# trip_day = db.Relationship("TripDay", backref="location", cascade="all, delete")
-	# u_camps = db.Relationship("UTripCamp", backref="location", cascade="all, delete")
-	# trip_day = db.Relationship("TripDay", backref="camp", cascade="all, delete")
+	day_acts = db.Relationship("TripDayPoiAct", backref="pois")
 
 	def __repr__(self):
 		return f"<POI #{self.id}: {self.name}>"
@@ -147,7 +141,6 @@ class POI(db.Model):
 		db.session.add(poi)
 		db.session.commit()
 
-
 class TripDay(db.Model):
 	__tablename__ = "trip_days"
 
@@ -158,12 +151,18 @@ class TripDay(db.Model):
 	year = db.Column(db.Text)
 	month = db.Column(db.Text)
 	day = db.Column(db.Text)
-	stay = db.Column(db.ForeignKey("pois.id"), nullable=True)
-
-	day_acts = db.Relationship("DayActivity", backref="trip_day", cascade="all, delete")
+	stay_id = db.Column(db.ForeignKey("pois.id"), nullable=True)
+	stay = db.Relationship("POI")
+	pois = db.Relationship("POI", secondary="trip_day_poi_act")
 	
 	def __repr__(self):
 		return f"<TripDay Trip#{self.trip_id} date: {self.date}>"
+
+	def addStay(self, stay_id):
+		self.stay_id = stay_id
+		print(self.id)
+		db.session.add(self)
+
 
 	@classmethod
 	def add(cls, start_date, end_date, trip_id):
@@ -193,8 +192,7 @@ class Activity(db.Model):
 	
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.Text)
-	day_act = db.Relationship("DayActivity", backref="activity")
-	u_acts = db.Relationship("UTripAct", backref="activity")
+	day_acts = db.Relationship("TripDayPoiAct", backref="activities")
 	
 	def __repr__(self):
 		return f"<Activity: {self.name}>"
@@ -213,21 +211,60 @@ class Activity(db.Model):
 				db.session.add(new_activity)
 				db.session.commit()
 
-class TripPoiActivity(db.Model):
-	__tablename__ = "trip_poi_activity"
-
+class TripDayPoiAct(db.Model):
+	__tablename__ = "trip_day_poi_act"
+	
 	id = db.Column(db.Integer, primary_key=True)
-	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"), nullable=False)
+	trip_id = db.Column(db.ForeignKey("trips.id", 
+				   ondelete="CASCADE"), 
+				   nullable=False)
+	day_id = db.Column(db.ForeignKey("trip_days.id", 
+				  ondelete="CASCADE"), 
+				  nullable=True)
 	poi_id = db.Column(db.ForeignKey("pois.id"), nullable=False)
-	act_id = db.Column(db.ForeignKey("activities.id"), nullable=False)
-	notes = db.Column(db.Text)
+	act_id = db.Column(db.ForeignKey("activities.id"), nullable=True)
+	trip = db.Relationship("Trip", backref="day_acts")
+	day = db.Relationship("TripDay")
+	poi = db.Relationship("POI")
+	activity = db.Relationship("Activity")
 
-class DayActivity(db.Model):
-	__tablename__ = "day_acts"
-
+class Possibility(db.Model):
+	__tablename__ = "possibilities"
+ 
 	id = db.Column(db.Integer, primary_key=True)
-	trip_day_id = db.Column(db.ForeignKey("trip_days.id", ondelete="CASCADE"), nullable=False)
-	trip_poi_activity_id = db.Column(db.ForeignKey("trip_poi_activity.id", ondelete="CASCADE"))
+	trip_id = db.Column(db.ForeignKey("trips.id", 
+				   ondelete="CASCADE"), 
+				   nullable=False)
+	poi_id = db.Column(db.ForeignKey("pois.id"))
+	act_id = db.Column(db.ForeignKey("activities.id"))
+	type = db.Column(db.Text, nullable=False)
+	name = db.Column(db.Text)
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	# activity_id = db.Column(db.ForeignKey("activities")),
+
+	# trip_poi_activity_id = db.Column(db.ForeignKey("trip_poi_activity.id", ondelete="CASCADE"))
+
 
 
 
@@ -246,3 +283,58 @@ class DayActivity(db.Model):
 # 	location_id = db.Column(db.ForeignKey("locations.id"), nullable=False)
 # 	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"), nullable=False)
 
+# day_acts = db.Relationship("TripDayPoiAct")
+	
+	# pois = db.Relationship("POI", secondary="trip_poi_activity", backref="trips")
+	# u_camps = db.Relationship("Location",
+	# 			  secondary="u_camps", cascade="all, delete")
+	# u_acts = db.Relationship("UTripAct", cascade="all, delete")
+
+# day_acts = db.Relationship("DayActivity", backref="location", cascade="all, delete")
+	# u_acts = db.Relationship("UTripAct", backref="location", cascade="all, delete")
+	# trip_day = db.Relationship("TripDay", backref="location", cascade="all, delete")
+	# u_camps = db.Relationship("UTripCamp", backref="location", cascade="all, delete")
+	# trip_day = db.Relationship("TripDay", backref="camp", cascade="all, delete")
+
+
+# class TripDayPoiAct(db.Model):
+# 	__tablename__ = "trip_day_poi_act"
+
+# 	id = db.Column(db.Integer, primary_key=True)
+# 	trip_id = db.Column(db.ForeignKey("trips.id"), nullable=False)
+# 	trip_day_id = db.Column(db.ForeignKey("trip_days.id", ondelete="CASCADE"), nullable=False)
+# 	poi_id = db.Column(db.ForeignKey("pois.id"), nullable=False)
+# 	act_id = db.Column(db.ForeignKey("activities.id"), nullable=False)
+# 	activity = db.relationship("Activity")
+
+# class PoiAct(db.Model):
+# 	__tablename__ = "poi-acts"
+
+# 	id = db.Column(db.Integer, primary_key=True)
+# 	poi_id = db.Column(db.ForeignKey("pois.id"))
+# 	activity_id = db.Column(db.ForeignKey("activities.id"))
+# 	poi = db.Relationship("POI")
+# 	act = db.Relationship("Activity")
+
+# class DayPoi(db.Model):
+# 	__tablename__ = "day_pois"
+
+# 	id = db.Column(db.Integer, primary_key=True)
+# 	trip_day_id = db.Column(db.ForeignKey("trip_days.id", ondelete="CASCADE"), nullable=False)
+# 	notes = db.Column(db.Text)
+# 	poi_id = db.Column(db.ForeignKey("pois.id"))
+# 	trip_day_poi_act_id = db.Column(db.ForeignKey("trip_day_poi_act.id"))
+# 	poi = db.relationship("POI")
+
+# 	@classmethod
+# 	def get_poi_activities(self, poi_id, trip_day_id):
+# 		results = TripDayPoiAct.query.filter(
+# 			and_(
+# 				TripDayPoiAct.poi_id == poi_id, 
+# 				TripDayPoiAct.trip_day_id == trip_day_id
+# 				).all()
+# 			)
+# 		activities = []
+# 		for result in results:
+# 			activities.append(result.activity.name)
+# 		return activities
