@@ -364,3 +364,27 @@ def name_id_only(list, type):
 def display_date(date):
     """ given a datatime object, returns a date as Month, day,"""
     return date.strftime("%b %-d, %Y")
+
+
+def poi_activities(poi_id):
+    endpoint = ""
+    if "rec" in poi_id:
+        endpoint = "recareas"
+    if "fac" in poi_id:
+        endpoint = "facilities"
+
+    id = "".join(filter(str.isdigit, poi_id))
+
+    resp = requests.get(f"{REC_BASE_URL}/{endpoint}/{id}/activities",
+            params={"apikey" : REC_API_KEY})
+
+    activities = []
+    for act in resp.json()["RECDATA"]:
+        activities.append(
+            {
+                "id" : act.get("ActivityID"),
+                "name" : act.get("ActivityName")
+            }
+        )
+
+    return activities

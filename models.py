@@ -228,6 +228,24 @@ class TripDayPoiAct(db.Model):
 	poi = db.Relationship("POI")
 	activity = db.Relationship("Activity")
 
+	@classmethod
+	def add(cls, trip_id, date, act_id, poi_id):
+		print('METHOD##################################')
+		print(poi_id)
+		trip_day = TripDay.query.filter(
+			TripDay.date == date, TripDay.trip_id == trip_id
+			).first()
+		
+		new_tdpa = TripDayPoiAct(
+			trip_id = trip_id,
+			day_id = trip_day.id,
+			poi_id = poi_id,
+			act_id = act_id
+		)
+
+		db.session.add(new_tdpa)
+		db.session.commit()
+
 class Possibility(db.Model):
 	__tablename__ = "possibilities"
  

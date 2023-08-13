@@ -9,7 +9,7 @@ import config, random, json
 from data import states
 from models import connect_db, db, User, Trip, POI, TripDay, Activity, TripDayPoiAct, bcrypt
 from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, DescriptionUpdateForm, TripUpdateForm
-from functions import search_by_location, get_poi_details, display_date, get_location_options, search_by_poi, search_by_location
+from functions import search_by_location, get_poi_details, display_date, get_location_options, search_by_poi, search_by_location, poi_activities
 from background_url import loc_bg_imgs, act_bg_imgs
 
 app = Flask(__name__)
@@ -336,7 +336,24 @@ def assign_campground(trip_id):
             day.addStay(poi_id)
     db.session.commit()
 
-    # TripDay.add_stay(trip_id, from_date, to_date, poi_name)
+    return redirect(f"/trips/{trip_id}")
+
+@app.route("/trips/<int:trip_id>/poi/assign", methods=["POST"])
+def assign_poi(trip_id):
+    if not g.user:
+            flash("Please Login or Create an Account")
+            return redirect("/login")
+    
+    date = request.form.get("visit-date")
+    poi_id = request.form.get("poi-id")
+    activities = []
+    for key in request.form:
+        if key == "visit-date" or key == "poi-id": continue
+        activities.append(key)
+    print("########VEIWFUNCTION#############")
+    print(poi_id)
+    for act in activities:
+         TripDayPoiAct.add(trip_id, date, act, poi_id)
 
     return redirect(f"/trips/{trip_id}")
 
@@ -635,3 +652,9 @@ def get_trip_options():
     results = search_by_location("", "", lat, long, radius)
 
     return jsonify(results)
+
+@app.route("/api/poi/<id>/activities")
+def get_poi_activities(id):
+    activities = poi_activities(id)
+
+    return jsonify(activities)
