@@ -15,21 +15,24 @@
 	</div>
 	<div class="row">
 		<div class="col-1"></div>
-		<div class="col-7">
+		<div class="col-6">
 			{% for day in days %}
 			<div class="row" id="day-{{ day.id }}">
-				<div class="row border mt-3" style="background-color: lightgray">
+				<div class="row border mt-3 p-1" style="background-color: lightgray">
 					<div class="col-2">
 						<h5>Day {{ loop.index }}</h5>
 					</div>
-					<div class="col-7"></div>
+					<div class="col-2">
+						<button class="btn btn-secondary btn-sm">Edit</button>
+					</div>
+					<div class="col-5"></div>
 					<div class="col-3">
 						<h5>{{ day.dow }}, {{ day.month }} {{ day.day }}</h5>
 					</div>
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-2">
+				<div class="col-4">
 					<h5>Stay</h5>
 					{% if day.stay %}
 					<p><a href="/poi/{{ day.stay.id }}">{{ day.stay.name }}</a></p>
@@ -37,16 +40,16 @@
 					<button class="btn btn-sm btn-secondary">Campsites</button>
 					{% endif %}
 				</div>
-				<div class="col-10">
-					<div class="row text-center pt-1">
+				<div class="col-8">
+					<div class="row pt-1">
 						<h5>Activities</h5>
 					</div>
 					{% for poi in day.pois %}
 					<div class="row">
-						<div class="col-4">
+						<div class="col-6">
 							<a href="/poi/{{ poi.id }}">{{ poi.name }}</a>
 						</div>
-						<div class="col-3">
+						<div class="col-5">
 							<ul class="list-unstyled">
 								{% for day_act in poi.day_acts %}
 									{% if day_act.day_id == day.id %}
@@ -55,16 +58,13 @@
 								{% endfor %}
 							</ul>
 						</div>
-						<div class="col-5">
-							<textarea class="form-control" placeholder="Notes"></textarea>
-						</div>
 					</div>
 					{% endfor %}
 				</div>
 			</div>
 			{% endfor%}
 		</div>	
-		<div class="col-3" id="poss_table">
+		<div class="col-4" id="poss_table">
 			<h2 class="display-5">Possibilities</h2>
 			<ul class="nav nav-tabs" id="possibility-tabs">
 				<li class="nav-item">
@@ -81,8 +81,9 @@
 				<tbody>
 					{% for poss in trip.possibilities %}
 						{% if poss.type == "stay" %}
-						<tr id="{{ poss.poi_id }}">
-							<td id="name-col" class="align-middle">{{ poss.name }}</td>
+						<tr>
+							<td id="{{ poss.poi_id }}" class="align-middle">{{ poss.name }}</td>
+							<td><button class="btn btn-sm btn-light">remove</button></td>
 						</tr>
 						{% endif %}
 					{% endfor %}
@@ -95,8 +96,8 @@
 				<tbody>
 					{% for poss in trip.possibilities %}
 						{% if poss.type == "visit" %}
-						<tr id="{{ poss.poi_id }}">
-							<td id="name-col" class="align-middle">{{ poss.name }}</td>
+						<tr>
+							<td id="{{ poss.poi_id }}" class="align-middle">{{ poss.name }}</td>
 						</tr>
 						{% endif %}
 					{% endfor %}
@@ -119,7 +120,7 @@
 						</div>
 					</div>
 					<div id="modal-body">
-						<form action="/trips/{{ trip.id }}/campground/assign" method="POST" id="stay-assign-form">
+						<form action="/trips/{{ trip.id }}/campground/assign" method="POST" id="stay-assign-form" class="d-none">
 							<label for="from-date">
 								From:
 							</label>
@@ -138,7 +139,19 @@
 							</select>
 							<button type="submit" class="btn btn-sm btn-secondary mt-3">Add to Trip</button>
 						</form>
-						
+						<form action="/trips/{{ trip.id }}/poi/assign" method="POST" id="visit-assign-form" class="d-none">
+							<label for="visit-date">
+								Date:
+							</label>
+							<select class="form-select" name="visit-date" id="visit-date">
+								{% for day in trip.days %}
+								<option value="{{ day.date }}">Day {{ loop.index }}: {{ day.dow }}, {{ day.month }} {{ day.day }}</option>
+								{% endfor %}
+							</select>
+							<label>Select Activities</label>
+							<div id="activities-select"></div>
+							<button type="submit" class="btn btn-sm btn-secondary mt-3">Add to Trip</button>
+						</form>
 					</div>
 				</div>
 			</div>
