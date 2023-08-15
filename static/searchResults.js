@@ -25,3 +25,24 @@ function handleSelect(e) {
 	$searchResults.removeClass("d-none")
 }
 $typeMenu.on("click", handleSelect)
+
+const $typeTabs = $("#type-tabs")
+const $campTab = $("#camp-tab")
+const $parkTab = $("#park-tab")
+const $parksTable = $("#parks-table")
+const $campgroundsTable = $("#campgrounds-table")
+
+$("#type-tabs").on("click", function(evt){
+	evt.preventDefault();
+	$campTab.removeClass("active");
+	$parkTab.removeClass("active")
+	if($(evt.target).prop("id") == $campTab.prop("id")){
+		$parksTable.addClass("d-none")
+		$campgroundsTable.removeClass("d-none")
+	} else if($(evt.target).prop("id") == $parkTab.prop('id')) {
+		$($campgroundsTable.addClass('d-none'))
+		$($parksTable.removeClass('d-none'))
+	}
+	$(evt.target).addClass("active")
+})
+

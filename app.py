@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, url_for, request, flash, session, g, jsonify
+from flask import Flask, redirect, render_template, url_for, request, flash, session, g, jsonify, make_response
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy import and_
 from sqlalchemy.orm import joinedload
@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import config, random, json
 
 from data import states
-from models import connect_db, db, User, Trip, POI, TripDay, Activity, TripDayPoiAct, bcrypt
+from models import connect_db, db, User, Trip, POI, TripDay, Activity, TripDayPoiAct, Possibility, bcrypt
 from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, DescriptionUpdateForm, TripUpdateForm
 from functions import search_by_location, get_poi_details, display_date, get_location_options, search_by_poi, search_by_location, poi_activities
 from background_url import loc_bg_imgs, act_bg_imgs
@@ -31,6 +31,7 @@ connect_db(app)
 
 CURR_USER = "curr_user"
 CURR_TRIP = "curr_trip"
+CURR_POI = "curr_poi"
 REC_BASE_URL = "https://ridb.recreation.gov/api/v1"
 GEOCODE_BASE_URL = "https://api.tomtom.com/search/2/geocode/"
 
@@ -93,7 +94,7 @@ def logout():
     flash("You are now logged out.", "success")
     return redirect('/')
 
-@app.route("/users/new", methods=["GET", "POST"])
+@app.route("/signup", methods=["GET", "POST"])
 def signup():
     """create a mew user account"""
 
@@ -117,10 +118,10 @@ def signup():
             return render_template("/users/user-new.html", form=form)
         
         do_login(User.query.get(username))
-        return redirect(f"/trips")
+        return redirect(f"/users/{username}/trips")
     
     else:
-        return render_template("/users/user-new.html", form = form)
+        return render_template("/forms/createAccount.html", form = form)
 
 @app.route("/users/<username>")
 def user_profile(username):
@@ -159,6 +160,17 @@ def edit_user(username):
         return redirect(f"/users/{g.user.username}")
     return render_template("/users/edit-user.html", form=edit_form, user=g.user)
 
+@app.route("/users/<username>/trips")
+def show_user_trips(username):
+    if not g.user:
+        flash("Please Login or Create an Account")
+        return redirect("/login")
+    if g.user.username != username:
+        flash("Unauthorized")
+        return redirect("/logout")
+    raise
+
+    return render_template("/users/trips.html", user = g.user)
 
 
 ####################### TRIP VIEW FUNCTIONS ##############################
@@ -175,21 +187,19 @@ def show_a_trip(trip_id):
 
     desc_form = DescriptionUpdateForm(obj=trip)
 
-
-    return render_template("/trip/trip-details.html", trip = trip, days=days, form=desc_form)
+    return render_template("/trip/trip-details.html", trip = trip, days=days, form=desc_form, user=g.user)
 
 
 @app.route("/trips/create", methods=["GET", "POST"])
 def create_trip():
     """ get basic information about a new trip and
     create new trip that is attached to current, logged in user"""
-
     if not g.user:
             flash("Please Login or Create an Account")
             return redirect("/login")
 
     form = CreateTripForm()
-    
+
     if form.validate_on_submit():
         if not g.user:
             flash("Please Login or Create an Account")
@@ -213,7 +223,7 @@ def create_trip():
         
         return redirect(f"/trips/{new_trip.id}")
     
-    return render_template("/trip/create-trip.html", form=form)
+    return render_template("/trip/create-trip.html", form=form, user=g.user)
 
 
 @app.route("/trips/<int:trip_id>/where", methods=["GET"])
@@ -338,6 +348,21 @@ def assign_campground(trip_id):
 
     return redirect(f"/trips/{trip_id}")
 
+@app.route("/trips/poi/add", methods=["POST"])
+def add_poi_to_trip():
+    trip_id = request.form.get("trip")
+    curr_poi = session.get(CURR_POI)
+    
+    check_poi = POI.query.get(curr_poi["id"])
+    if not check_poi:
+        POI.create_poi(**curr_poi)
+
+    Possibility.add(trip_id, curr_poi)
+
+    flash("Added to Trip!", "success")
+    
+    return redirect(f"/poi/{curr_poi['id']}")
+
 @app.route("/trips/<int:trip_id>/poi/assign", methods=["POST"])
 def assign_poi(trip_id):
     if not g.user:
@@ -350,11 +375,10 @@ def assign_poi(trip_id):
     for key in request.form:
         if key == "visit-date" or key == "poi-id": continue
         activities.append(key)
-    print("########VEIWFUNCTION#############")
-    print(poi_id)
     for act in activities:
          TripDayPoiAct.add(trip_id, date, act, poi_id)
-
+    if not activities:
+        TripDayPoiAct.add(trip_id, date, None, poi_id)
     return redirect(f"/trips/{trip_id}")
 
     # if day_id:
@@ -545,7 +569,20 @@ def delete_trip(trip_id):
 def show_poi_details(id):
     poi_details = get_poi_details(id)
 
-    return render_template("results/poi-details.html", details = poi_details)
+    session[CURR_POI] = { 
+        "id" : poi_details["id"],
+        "name" : poi_details["name"],
+        "type" : poi_details["type"],
+        "subtype" : poi_details["subtype"],
+        "lat" : poi_details["lat"],
+        "long" : poi_details["long"]
+    }
+
+    print("##########################")
+    print(session.get(CURR_POI))
+
+
+    return render_template("results/poi-details.html", details = poi_details, user=g.user)
 
 
 
@@ -598,6 +635,7 @@ def search():
     if data.get("poi"):
         results = search_by_poi(data["term"], data["poi"])
     else:
+        print(f"TERM: {data['term']}")
         results = search_by_location(data["term"], data["lat"], data["lon"])
 
     fac_types = []
@@ -658,3 +696,27 @@ def get_poi_activities(id):
     activities = poi_activities(id)
 
     return jsonify(activities)
+
+@app.route("/api/user/trips")
+def get_users_trips():
+    def serialize_trip(trip):
+        return {
+            "id" : trip.id,
+            "name" : trip.name,
+        }
+    trips = []
+    for trip in g.user.trips:
+
+        trips.append(serialize_trip(trip))
+    
+
+    return jsonify(trips)
+
+# @app.route("/api/trips/<int:trip_id>/poi/<poi_id>", methods=["POST"])
+# def add_poi_to_trip(trip_id, poi_id):
+#     Possibility.add(trip_id, poi_id)
+
+#     resp_data = {"message" : "POST request successful"}
+#     resp = make_response(jsonify(resp_data), 200)
+
+#     return resp

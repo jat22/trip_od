@@ -230,8 +230,6 @@ class TripDayPoiAct(db.Model):
 
 	@classmethod
 	def add(cls, trip_id, date, act_id, poi_id):
-		print('METHOD##################################')
-		print(poi_id)
 		trip_day = TripDay.query.filter(
 			TripDay.date == date, TripDay.trip_id == trip_id
 			).first()
@@ -254,13 +252,22 @@ class Possibility(db.Model):
 				   ondelete="CASCADE"), 
 				   nullable=False)
 	poi_id = db.Column(db.ForeignKey("pois.id"))
-	act_id = db.Column(db.ForeignKey("activities.id"))
-	type = db.Column(db.Text, nullable=False)
-	name = db.Column(db.Text)
+	poi = db.Relationship("POI")
 	
-	
+	@classmethod
+	def add(cls, trip_id, poi):
 
 
+		if not POI.query.get(poi["id"]):
+			POI.create_poi(**poi)
+
+		new_poss = Possibility(
+			trip_id = trip_id,
+			poi_id = poi["id"],
+		)
+
+		db.session.add(new_poss)
+		db.session.commit()
 
 
 

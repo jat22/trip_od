@@ -80,9 +80,9 @@
 				</thead>
 				<tbody>
 					{% for poss in trip.possibilities %}
-						{% if poss.type == "stay" %}
+						{% if poss.poi.subtype == "Campground" %}
 						<tr>
-							<td id="{{ poss.poi_id }}" class="align-middle">{{ poss.name }}</td>
+							<td id="{{ poss.poi_id }}" class="align-middle">{{ poss.poi.name }}</td>
 							<td><button class="btn btn-sm btn-light">remove</button></td>
 						</tr>
 						{% endif %}
@@ -95,9 +95,9 @@
 				</thead>
 				<tbody>
 					{% for poss in trip.possibilities %}
-						{% if poss.type == "visit" %}
+						{% if poss.poi.subtype != "Campground" %}
 						<tr>
-							<td id="{{ poss.poi_id }}" class="align-middle">{{ poss.name }}</td>
+							<td id="{{ poss.poi_id }}" class="align-middle">{{ poss.poi.name }}</td>
 						</tr>
 						{% endif %}
 					{% endfor %}

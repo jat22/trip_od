@@ -23,7 +23,7 @@ $visitTable.on("click", async function(e){
 $('#close-btn').on('click', hanldeClose)
 function hanldeClose(e){
 	$addModal.addClass("d-none");
-	$('"#activities-select"').empty();
+	$('#activities-select').empty();
 	$('#modal-title').empty();
 }
 

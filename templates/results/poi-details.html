@@ -3,56 +3,37 @@
 {% block title %}{{ details.name }}{% endblock %}
 
 {% block content %}
-<!-- <div class="position-fixed top-0 start-0 d-flex align-items-center justify-content-center d-none pop-up-form" style="height: 100vh; width: 100vw;">
+<div class="position-fixed top-0 start-0 d-flex align-items-center justify-content-center d-none pop-up-form" style="height: 100vh; width: 100vw;" id="modal">
 	<div class="col-3"></div>
 	<div class="col-6">
 		<div class="container card bg-info bg-opacity-75">
-			<div class="card-body">
-				<h3>Add to a Trip</h3>
-				<form>
-					<div class="mb-3">
-						<select class="form-select" name="trip-name">
-							<option value="trip1" selected>Select A Trip</option>
-							<option value="trip1">Trip One</option>
-							<option value="trip2">Trip Two</option>
-							<option value="trip3">Trip Three</option>
-						</select>
-					</div>
-					<div class="mb-3">
-						<label for="act-select">Select Activities (hold cmd to select multiple)</label>
-						<select name="act-select" id="act-select" class="form-select" multiple aria-label="Default select example">
-							<option value="1">Hiking</option>
-							<option value="2">Kayaking</option>
-							<option value="3">Swimming</option>
-							<option value="1">Boating</option>
-							<option value="2">Fishing</option>
-							<option value="3">Campping</option>
-							<option value="1">Day Use</option>
-							<option value="2">Picnic</option>
-							<option value="3">Photography</option>
-						  </select>
-						
-					</div>
-					<button class="btn btn-secondary btn-sm">Submit</button>
-					<button class="btn btn-outlin btn-sm">Cancel</button>
-				</form>
+			<div class="card-body" id="trip-card">
+				{% if details.subtype == "Campground" %}
+					<h3>Add Campground</h3>
+					<p>Add this campground as a possibility to one of your trips, or create a new trip.</p>
+				{% else %}
+					<h3>Add Point of Interest</h3>
+					<p>If you're interested in visiting here, add to one of your trips as a possibility, or create a new trip.</p>
+				{% endif %}
+				<a href="/trips/create" class="btn btn-sm btn-secondary mb-2">Create A New Trip</a>
 			</div>
 		</div>
 	</div>
 	<div class="col-3"></div>
-</div> -->
+</div>
 <div class="container mt-2">
 	<h1 class="display-3">{{ details.name }}</h1>
 	{% if details.city and details.state %}
 	<h5>
-		{{ details.city }}, {{ details.state }}; Coordinates{{ details.lat }}, {{ details.long }}
+		{{ details.city }}, {{ details.state }}<br>
+		Latitude: {{ details.lat }}, Longitude: {{ details.long }}
 	</h5>
 	{% else %}
 	<h5>
-		Coordinates {{ details.lat }}, {{ details.long }}
+		Latitude: {{ details.lat }}, Longitude: {{ details.long }}
 	</h5>
 	{% endif %}
-	<!-- <button id="add-to-trip-btn" class="btn btn-sm btn-secondary">Add</button> -->
+	<button id="add-to-trip-btn" class="btn btn-sm btn-secondary">Add To A Trip</button>
 </div>
 <div class="container mt-3">
 	<div class="row">
@@ -98,4 +79,7 @@
 	</div>
 </div>
 </div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/poiDetails.js"></script>
 {% endblock %}

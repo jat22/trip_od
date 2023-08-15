@@ -1,5 +1,5 @@
 from app import app
-from models import db, Trip, User, POI, TripDay, TripDayPoiAct, DayPoi, Activity
+from models import db, Trip, User, POI, TripDay, TripDayPoiAct, Activity
 import datetime
 
 db.drop_all()

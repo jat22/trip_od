@@ -294,6 +294,7 @@ def clean_location_data(resp_data):
             "id" : "rec" + data[f"{type}ID"],
             "name" : data[f"{type}Name"].title(),
             "type" : "recarea",
+            "subtype" : "none",
             "email" : data[f"{type}Email"],
             "phone" : data[f"{type}Phone"],
             "description" : data[f"{type}Description"],
