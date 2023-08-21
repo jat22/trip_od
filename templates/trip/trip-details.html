@@ -3,184 +3,100 @@
 {% block title %}{{ trip.name }}{% endblock %}
 
 {% block content %}
-<div class="container mt-2">
-
-</div>
-<div class="container-fluid mb-5">
-	<div class="row">
-		<div class="col-1"></div>
-		<div class="col pl-0">
-			<h1 class="display-3">{{ trip.name }}</h1>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-1"></div>
-		<div class="col-6">
-			{% for day in days %}
-			<div class="row" id="day-{{ day.id }}">
-				<div class="row border mt-3 p-1" style="background-color: lightgray">
-					<div class="col-2">
-						<h5>Day {{ loop.index }}</h5>
-					</div>
-					<div class="col-2">
-						<button class="btn btn-secondary btn-sm">Edit</button>
-					</div>
-					<div class="col-5"></div>
-					<div class="col-3">
-						<h5>{{ day.dow }}, {{ day.month }} {{ day.day }}</h5>
-					</div>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-4">
-					<h5>Stay</h5>
-					{% if day.stay %}
-					<p><a href="/poi/{{ day.stay.id }}">{{ day.stay.name }}</a></p>
-					{% else %}
-					<button class="btn btn-sm btn-secondary">Campsites</button>
-					{% endif %}
-				</div>
-				<div class="col-8">
-					<div class="row pt-1">
-						<h5>Activities</h5>
-					</div>
-					{% for poi in day.pois %}
-					<div class="row">
-						<div class="col-6">
-							<a href="/poi/{{ poi.id }}">{{ poi.name }}</a>
+<div class="container">
+	<h1 class="display-3 mt-2 mb-2">Trip: {{ trip.name }}</h1>
+	<h4 >{{ days[0].month }} {{ days[0].day}}, {{ days[0].year }} - {{ days[-1].month }} {{ days[-1].day}}, {{ days[-1].year }}</h4>
+	<div class="accordion mb-5" id="day-accordian">
+		{% for day in days %}
+			<div class="accordion-item">
+				<h2 class="accordion-header" id="day{{ loop.index }}-heading">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#day{{ loop.index }}" aria-expanded="true" aria-controls="day{{ loop.index }}">
+					Day {{ loop.index }} - {{ day.dow }}, {{ day.month }} {{ day.day }}
+					</button>
+				</h2>
+				<div id="day{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="day{{ loop.index }}-heading" >
+					<div class="accordion-body">
+						<div class="row">
+							<div class="col-6">
+								<h6>Campground</h6>
+							</div>
+							<div class="col-6">
+								<h6>Parks You Plan to Visit</h6>
+							</div>
 						</div>
-						<div class="col-5">
-							<ul class="list-unstyled">
-								{% for day_act in poi.day_acts %}
-									{% if day_act.day_id == day.id %}
-										<li>{{ day_act.activity.name }}</li>
+						<div class="row">
+							<div class="col-6">
+								<div class="dropdown">
+									{% if day.stay %}
+										<button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="campground-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+											{{ day.stay.name }}
+										</button>
+									{% else %}
+										<a class="btn btn-sm btn-info mt-3" href="" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-dayid="{{ day.id }}" data-bs-type="campground-add">Add Campground</a>
 									{% endif %}
-								{% endfor %}
-							</ul>
-						</div>
-					</div>
-					{% endfor %}
-				</div>
-			</div>
-			{% endfor%}
-		</div>	
-		<div class="col-4" id="poss_table">
-			<h2 class="display-5">Possibilities</h2>
-			<ul class="nav nav-tabs" id="possibility-tabs">
-				<li class="nav-item">
-					<a class="nav-link active" id="stay-tab" aria-current="page" href="#">Stay</a>
-				</li>
-				<li class="nav-item" >
-					<a class="nav-link" id="visit-tab" href="#">Visit</a>
-				</li>
-			</ul>
-			<table class="table table-hover mt-3" id="stay-table">
-				<thead>
-					<td colspan="2" class="fw-bold">Places to Stay</td>
-				</thead>
-				<tbody>
-					{% for poss in trip.possibilities %}
-						{% if poss.poi.subtype == "Campground" %}
-						<tr>
-							<td id="{{ poss.poi_id }}" class="align-middle">{{ poss.poi.name }}</td>
-							<td><button class="btn btn-sm btn-light">remove</button></td>
-						</tr>
-						{% endif %}
-					{% endfor %}
-				</tbody>
-				</table>
-			<table class="table table-hover mt-3 d-none" id="visit-table">
-				<thead>
-					<td colspan="2" class="fw-bold">Places to Visit</caption>
-				</thead>
-				<tbody>
-					{% for poss in trip.possibilities %}
-						{% if poss.poi.subtype != "Campground" %}
-						<tr>
-							<td id="{{ poss.poi_id }}" class="align-middle">{{ poss.poi.name }}</td>
-						</tr>
-						{% endif %}
-					{% endfor %}
-				</tbody>
-			</table>
-		</div>
-		<div class="col-1"></div>
-	</div>
+									<ul class="dropdown-menu" aria-labelledby="campground-dropdown">
+										<li>
+											<a class="dropdown-item" target="_blank" href="/poi/{{ day.stay.id }}">More Information</a>
+										</li>
+										<li>
+											<a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-dayid="{{ day.id }}" data-bs-type="campground" data-bs-tripid="
+											{{ trip.id }}">Change</a>
+										</li>
+										<li>
+											<form action="/trips/{{ trip.id }}/stay" method="DELETE">
+												<button type="submit" class="dropdown-item">Delete</button>
+											</form>
 
-	<div class="position-fixed top-0 start-0 d-flex align-items-center justify-content-center d-none pop-up-form" id="add-modal" style="height: 100vh; width: 100vw;">
-		<div class="col-3"></div>
-		<div class="col-6">
-			<div class="container card">
-				<div class="card-body">
-					<div class="row">
-						<div class="col-11" id="modal-title">
-						</div>
-						<div class="col-1">
-							<button class="btn btn-secondary opacity-75 btn-sm" id="close-btn">X</button>
-						</div>
-					</div>
-					<div id="modal-body">
-						<form action="/trips/{{ trip.id }}/campground/assign" method="POST" id="stay-assign-form" class="d-none">
-							<label for="from-date">
-								From:
-							</label>
-							<select class="form-select" name="from-date" id="from-date">
-								{% for day in trip.days %}
-								<option value="{{ day.date }}">Day {{ loop.index }}: {{ day.dow }}, {{ day.month }} {{ day.day }}</option>
-								{% endfor %}
-							</select>
-							<label for="to-date">
-								To:
-							</label>
-							<select class="form-select" name="to-date" id="to-date">
-								{% for day in trip.days %}
-								<option value="{{ day.date }}">Day {{ loop.index }}: {{ day.dow }}, {{ day.month }} {{ day.day }}</option>
-								{% endfor %}
-							</select>
-							<button type="submit" class="btn btn-sm btn-secondary mt-3">Add to Trip</button>
-						</form>
-						<form action="/trips/{{ trip.id }}/poi/assign" method="POST" id="visit-assign-form" class="d-none">
-							<label for="visit-date">
-								Date:
-							</label>
-							<select class="form-select" name="visit-date" id="visit-date">
-								{% for day in trip.days %}
-								<option value="{{ day.date }}">Day {{ loop.index }}: {{ day.dow }}, {{ day.month }} {{ day.day }}</option>
-								{% endfor %}
-							</select>
-							<label>Select Activities</label>
-							<div id="activities-select"></div>
-							<button type="submit" class="btn btn-sm btn-secondary mt-3">Add to Trip</button>
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="col-3"></div>
-	</div>
+										</li>
+									</ul>
+								</div>
+							</div>
+							<div class="col-6">
+								{% for poi in day.pois %}
+								<div class="dropdown">
+									<button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="park-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+										{{ poi.name }}
+									</button>
+									<ul class="dropdown-menu" aria-labelledby="park-dropdown">
+										<li></li>
+										<li>
+											<a class="dropdown-item" target="_blank" href="/poi/{{ poi.id }}">More Information</a>
+										</li>
+										<li>
+											<form action="/trips/{{ trip.id }}/poi/{{ poi.id }}" method="DELETE">
+												<button type="submit" class="dropdown-item">Delete</button>
+											</form>
 
-	<div class="position-fixed top-0 start-0 d-flex align-items-center justify-content-center d-none pop-up-form" id="add-modal" style="height: 100vh; width: 100vw;">
-		<div class="col-3"></div>
-		<div class="col-6">
-			<div class="container card">
-				<div class="card-body">
-					<div class="row">
-						<div class="col-11" id="modal-title">
+										</li>
+									</ul>
+								</div>
+								{% endfor %}
+								<a class="btn btn-sm btn-info mt-3" href="" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-dayid="{{ day.id }}" data-bs-type="park" data-bs-tripid="
+								{{ trip.id }}">Add A Park</a>
+							</div>
 						</div>
-						<div class="col-1">
-							<button class="btn btn-secondary opacity-75 btn-sm" id="close-btn">X</button>
-						</div>
-					</div>
-					<div id="modal-body">
-						<ul class="list-group mb-3 mt-3" id="modal-body">
-						</ul>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="col-3"></div>
+		{% endfor %}
 	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="editModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-scrollable">
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h4 class="modal-title" id="editModalLabel"></h4>
+		  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body"></div>
+	  </div>
+	</div>
+  </div>
+
 {% endblock %}
 {% block scripts %}
-<script src="/static/tripDetails.js"> </script>
+<script src="/static/tripDetails.js"></script>
 {% endblock %}
+

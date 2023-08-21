@@ -168,7 +168,7 @@ def show_user_trips(username):
     if g.user.username != username:
         flash("Unauthorized")
         return redirect("/logout")
-    raise
+
 
     return render_template("/users/trips.html", user = g.user)
 
@@ -247,6 +247,322 @@ def show_campgrounds(trip_id):
     return render_template("/results/campgrounds.html", trip_id=trip_id)
 
 
+
+
+@app.route("/trips/<int:trip_id>/campground/assign", methods=["POST"])
+def assign_campground(trip_id):
+    """ assign a particular campground to a particular day """
+
+    if not g.user:
+            flash("Please Login or Create an Account")
+            return redirect("/login")
+
+    from_date = datetime.strptime(
+        request.form.get("from-date"), '%Y-%m-%d')
+    
+    to_date = datetime.strptime(
+        request.form.get("to-date"), '%Y-%m-%d')
+    
+    trip = Trip.query.get(trip_id)
+
+    date_diff = to_date - from_date
+    date_range = [(from_date + timedelta(days=i)).strftime('%Y-%m-%d') 
+                for i in range(date_diff.days + 1)]
+
+    poi_name = request.form.get("poi-name")
+    poi_id = POI.query.filter(POI.name == poi_name).first().id
+
+    for day in trip.days:
+        if str(day.date) in date_range:
+            day.addStay(poi_id)
+    db.session.commit()
+
+    return redirect(f"/trips/{trip_id}")
+    
+@app.route("/trips/<int:trip_id>/campground/update", methods=["POST"])
+def update_day_campground(trip_id):
+    day_id = request.form.get("dayId")
+    poi_id = request.form.get("select-campground")
+
+    day = TripDay.query.get(day_id)
+
+    day.updateStay(poi_id)
+    db.session.commit()
+
+    return redirect(request.referrer)
+
+@app.route("/trips/poi/add", methods=["POST"])
+def add_poi_to_trip():
+    trip_id = request.form.get("trip")
+    poi_id = session.get(CURR_POI)
+    
+    check_poi = POI.query.get(poi_id)
+    if not check_poi:
+        POI.create_poi(poi_id)
+
+    Possibility.add(trip_id, poi_id)
+
+    flash("Added to Trip!", "success")
+    
+    return redirect(f"/poi/{poi_id}")
+
+@app.route("/trips/<int:trip_id>/poi/assign", methods=["POST"])
+def assign_poi(trip_id):
+    if not g.user:
+            flash("Please Login or Create an Account")
+            return redirect("/login")
+    
+    date = request.form.get("visit-date")
+    poi_id = request.form.get("poi-id")
+    activities = []
+    for key in request.form:
+        if key == "visit-date" or key == "poi-id": continue
+        activities.append(key)
+    for act in activities:
+         TripDayPoiAct.add(trip_id, date, act, poi_id)
+    if not activities:
+        TripDayPoiAct.add(trip_id, date, None, poi_id)
+    return redirect(f"/trips/{trip_id}")
+
+    # if day_id:
+    #     camp_id = request.form.get("location-id")
+
+    #     trip_day = TripDay.query.get(day_id)
+    #     if trip_day.camp_id:
+    #         flash("A campground is already assigned, if you would like to replace it, please delete current campground.", "danger")
+
+    #     trip_day.stay = camp_id
+    #     db.session.add(trip_day)
+
+        # u_camp = UTripCamp.query.filter(and_(UTripCamp.location_id==camp_id, UTripCamp.trip_id==trip_id)).first()
+        
+        # db.session.delete(u_camp)
+        # db.session.commit()
+    # else:
+    #      flash("Please select a day.", "danger")
+
+    
+
+#### CHANGES ENTIRELY
+# @app.route("/trips/<int:trip_id>/campground/delete", methods=["POST"])
+# def delete_campground(trip_id):
+#     """ remove a campground from a trip entirely """
+
+#     if not g.user:
+#         flash("Please Login or Create an Account")
+#         return redirect("/login")
+#     ucamp_id = request.form.get("ucampground-id")
+
+#     ucamp = UTripCamp.query.filter(and_(UTripCamp.location_id==ucamp_id, UTripCamp.trip_id==trip_id)).first()
+
+#     db.session.delete(ucamp)
+#     db.session.commit()
+
+#     return redirect(f"/trips/{trip_id}")
+
+############CHANGES A LOT
+# 
+
+#############################################
+#############################################
+############################################
+
+@app.route("/trips")
+def show_mytrips():
+    """ display a list of all of the current user's trips """
+
+    if not g.user:
+            flash("Please Login or Create an Account")
+            return redirect("/login")
+
+    trips = User.query.get(session[CURR_USER]).trips
+
+    return render_template("trip/mytrips.html", trips=trips, display_date=display_date)
+
+@app.route("/trips/<int:trip_id>/update", methods=["GET", "POST"])
+def update_trip_info(trip_id):
+    if not g.user:
+        flash("Please Login or Create an Account")
+        return redirect("/login")
+    
+    trip = Trip.query.get(trip_id)
+
+    # desc_form = DescriptionUpdateForm(obj=trip)
+    trip_form = TripUpdateForm(obj=trip)
+
+    # if desc_form.validate_on_submit():
+    #     trip.description = desc_form.description.data
+    #     db.session.commit()
+    #     return redirect(f"/trips/{trip_id}")
+
+    if trip_form.validate_on_submit():
+        Trip.update(
+            trip = trip,
+            name = trip_form.name.data,
+            notes = trip_form.description.data,
+            start_date = trip_form.start_date.data,
+            end_date = trip_form.end_date.data,
+        )
+        return redirect(f"/trips/{trip_id}")
+    
+    return render_template("/trip/update.html", form=trip_form, trip_id=trip.id)
+
+@app.route("/trips/<int:trip_id>/confirm-delete")
+def confirm_trip_delete(trip_id):
+    trip = Trip.query.get(trip_id)
+    form = TripUpdateForm(obj=trip)
+    return render_template("/trip/confirm-delete.html", trip=trip, form=form)
+
+@app.route("/trips/<int:trip_id>/delete")
+def delete_trip(trip_id):
+    trip = Trip.query.get(trip_id)
+
+    db.session.delete(trip)
+    db.session.commit()
+
+    return redirect("/trips")
+
+
+############################# LOCATION VIEW FUNCTIONS #########################
+
+@app.route("/poi/<id>")
+def show_poi_details(id):
+    poi_details = get_poi_details(id)
+
+    session[CURR_POI] = id
+
+    return render_template("results/poi-details.html", details = poi_details, user=g.user)
+
+
+
+
+################### SEACH APIs ##########################
+
+@app.route("/search")
+def search():
+    data = json.loads(request.args.get('data'))
+    
+    if data.get("poi"):
+        results = search_by_poi(data["term"], data["poi"])
+    else:
+        print(f"TERM: {data['term']}")
+        results = search_by_location(data["term"], data["lat"], data["lon"])
+
+    fac_types = []
+    for r in results:
+        if r["type"] not in fac_types:
+            fac_types.append(r["type"])  
+    results_json = json.dumps(results)
+
+    return render_template("searchResults.html", results=results, results_json=results_json, fac_types=fac_types)
+
+
+@app.route("/api/geolocation")
+def get_location():
+    city = request.args.get("city")
+    state = request.args.get("state")
+    location_options = get_location_options(city, state)
+
+    return jsonify(location_options)
+
+@app.route("/api/search")
+def search_():
+    """ main search function using location input from user """
+
+    results = search_by_location(
+        city = request.args.get("city"),
+        state = request.args.get("state"),
+        latitude = request.args.get("latitude"),
+        longitude = request.args.get("longitude"),
+        radius = request.args.get("radius")
+        )
+
+    trip = Trip.query.get(request.args.get("tripId"))
+    trip.lat = results['search_geolocation']['lat']
+    trip.long = results['search_geolocation']['long']
+    trip.radius = results['search_geolocation']['radius']
+    db.session.commit()
+
+    return jsonify(results)
+
+# @app.route("/api/trip/options")
+# def get_trip_options():
+
+#     """ gets campground and activitiy options for a trip based on location inform attached to the trip
+#         used to update information avaliable when the current trip is changed
+#     """
+
+#     trip = Trip.query.get(request.args.get("trip_id"))
+#     lat = trip.lat
+#     long = trip.long
+#     radius = ""
+
+#     results = search_by_location("", "", lat, long, radius)
+
+#     return jsonify(results)
+
+@app.route("/api/poi/<id>/activities")
+def get_poi_activities(id):
+    activities = poi_activities(id)
+
+    return jsonify(activities)
+
+@app.route("/api/user/trips")
+def get_users_trips():
+    def serialize_trip(trip):
+        return {
+            "id" : trip.id,
+            "name" : trip.name,
+        }
+    trips = []
+    for trip in g.user.trips:
+
+        trips.append(serialize_trip(trip))
+    
+
+    return jsonify(trips)
+
+
+@app.route("/api/trips/<int:trip_id>/options")
+def get_trip_options(trip_id):
+    options_query = Possibility.query.filter(trip_id==trip_id)
+
+    campgrounds = []
+    parks = []
+
+    for opt in options_query:
+        if opt.poi.subtype == "Campground":
+            campgrounds.append(
+                {
+                    "id" : opt.poi.id,
+                    "name" : opt.poi.name
+                }
+            )    
+        else:
+            parks.append(
+                {
+                    "id" : opt.poi.id,
+                    "name" : opt.poi.name
+                }
+            )
+
+    options = {
+        "campgrounds" : campgrounds,
+        "parks" : parks
+    }
+
+    return jsonify(options)
+
+
+# @app.route("/api/trips/<int:trip_id>/poi/<poi_id>", methods=["POST"])
+# def add_poi_to_trip(trip_id, poi_id):
+#     Possibility.add(trip_id, poi_id)
+
+#     resp_data = {"message" : "POST request successful"}
+#     resp = make_response(jsonify(resp_data), 200)
+
+#     return resp
+
 # @app.route("/trips/<int:trip_id>/campgrounds/<location_id>/add", methods=["POST"])
 # def add_campground(trip_id, location_id):
 #     """add a campground to the current trip"""
@@ -317,274 +633,90 @@ def show_campgrounds(trip_id):
 
 #     return redirect(f"/trips/{trip_id}/activities")
 
-@app.route("/trips/<int:trip_id>/campground/assign", methods=["POST"])
-def assign_campground(trip_id):
-    """ assign a particular campground to a particular day """
+# @app.route("/trips/<int:trip_id>/campground/unassign", methods=["POST"])
+# def unassign_campground(trip_id):
+#     """ unassign a campground from a particular day, but leave attached to the trip """
 
-    if not g.user:
-            flash("Please Login or Create an Account")
-            return redirect("/login")
+#     if not g.user:
+#         flash("Please Login or Create an Account")
+#         return redirect("/login")
 
-    from_date = datetime.strptime(
-        request.form.get("from-date"), '%Y-%m-%d')
+#     trip_day = TripDay.query.get(request.form.get("day-id"))
+#     trip_day.stay = None
+
+#     ucamp = UTripCamp(
+#         location_id = request.form.get("campground-id"),
+#         trip_id = trip_day.trip_id
+#     )
+#     db.session.add(ucamp)
+#     db.session.commit()
+#     return redirect(f"/trips/{trip_id}")
+
+
+# ### UPDATE WITH UI #############
+# @app.route("/trips/<int:trip_id>/activity/assign", methods=["POST"])
+# def assign_activity(trip_id):
+#     """ assign an activity(with a location) to a particular day """
+
+#     if not g.user:
+#             flash("Please Login or Create an Account")
+#             return redirect("/login")
     
-    to_date = datetime.strptime(
-        request.form.get("to-date"), '%Y-%m-%d')
-    
-    trip = Trip.query.get(trip_id)
-
-    date_diff = to_date - from_date
-    date_range = [(from_date + timedelta(days=i)).strftime('%Y-%m-%d') 
-                  for i in range(date_diff.days + 1)]
-
-    poi_name = request.form.get("poi-name")
-    poi_id = POI.query.filter(POI.name == poi_name).first().id
-
-    for day in trip.days:
-        print(str(day.date), date_range[0])
-        if str(day.date) in date_range:
-            day.addStay(poi_id)
-    db.session.commit()
-
-    return redirect(f"/trips/{trip_id}")
-
-@app.route("/trips/poi/add", methods=["POST"])
-def add_poi_to_trip():
-    trip_id = request.form.get("trip")
-    curr_poi = session.get(CURR_POI)
-    
-    check_poi = POI.query.get(curr_poi["id"])
-    if not check_poi:
-        POI.create_poi(**curr_poi)
-
-    Possibility.add(trip_id, curr_poi)
-
-    flash("Added to Trip!", "success")
-    
-    return redirect(f"/poi/{curr_poi['id']}")
-
-@app.route("/trips/<int:trip_id>/poi/assign", methods=["POST"])
-def assign_poi(trip_id):
-    if not g.user:
-            flash("Please Login or Create an Account")
-            return redirect("/login")
-    
-    date = request.form.get("visit-date")
-    poi_id = request.form.get("poi-id")
-    activities = []
-    for key in request.form:
-        if key == "visit-date" or key == "poi-id": continue
-        activities.append(key)
-    for act in activities:
-         TripDayPoiAct.add(trip_id, date, act, poi_id)
-    if not activities:
-        TripDayPoiAct.add(trip_id, date, None, poi_id)
-    return redirect(f"/trips/{trip_id}")
-
-    # if day_id:
-    #     camp_id = request.form.get("location-id")
-
-    #     trip_day = TripDay.query.get(day_id)
-    #     if trip_day.camp_id:
-    #         flash("A campground is already assigned, if you would like to replace it, please delete current campground.", "danger")
-
-    #     trip_day.stay = camp_id
-    #     db.session.add(trip_day)
-
-        # u_camp = UTripCamp.query.filter(and_(UTripCamp.location_id==camp_id, UTripCamp.trip_id==trip_id)).first()
+#     if request.form.get("act-day"):
+#         u_act = UTripAct.query.get(request.form.get("uact-id"))
         
-        # db.session.delete(u_camp)
-        # db.session.commit()
-    # else:
-    #      flash("Please select a day.", "danger")
+#         new_day_activity = DayActivity(
+#             trip_day_id = request.form.get("act-day"),
+#             act_id = u_act.act_id,
+#             location_id = u_act.location_id
+#         )
 
+#         db.session.add(new_day_activity)
+
+
+#         db.session.delete(u_act)
+#         db.session.commit()
+#     else:
+#         flash("Please select a date.", "danger")
+
+#     return redirect(f"/trips/{trip_id}")
+
+
+
+# @app.route("/trips/<int:trip_id>/activity/unassign", methods=["POST"])
+# def unassign_activity(trip_id):
+#     """ unassign an activity from a particular day """
+#     if not g.user:
+#         flash("Please Login or Create an Account")
+#         return redirect("/login")
     
+#     day_act = DayActivity.query.get(request.form.get("day-act-id"))
 
-#### CHANGES ENTIRELY
-@app.route("/trips/<int:trip_id>/campground/delete", methods=["POST"])
-def delete_campground(trip_id):
-    """ remove a campground from a trip entirely """
+#     uact = UTripAct(
+#          act_id = day_act.act_id,
+#          location_id = day_act.location.id,
+#          trip_id = trip_id
+#     )
 
-    if not g.user:
-        flash("Please Login or Create an Account")
-        return redirect("/login")
-    ucamp_id = request.form.get("ucampground-id")
+#     db.session.delete(day_act)
+#     db.session.add(uact)
+#     db.session.commit()
+#     return redirect(f"/trips/{trip_id}")
 
-    ucamp = UTripCamp.query.filter(and_(UTripCamp.location_id==ucamp_id, UTripCamp.trip_id==trip_id)).first()
+# @app.route("/trips/<int:trip_id>/activity/delete", methods=["POST"])
+# def delete_activity(trip_id):
+#     """ remove an acitivty from a trip entirely"""
 
-    db.session.delete(ucamp)
-    db.session.commit()
+#     if not g.user:
+#         flash("Please Login or Create an Account")
+#         return redirect("/login")
 
-    return redirect(f"/trips/{trip_id}")
+#     uact = UTripAct.query.get(request.form.get("uact-id"))
 
-############CHANGES A LOT
-@app.route("/trips/<int:trip_id>/campground/unassign", methods=["POST"])
-def unassign_campground(trip_id):
-    """ unassign a campground from a particular day, but leave attached to the trip """
+#     db.session.delete(uact)
+#     db.session.commit()
 
-    if not g.user:
-        flash("Please Login or Create an Account")
-        return redirect("/login")
-
-    trip_day = TripDay.query.get(request.form.get("day-id"))
-    trip_day.stay = None
-
-    ucamp = UTripCamp(
-        location_id = request.form.get("campground-id"),
-        trip_id = trip_day.trip_id
-    )
-    db.session.add(ucamp)
-    db.session.commit()
-    return redirect(f"/trips/{trip_id}")
-
-
-### UPDATE WITH UI #############
-@app.route("/trips/<int:trip_id>/activity/assign", methods=["POST"])
-def assign_activity(trip_id):
-    """ assign an activity(with a location) to a particular day """
-
-    if not g.user:
-            flash("Please Login or Create an Account")
-            return redirect("/login")
-    
-    if request.form.get("act-day"):
-        u_act = UTripAct.query.get(request.form.get("uact-id"))
-        
-        new_day_activity = DayActivity(
-            trip_day_id = request.form.get("act-day"),
-            act_id = u_act.act_id,
-            location_id = u_act.location_id
-        )
-
-        db.session.add(new_day_activity)
-
-
-        db.session.delete(u_act)
-        db.session.commit()
-    else:
-        flash("Please select a date.", "danger")
-
-    return redirect(f"/trips/{trip_id}")
-
-
-
-@app.route("/trips/<int:trip_id>/activity/unassign", methods=["POST"])
-def unassign_activity(trip_id):
-    """ unassign an activity from a particular day """
-    if not g.user:
-        flash("Please Login or Create an Account")
-        return redirect("/login")
-    
-    day_act = DayActivity.query.get(request.form.get("day-act-id"))
-
-    uact = UTripAct(
-         act_id = day_act.act_id,
-         location_id = day_act.location.id,
-         trip_id = trip_id
-    )
-
-    db.session.delete(day_act)
-    db.session.add(uact)
-    db.session.commit()
-    return redirect(f"/trips/{trip_id}")
-
-@app.route("/trips/<int:trip_id>/activity/delete", methods=["POST"])
-def delete_activity(trip_id):
-    """ remove an acitivty from a trip entirely"""
-
-    if not g.user:
-        flash("Please Login or Create an Account")
-        return redirect("/login")
-
-    uact = UTripAct.query.get(request.form.get("uact-id"))
-
-    db.session.delete(uact)
-    db.session.commit()
-
-    return redirect(f"/trips/{trip_id}")
-
-#############################################
-#############################################
-############################################
-
-@app.route("/trips")
-def show_mytrips():
-    """ display a list of all of the current user's trips """
-
-    if not g.user:
-            flash("Please Login or Create an Account")
-            return redirect("/login")
-
-    trips = User.query.get(session[CURR_USER]).trips
-
-    return render_template("trip/mytrips.html", trips=trips, display_date=display_date)
-
-@app.route("/trips/<int:trip_id>/update", methods=["GET", "POST"])
-def update_trip_info(trip_id):
-    if not g.user:
-        flash("Please Login or Create an Account")
-        return redirect("/login")
-    
-    trip = Trip.query.get(trip_id)
-
-    # desc_form = DescriptionUpdateForm(obj=trip)
-    trip_form = TripUpdateForm(obj=trip)
-
-    # if desc_form.validate_on_submit():
-    #     trip.description = desc_form.description.data
-    #     db.session.commit()
-    #     return redirect(f"/trips/{trip_id}")
-
-    if trip_form.validate_on_submit():
-        Trip.update(
-            trip = trip,
-            name = trip_form.name.data,
-            notes = trip_form.description.data,
-            start_date = trip_form.start_date.data,
-            end_date = trip_form.end_date.data,
-        )
-        return redirect(f"/trips/{trip_id}")
-    
-    return render_template("/trip/update.html", form=trip_form, trip_id=trip.id)
-
-@app.route("/trips/<int:trip_id>/confirm-delete")
-def confirm_trip_delete(trip_id):
-    trip = Trip.query.get(trip_id)
-    form = TripUpdateForm(obj=trip)
-    return render_template("/trip/confirm-delete.html", trip=trip, form=form)
-
-@app.route("/trips/<int:trip_id>/delete")
-def delete_trip(trip_id):
-    trip = Trip.query.get(trip_id)
-
-    db.session.delete(trip)
-    db.session.commit()
-
-    return redirect("/trips")
-
-
-############################# LOCATION VIEW FUNCTIONS #########################
-
-@app.route("/poi/<id>")
-def show_poi_details(id):
-    poi_details = get_poi_details(id)
-
-    session[CURR_POI] = { 
-        "id" : poi_details["id"],
-        "name" : poi_details["name"],
-        "type" : poi_details["type"],
-        "subtype" : poi_details["subtype"],
-        "lat" : poi_details["lat"],
-        "long" : poi_details["long"]
-    }
-
-    print("##########################")
-    print(session.get(CURR_POI))
-
-
-    return render_template("results/poi-details.html", details = poi_details, user=g.user)
-
-
+#     return redirect(f"/trips/{trip_id}")
 
 # @app.route("/locations/<location_id>")
 # def show_location_details(location_id):
@@ -625,98 +757,3 @@ def show_poi_details(id):
 
 #     return render_template("/trip/location-details.html", location=location_details, session=session, option="campgrounds", bg_img1=loc_bg_imgs[random.randint(0,9)], bg_img2=loc_bg_imgs[random.randint(0,9)])
 
-
-################### SEACH APIs ##########################
-
-@app.route("/search")
-def search():
-    data = json.loads(request.args.get('data'))
-    
-    if data.get("poi"):
-        results = search_by_poi(data["term"], data["poi"])
-    else:
-        print(f"TERM: {data['term']}")
-        results = search_by_location(data["term"], data["lat"], data["lon"])
-
-    fac_types = []
-    for r in results:
-        if r["type"] not in fac_types:
-            fac_types.append(r["type"])  
-    results_json = json.dumps(results)
-
-    return render_template("searchResults.html", results=results, results_json=results_json, fac_types=fac_types)
-
-
-@app.route("/api/geolocation")
-def get_location():
-    city = request.args.get("city")
-    state = request.args.get("state")
-    location_options = get_location_options(city, state)
-
-    return jsonify(location_options)
-
-@app.route("/api/search")
-def search_():
-    """ main search function using location input from user """
-
-    results = search_by_location(
-        city = request.args.get("city"),
-        state = request.args.get("state"),
-        latitude = request.args.get("latitude"),
-        longitude = request.args.get("longitude"),
-        radius = request.args.get("radius")
-        )
-
-    trip = Trip.query.get(request.args.get("tripId"))
-    trip.lat = results['search_geolocation']['lat']
-    trip.long = results['search_geolocation']['long']
-    trip.radius = results['search_geolocation']['radius']
-    db.session.commit()
-
-    return jsonify(results)
-
-@app.route("/api/trip/options")
-def get_trip_options():
-
-    """ gets campground and activitiy options for a trip based on location inform attached to the trip
-        used to update information avaliable when the current trip is changed
-    """
-
-    trip = Trip.query.get(request.args.get("trip_id"))
-    lat = trip.lat
-    long = trip.long
-    radius = ""
-
-    results = search_by_location("", "", lat, long, radius)
-
-    return jsonify(results)
-
-@app.route("/api/poi/<id>/activities")
-def get_poi_activities(id):
-    activities = poi_activities(id)
-
-    return jsonify(activities)
-
-@app.route("/api/user/trips")
-def get_users_trips():
-    def serialize_trip(trip):
-        return {
-            "id" : trip.id,
-            "name" : trip.name,
-        }
-    trips = []
-    for trip in g.user.trips:
-
-        trips.append(serialize_trip(trip))
-    
-
-    return jsonify(trips)
-
-# @app.route("/api/trips/<int:trip_id>/poi/<poi_id>", methods=["POST"])
-# def add_poi_to_trip(trip_id, poi_id):
-#     Possibility.add(trip_id, poi_id)
-
-#     resp_data = {"message" : "POST request successful"}
-#     resp = make_response(jsonify(resp_data), 200)
-
-#     return resp

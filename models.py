@@ -2,7 +2,7 @@ from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
-from functions import get_all_activities, trip_dates, make_date_range
+from functions import get_all_activities, trip_dates, make_date_range, get_poi_details
 from datetime import timedelta
 
 bcrypt = Bcrypt()
@@ -128,15 +128,16 @@ class POI(db.Model):
 		return f"<POI #{self.id}: {self.name}>"
 
 	@classmethod
-	def create_poi(cls, id, name, type, subtype, lat, long):
+	def create_poi(cls, id):
+		details = get_poi_details(id)
 
 		poi = POI(
-			id = id,
-			name = name,
-			type = type,
-			subtype = subtype,
-			lat = lat,
-			long = long
+			id = details.get("id"),
+			name = details.get("name"),
+			type = details.get("type"),
+			subtype = details.get("subtype"),
+			lat = details.get("lat"),
+			long = details.lget("long")
 		)
 		db.session.add(poi)
 		db.session.commit()
@@ -160,7 +161,10 @@ class TripDay(db.Model):
 
 	def addStay(self, stay_id):
 		self.stay_id = stay_id
-		print(self.id)
+		db.session.add(self)
+	
+	def updateStay(self, stay_id):
+		self.stay_id = stay_id
 		db.session.add(self)
 
 

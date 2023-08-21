@@ -99,3 +99,73 @@ function determineTable(e){
 		return $doTable
 	}
 }
+
+
+$('#editModal').on('show.bs.modal', async function(evt){
+	const tripId = parseInt($(evt.relatedTarget).data('bs-tripid'))
+	const dayId =  $(evt.relatedTarget).data('bs-dayid');
+	const editType = $(evt.relatedTarget).data('bs-type');
+	console.log(editType)
+	const resp = await axios.get(`/api/trips/${tripId}/options`)
+	const tripOptions = resp.data
+	$(".modal-body").empty()
+	if(editType === "campground"){
+
+		$("#editModalLabel").html("Update Campground")
+		$(".modal-body").append(
+			`<form action="/trips/${tripId}/campground/update" method="POST">
+			<div class="mb-3">
+				<label class="form-label" for="select-campground">
+					Select A Different Campground
+				</label>
+				<select class="form-select" id="select-campground" name="select-campground">
+				</select>
+				<input type="hidden" name="dayId" value="${dayId}"
+			</div>
+			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+				Close
+			</button>
+		  	<button type="submit" class="btn btn-primary">
+				Update
+			</button>
+			</form>`
+		)
+		for(let c of tripOptions.campgrounds){
+			$("#select-campground").append(
+				`<option value="${c.id}">${c.name}</option>`
+			)
+		}
+	}
+
+	if(editType === "park"){
+		$("#editModalLabel").html("Add a Park")
+		$(".modal-body").append(
+			`<form action="/trips/${tripId}/poi/assign" method="POST">
+			<div class="mb-3">
+				<label class="form-label" for="park">
+					Select A Park
+				</label>
+				<select class="form-select" id="park" name="park">
+				</select>
+				<input type="hidden" name="dayId" value="${dayId}"
+			</div>
+			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+				Close
+			</button>
+		  	<button type="submit" id="update-btn" class="btn btn-primary">
+				Update
+			</button>
+			</form`
+		)
+		for(let p of tripOptions.parks){
+			$("#park").append(
+				`<option value="${p.id}">${p.name}</option>`
+			)
+		}
+	}
+})
+	
+
+// $("#update-button").on('click', ()=> $(".modal-body").empty())
+
+
