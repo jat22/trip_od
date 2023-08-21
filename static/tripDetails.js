@@ -142,12 +142,12 @@ $('#editModal').on('show.bs.modal', async function(evt){
 		$(".modal-body").append(
 			`<form action="/trips/${tripId}/poi/assign" method="POST">
 			<div class="mb-3">
-				<label class="form-label" for="park">
+				<label class="form-label" for="poi-id">
 					Select A Park
 				</label>
-				<select class="form-select" id="park" name="park">
+				<select class="form-select" id="park" name="poi-id">
 				</select>
-				<input type="hidden" name="dayId" value="${dayId}"
+				<input type="hidden" name="day-id" value="${dayId}"
 			</div>
 			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
 				Close

@@ -60,8 +60,6 @@ class Trip(db.Model):
 	username = db.Column(db.ForeignKey("users.username", ondelete="CASCADE"))
 	days = db.Relationship("TripDay", backref="trip", cascade="all, delete")
 	pois = db.Relationship("POI", secondary="trip_day_poi_act")
-	activities = db.Relationship("Activity",
-			      secondary="trip_day_poi_act")
 	possibilities = db.Relationship("Possibility", backref="trip")
 	
 
@@ -167,7 +165,6 @@ class TripDay(db.Model):
 		self.stay_id = stay_id
 		db.session.add(self)
 
-
 	@classmethod
 	def add(cls, start_date, end_date, trip_id):
 		new_trip_days = trip_dates(start_date, end_date)
@@ -184,6 +181,13 @@ class TripDay(db.Model):
 			db.session.commit()
 
 	@classmethod
+	def remove_stay(cls, day_id):
+		td = TripDay.query.get(day_id)
+		td.stay_id = None
+		
+		db.session.commit()
+
+	@classmethod
 	def delete(cls, start_date, end_date, trip_days):
 		del_days = make_date_range(start_date, end_date)
 		for day in trip_days:
@@ -196,7 +200,6 @@ class Activity(db.Model):
 	
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.Text)
-	day_acts = db.Relationship("TripDayPoiAct", backref="activities")
 	
 	def __repr__(self):
 		return f"<Activity: {self.name}>"
@@ -226,26 +229,27 @@ class TripDayPoiAct(db.Model):
 				  ondelete="CASCADE"), 
 				  nullable=True)
 	poi_id = db.Column(db.ForeignKey("pois.id"), nullable=False)
-	act_id = db.Column(db.ForeignKey("activities.id"), nullable=True)
 	trip = db.Relationship("Trip", backref="day_acts")
 	day = db.Relationship("TripDay")
 	poi = db.Relationship("POI")
-	activity = db.Relationship("Activity")
 
 	@classmethod
-	def add(cls, trip_id, date, act_id, poi_id):
-		trip_day = TripDay.query.filter(
-			TripDay.date == date, TripDay.trip_id == trip_id
-			).first()
+	def add(cls, trip_id, day_id, poi_id):
 		
 		new_tdpa = TripDayPoiAct(
 			trip_id = trip_id,
-			day_id = trip_day.id,
-			poi_id = poi_id,
-			act_id = act_id
+			day_id = day_id,
+			poi_id = poi_id
 		)
 
 		db.session.add(new_tdpa)
+		db.session.commit()
+
+	@classmethod
+	def remove(cls, day_id, poi_id):
+		tdpa = TripDayPoiAct.query.filter(and_(TripDayPoiAct.day_id==day_id, TripDayPoiAct.poi_id==poi_id)).first()
+
+		db.session.delete(tdpa)
 		db.session.commit()
 
 class Possibility(db.Model):

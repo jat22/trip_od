@@ -293,6 +293,8 @@ def update_day_campground(trip_id):
 
 @app.route("/trips/poi/add", methods=["POST"])
 def add_poi_to_trip():
+    # ADD POI to a trip as a possibility.
+
     trip_id = request.form.get("trip")
     poi_id = session.get(CURR_POI)
     
@@ -308,64 +310,41 @@ def add_poi_to_trip():
 
 @app.route("/trips/<int:trip_id>/poi/assign", methods=["POST"])
 def assign_poi(trip_id):
+    # ASSIGN POI TO A TRIP DAY
+
     if not g.user:
             flash("Please Login or Create an Account")
             return redirect("/login")
     
-    date = request.form.get("visit-date")
+    day_id = request.form.get("day-id")
     poi_id = request.form.get("poi-id")
-    activities = []
-    for key in request.form:
-        if key == "visit-date" or key == "poi-id": continue
-        activities.append(key)
-    for act in activities:
-         TripDayPoiAct.add(trip_id, date, act, poi_id)
-    if not activities:
-        TripDayPoiAct.add(trip_id, date, None, poi_id)
+
+    TripDayPoiAct.add(trip_id, day_id, poi_id)
     return redirect(f"/trips/{trip_id}")
 
-    # if day_id:
-    #     camp_id = request.form.get("location-id")
-
-    #     trip_day = TripDay.query.get(day_id)
-    #     if trip_day.camp_id:
-    #         flash("A campground is already assigned, if you would like to replace it, please delete current campground.", "danger")
-
-    #     trip_day.stay = camp_id
-    #     db.session.add(trip_day)
-
-        # u_camp = UTripCamp.query.filter(and_(UTripCamp.location_id==camp_id, UTripCamp.trip_id==trip_id)).first()
-        
-        # db.session.delete(u_camp)
-        # db.session.commit()
-    # else:
-    #      flash("Please select a day.", "danger")
-
+@app.route("/trips/<int:trip_id>/poi/<poi_id>/remove/<int:day_id>", methods=["POST"])
+def remove_poi(trip_id, poi_id, day_id):
+    # REMOVE POI FROM TRIP_DAY
+    if not g.user:
+            flash("Please Login or Create an Account")
+            return redirect("/login")
     
+    TripDayPoiAct.remove(day_id, poi_id)
 
-#### CHANGES ENTIRELY
-# @app.route("/trips/<int:trip_id>/campground/delete", methods=["POST"])
-# def delete_campground(trip_id):
-#     """ remove a campground from a trip entirely """
+    return redirect(f"/trips/{trip_id}")
 
-#     if not g.user:
-#         flash("Please Login or Create an Account")
-#         return redirect("/login")
-#     ucamp_id = request.form.get("ucampground-id")
+@app.route("/trips/<int:trip_id>/stay/<day_id>/remove", methods=["POST"])
+def remove_stay(trip_id, day_id):
+    # REMOVE CAMPGROUND FROM TRIP_DAY
+    if not g.user:
+        flash("Please Login or Create an Account")
+        return redirect("/login")
+    
+    TripDay.remove_stay(day_id)
 
-#     ucamp = UTripCamp.query.filter(and_(UTripCamp.location_id==ucamp_id, UTripCamp.trip_id==trip_id)).first()
+    return redirect(f"/trips/{trip_id}")
 
-#     db.session.delete(ucamp)
-#     db.session.commit()
 
-#     return redirect(f"/trips/{trip_id}")
-
-############CHANGES A LOT
-# 
-
-#############################################
-#############################################
-############################################
 
 @app.route("/trips")
 def show_mytrips():
@@ -757,3 +736,46 @@ def get_trip_options(trip_id):
 
 #     return render_template("/trip/location-details.html", location=location_details, session=session, option="campgrounds", bg_img1=loc_bg_imgs[random.randint(0,9)], bg_img2=loc_bg_imgs[random.randint(0,9)])
 
+
+    # if day_id:
+    #     camp_id = request.form.get("location-id")
+
+    #     trip_day = TripDay.query.get(day_id)
+    #     if trip_day.camp_id:
+    #         flash("A campground is already assigned, if you would like to replace it, please delete current campground.", "danger")
+
+    #     trip_day.stay = camp_id
+    #     db.session.add(trip_day)
+
+        # u_camp = UTripCamp.query.filter(and_(UTripCamp.location_id==camp_id, UTripCamp.trip_id==trip_id)).first()
+        
+        # db.session.delete(u_camp)
+        # db.session.commit()
+    # else:
+    #      flash("Please select a day.", "danger")
+
+    
+
+#### CHANGES ENTIRELY
+# @app.route("/trips/<int:trip_id>/campground/delete", methods=["POST"])
+# def delete_campground(trip_id):
+#     """ remove a campground from a trip entirely """
+
+#     if not g.user:
+#         flash("Please Login or Create an Account")
+#         return redirect("/login")
+#     ucamp_id = request.form.get("ucampground-id")
+
+#     ucamp = UTripCamp.query.filter(and_(UTripCamp.location_id==ucamp_id, UTripCamp.trip_id==trip_id)).first()
+
+#     db.session.delete(ucamp)
+#     db.session.commit()
+
+#     return redirect(f"/trips/{trip_id}")
+
+############CHANGES A LOT
+# 
+
+#############################################
+#############################################
+############################################
