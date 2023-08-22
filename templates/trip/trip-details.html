@@ -6,8 +6,8 @@
 <div class="container">
 	<h1 class="display-3 mt-2 mb-2">Trip: {{ trip.name }}</h1>
 	<h4 >{{ days[0].month }} {{ days[0].day}}, {{ days[0].year }} - {{ days[-1].month }} {{ days[-1].day}}, {{ days[-1].year }}</h4>
-	<a class="btn btn-secondary btn-sm mb-3" data-bs-toggle="offcanvas" href="#tripOptionsOffcanvas" role="button" aria-controls="tripOptionsOffcanvas">
-		Saved Campgrounds and Parks
+	<a class="btn btn-outline-secondary mb-3" data-bs-toggle="offcanvas" href="#tripOptionsOffcanvas" role="button" aria-controls="tripOptionsOffcanvas">
+		Saved Places
 	</a>
 	<div class="accordion mb-5" id="day-accordian">
 		{% for day in days %}
@@ -19,12 +19,12 @@
 				</h2>
 				<div id="day{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="day{{ loop.index }}-heading" >
 					<div class="accordion-body">
-						<div class="row">
+						<div class="row border-bottom">
 							<div class="col-6">
-								<h6>Campground</h6>
+								<h5>Where You'll Sleep</h5>
 							</div>
 							<div class="col-6">
-								<h6>Parks You Plan to Visit</h6>
+								<h5>Parks To Visit</h5>
 							</div>
 						</div>
 						<div class="row">
@@ -35,7 +35,7 @@
 											{{ day.stay.name }}
 										</button>
 									{% else %}
-										<a class="btn btn-sm btn-info mt-3" href="" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-dayid="{{ day.id }}" data-bs-type="campground" data-bs-tripid="
+										<a class="btn btn-outline-info mt-3" href="" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-dayid="{{ day.id }}" data-bs-type="campground" data-bs-tripid="
 										{{ trip.id }}">Add Campground</a>
 									{% endif %}
 									<ul class="dropdown-menu" aria-labelledby="campground-dropdown">
@@ -75,7 +75,7 @@
 									</ul>
 								</div>
 								{% endfor %}
-								<a class="btn btn-sm btn-info mt-3" href="" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-dayid="{{ day.id }}" data-bs-type="park" data-bs-tripid="
+								<a class="btn btn-outline-secondary mt-3" href="" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-dayid="{{ day.id }}" data-bs-type="park" data-bs-tripid="
 								{{ trip.id }}">Add A Park</a>
 							</div>
 						</div>
@@ -101,18 +101,18 @@
   
 <!-- OFF CANVAS -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="tripOptionsOffcanvas" aria-labelledby="tripOptionsOffcanvasLabel">
-	<div class="offcanvas-header">
-		<h4 class="offcanvas-title" id="tripOptionsOffcanvasLabel">Campgrounds and Parks of Interest</h4>
+	<div class="offcanvas-header pb-0">
+		<h4 class="offcanvas-title display-6" id="tripOptionsOffcanvasLabel">Trip Options</h4>
 		<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 	</div>
+	<hr>
 	<div class="offcanvas-body">
-
 		<div class="mb-4">
 			<h5>Saved Campgrounds</h5>
 			{% for poss in trip.possibilities %}
 			{% if poss.poi.subtype == "Campground" %}
 				<div class="dropdown mb-2">
-					<button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="camp-poss-{{ poss.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+					<button class="btn btn-outline-success dropdown-toggle btn-sm" type="button" id="camp-poss-{{ poss.id }}" data-bs-toggle="dropdown" aria-expanded="false">
 							{{ poss.poi.name }}
 					</button>
 					<ul class="dropdown-menu" aria-labelledby="camp-poss-{{ poss.id }}">
@@ -130,13 +130,13 @@
 			{% endif %}
 			{% endfor %}
 		</div>
-
+		<hr>
 		<div class="mb-5">
 			<h5>Saved Parks</h5>
 			{% for poss in trip.possibilities %}
 			{% if poss.poi.subtype != "Campground" %}
 				<div class="dropdown mb-2">
-					<button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="camp-poss-{{ poss.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+					<button class="btn btn-outline-success dropdown-toggle btn-sm" type="button" id="camp-poss-{{ poss.id }}" data-bs-toggle="dropdown" aria-expanded="false">
 							{{ poss.poi.name }}
 					</button>
 					<ul class="dropdown-menu" aria-labelledby="camp-poss-{{ poss.id }}">

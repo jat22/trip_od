@@ -23,12 +23,22 @@
 					{{user.username}}
 				  </a>
 				  <ul class="dropdown-menu">
-					<li><a class="dropdown-item" href="/users/{{ user.username }}">Profile</a></li>
-					<li><a class="dropdown-item" href="/users/{{ user.username }}/trips">My Adventures</a></li>
-					<li><a class="dropdown-item" href="/trips/create">Plan</a></li>
-					<li><hr class="dropdown-divider"></li>
-					<li><a class="dropdown-item" href="/logout">Log Out</a></li>
+					<li>
+						<a class="dropdown-item" href="/users/{{ user.username }}">Profile</a>
+					</li>
+					<li>
+						<hr class="dropdown-divider">
+					</li>
+					<li>
+						<a class="dropdown-item" href="/logout">Log Out</a>
+					</li>
 				  </ul>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/users/{{ user.username }}/trips">My Adventures</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/trips/create">Create New</a>
 				</li>
 				{% else %}
 				<li class="nav-item">

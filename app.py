@@ -1,16 +1,12 @@
-from flask import Flask, redirect, render_template, url_for, request, flash, session, g, jsonify, make_response
+from flask import Flask, redirect, render_template, request, flash, session, g, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
-from sqlalchemy import and_
-from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import IntegrityError
-from datetime import datetime, timedelta
-import config, random, json
+import json
 
 from data import states
 from models import connect_db, db, User, Trip, POI, TripDay, Activity, TripDayPoiAct, Possibility, bcrypt
 from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, DescriptionUpdateForm, TripUpdateForm
-from functions import search_by_location, get_poi_details, display_date, get_location_options, search_by_poi, search_by_location, poi_activities
-from background_url import loc_bg_imgs, act_bg_imgs
+from functions import search_by_location, get_poi_details, display_date, get_location_options, search_by_poi, search_by_location
 
 app = Flask(__name__)
 app.app_context().push()
@@ -122,7 +118,11 @@ def signup():
     
     else:
         return render_template("/forms/createAccount.html", form = form)
+    
 
+
+
+################# ATTENTION NEEDED #############################################################
 @app.route("/users/<username>")
 def user_profile(username):
     """show current user's profile"""
@@ -159,6 +159,10 @@ def edit_user(username):
         db.session.commit()
         return redirect(f"/users/{g.user.username}")
     return render_template("/users/edit-user.html", form=edit_form, user=g.user)
+############################################################################
+
+
+
 
 @app.route("/users/<username>/trips")
 def show_user_trips(username):
@@ -226,58 +230,57 @@ def create_trip():
     return render_template("/trip/create-trip.html", form=form, user=g.user)
 
 
-@app.route("/trips/<int:trip_id>/where", methods=["GET"])
-def trip_location(trip_id):
-    """ get user input for location where they would like to visit """
+# @app.route("/trips/<int:trip_id>/where", methods=["GET"])
+# def trip_location(trip_id):
+#     """ get user input for location where they would like to visit """
 
-    if not g.user:
-            flash("Please Login or Create an Account")
-            return redirect("/login")
+#     if not g.user:
+#             flash("Please Login or Create an Account")
+#             return redirect("/login")
     
-    return render_template("/trip/search.html", trip_id=trip_id)
+#     return render_template("/trip/search.html", trip_id=trip_id)
     
 
-@app.route("/trips/<int:trip_id>/campgrounds")
-def show_campgrounds(trip_id):
-    """ show results for campgrounds based on location provided by user"""
+# @app.route("/trips/<int:trip_id>/campgrounds")
+# def show_campgrounds(trip_id):
+#     """ show results for campgrounds based on location provided by user"""
 
-    if not g.user:
-            flash("Please Login or Create an Account")
-            return redirect("/login")
-    return render_template("/results/campgrounds.html", trip_id=trip_id)
-
-
+#     if not g.user:
+#             flash("Please Login or Create an Account")
+#             return redirect("/login")
+#     return render_template("/results/campgrounds.html", trip_id=trip_id)
 
 
-@app.route("/trips/<int:trip_id>/campground/assign", methods=["POST"])
-def assign_campground(trip_id):
-    """ assign a particular campground to a particular day """
 
-    if not g.user:
-            flash("Please Login or Create an Account")
-            return redirect("/login")
+# @app.route("/trips/<int:trip_id>/campground/assign", methods=["POST"])
+# def assign_campground(trip_id):
+#     """ assign a particular campground to a particular day """
 
-    from_date = datetime.strptime(
-        request.form.get("from-date"), '%Y-%m-%d')
+#     if not g.user:
+#             flash("Please Login or Create an Account")
+#             return redirect("/login")
+
+#     from_date = datetime.strptime(
+#         request.form.get("from-date"), '%Y-%m-%d')
     
-    to_date = datetime.strptime(
-        request.form.get("to-date"), '%Y-%m-%d')
+#     to_date = datetime.strptime(
+#         request.form.get("to-date"), '%Y-%m-%d')
     
-    trip = Trip.query.get(trip_id)
+#     trip = Trip.query.get(trip_id)
 
-    date_diff = to_date - from_date
-    date_range = [(from_date + timedelta(days=i)).strftime('%Y-%m-%d') 
-                for i in range(date_diff.days + 1)]
+#     date_diff = to_date - from_date
+#     date_range = [(from_date + timedelta(days=i)).strftime('%Y-%m-%d') 
+#                 for i in range(date_diff.days + 1)]
 
-    poi_name = request.form.get("poi-name")
-    poi_id = POI.query.filter(POI.name == poi_name).first().id
+#     poi_name = request.form.get("poi-name")
+#     poi_id = POI.query.filter(POI.name == poi_name).first().id
 
-    for day in trip.days:
-        if str(day.date) in date_range:
-            day.addStay(poi_id)
-    db.session.commit()
+#     for day in trip.days:
+#         if str(day.date) in date_range:
+#             day.addStay(poi_id)
+#     db.session.commit()
 
-    return redirect(f"/trips/{trip_id}")
+#     return redirect(f"/trips/{trip_id}")
     
 @app.route("/trips/<int:trip_id>/campground/update", methods=["POST"])
 def update_day_campground(trip_id):
@@ -364,48 +367,48 @@ def show_mytrips():
 
     return render_template("trip/mytrips.html", trips=trips, display_date=display_date)
 
-@app.route("/trips/<int:trip_id>/update", methods=["GET", "POST"])
-def update_trip_info(trip_id):
-    if not g.user:
-        flash("Please Login or Create an Account")
-        return redirect("/login")
+# @app.route("/trips/<int:trip_id>/update", methods=["GET", "POST"])
+# def update_trip_info(trip_id):
+#     if not g.user:
+#         flash("Please Login or Create an Account")
+#         return redirect("/login")
     
-    trip = Trip.query.get(trip_id)
+#     trip = Trip.query.get(trip_id)
 
-    # desc_form = DescriptionUpdateForm(obj=trip)
-    trip_form = TripUpdateForm(obj=trip)
+#     # desc_form = DescriptionUpdateForm(obj=trip)
+#     trip_form = TripUpdateForm(obj=trip)
 
-    # if desc_form.validate_on_submit():
-    #     trip.description = desc_form.description.data
-    #     db.session.commit()
-    #     return redirect(f"/trips/{trip_id}")
+#     # if desc_form.validate_on_submit():
+#     #     trip.description = desc_form.description.data
+#     #     db.session.commit()
+#     #     return redirect(f"/trips/{trip_id}")
 
-    if trip_form.validate_on_submit():
-        Trip.update(
-            trip = trip,
-            name = trip_form.name.data,
-            notes = trip_form.description.data,
-            start_date = trip_form.start_date.data,
-            end_date = trip_form.end_date.data,
-        )
-        return redirect(f"/trips/{trip_id}")
+#     if trip_form.validate_on_submit():
+#         Trip.update(
+#             trip = trip,
+#             name = trip_form.name.data,
+#             notes = trip_form.description.data,
+#             start_date = trip_form.start_date.data,
+#             end_date = trip_form.end_date.data,
+#         )
+#         return redirect(f"/trips/{trip_id}")
     
-    return render_template("/trip/update.html", form=trip_form, trip_id=trip.id)
+#     return render_template("/trip/update.html", form=trip_form, trip_id=trip.id)
 
-@app.route("/trips/<int:trip_id>/confirm-delete")
-def confirm_trip_delete(trip_id):
-    trip = Trip.query.get(trip_id)
-    form = TripUpdateForm(obj=trip)
-    return render_template("/trip/confirm-delete.html", trip=trip, form=form)
+# @app.route("/trips/<int:trip_id>/confirm-delete")
+# def confirm_trip_delete(trip_id):
+#     trip = Trip.query.get(trip_id)
+#     form = TripUpdateForm(obj=trip)
+#     return render_template("/trip/confirm-delete.html", trip=trip, form=form)
 
-@app.route("/trips/<int:trip_id>/delete")
-def delete_trip(trip_id):
-    trip = Trip.query.get(trip_id)
+# @app.route("/trips/<int:trip_id>/delete")
+# def delete_trip(trip_id):
+#     trip = Trip.query.get(trip_id)
 
-    db.session.delete(trip)
-    db.session.commit()
+#     db.session.delete(trip)
+#     db.session.commit()
 
-    return redirect("/trips")
+#     return redirect("/trips")
 
 
 ############################# LOCATION VIEW FUNCTIONS #########################
@@ -419,10 +422,6 @@ def show_poi_details(id):
     return render_template("results/poi-details.html", details = poi_details, user=g.user)
 
 
-
-
-################### SEACH APIs ##########################
-
 @app.route("/search")
 def search():
     data = json.loads(request.args.get('data'))
@@ -430,16 +429,13 @@ def search():
     if data.get("poi"):
         results = search_by_poi(data["term"], data["poi"])
     else:
-        print(f"TERM: {data['term']}")
         results = search_by_location(data["term"], data["lat"], data["lon"])
 
-    fac_types = []
-    for r in results:
-        if r["type"] not in fac_types:
-            fac_types.append(r["type"])  
-    results_json = json.dumps(results)
+    return render_template("searchResults.html", results=results)
 
-    return render_template("searchResults.html", results=results, results_json=results_json, fac_types=fac_types)
+################### APIs ##########################
+
+
 
 
 @app.route("/api/geolocation")
@@ -450,25 +446,25 @@ def get_location():
 
     return jsonify(location_options)
 
-@app.route("/api/search")
-def search_():
-    """ main search function using location input from user """
+# @app.route("/api/search")
+# def search_():
+#     """ main search function using location input from user """
 
-    results = search_by_location(
-        city = request.args.get("city"),
-        state = request.args.get("state"),
-        latitude = request.args.get("latitude"),
-        longitude = request.args.get("longitude"),
-        radius = request.args.get("radius")
-        )
+#     results = search_by_location(
+#         city = request.args.get("city"),
+#         state = request.args.get("state"),
+#         latitude = request.args.get("latitude"),
+#         longitude = request.args.get("longitude"),
+#         radius = request.args.get("radius")
+#         )
 
-    trip = Trip.query.get(request.args.get("tripId"))
-    trip.lat = results['search_geolocation']['lat']
-    trip.long = results['search_geolocation']['long']
-    trip.radius = results['search_geolocation']['radius']
-    db.session.commit()
+#     trip = Trip.query.get(request.args.get("tripId"))
+#     trip.lat = results['search_geolocation']['lat']
+#     trip.long = results['search_geolocation']['long']
+#     trip.radius = results['search_geolocation']['radius']
+#     db.session.commit()
 
-    return jsonify(results)
+#     return jsonify(results)
 
 # @app.route("/api/trip/options")
 # def get_trip_options():
@@ -486,11 +482,11 @@ def search_():
 
 #     return jsonify(results)
 
-@app.route("/api/poi/<id>/activities")
-def get_poi_activities(id):
-    activities = poi_activities(id)
+# @app.route("/api/poi/<id>/activities")
+# def get_poi_activities(id):
+#     activities = poi_activities(id)
 
-    return jsonify(activities)
+#     return jsonify(activities)
 
 @app.route("/api/user/trips")
 def get_users_trips():

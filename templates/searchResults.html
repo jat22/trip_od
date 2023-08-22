@@ -9,39 +9,39 @@
 </div>
 <div class="container-sm mt-3">
 	<ul class="nav nav-tabs" id="type-tabs">
-		<li class="nav-item">
-			<a class="nav-link active" id="camp-tab" aria-current="page" href="#">Campgrounds</a>
-		</li>
 		<li class="nav-item" >
-			<a class="nav-link" id="park-tab" href="#">Parks</a>
+			<a class="nav-link active" id="park-tab" href="#">Parks</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" id="camp-tab" aria-current="page" href="#">Campgrounds</a>
 		</li>
 	</ul>
-	<table class="table table-hover mt-3" id="campgrounds-table">
-		<tbody id="results-tbody">
-			{% for result in results %}
-			{% if result.type == "Campground" %}
-			<tr onclick="window.location='/poi/{{ result.id }}';" >
-				<td class="img-col align-middle">
-					<img class="result-img" src="https://cdn.pixabay.com/photo/2020/06/14/17/57/mountains-5298769_1280.jpg">
-				</td>
-				<td class="name-col align-middle">{{ result.name }}</td>
-				{% if result.city and result.state%}
-					<td class="loc-col align-middle">{{ result.city}}, {{ result.state }}</td>
-				{% elif not result.city %}
-				<td class="loc-col align-middle">{{ result.state }}</td>
-				{% endif %}
-			</tr>
-			{% endif %}
-			{% endfor %}
-		</tbody>
-	  </table>
-	  <table class="table table-hover mt-3 d-none" id="parks-table">
-		<tbody id="results-tbody">
+	<table class="table table-hover mt-3 mb-5" id="parks-table">
+		<tbody id="parks-tbody">
 			{% for result in results %}
 			{% if result.type != "Campground" %}
 			<tr onclick="window.location='/poi/{{ result.id }}';" >
 				<td class="img-col align-middle">
-					<img class="result-img" src="https://cdn.pixabay.com/photo/2020/06/14/17/57/mountains-5298769_1280.jpg">
+					<img class="result-img" src="{{ result.img }}">
+				</td>
+				<td class="name-col align-middle">{{ result.name }}</td>
+				{% if result.city and result.state%}
+					<td class="loc-col align-middle">{{ result.city}}, {{ result.state }}</td>
+				{% elif not result.city %}
+				<td class="loc-col align-middle">{{ result.state }}</td>
+				{% endif %}
+			</tr>
+			{% endif %}
+			{% endfor %}
+		</tbody>
+	</table>
+	<table class="table table-hover mt-3 d-none mb-5" id="campgrounds-table">
+		<tbody id="campgrounds-tbody">
+			{% for result in results %}
+			{% if result.type == "Campground" %}
+			<tr onclick="window.location='/poi/{{ result.id }}';" >
+				<td class="img-col align-middle">
+					<img class="result-img" src="{{ result.img }}">
 				</td>
 				<td class="name-col align-middle">{{ result.name }}</td>
 				{% if result.city and result.state%}
@@ -54,10 +54,10 @@
 			{% endfor %}
 		</tbody>
 	  </table>
+	
 </div>
 {% endblock %}
 {% block scripts %}
-<script> const results = "{{ results_json }}"; </script>
 <script src="/static/searchResults.js"></script>
 {% endblock %}
 

@@ -1,8 +1,8 @@
 # from flask import Flask, redirect, render_template, jsonify
 # from flask_debugtoolbar import DebugToolbarExtension
-import requests, json, asyncio
-from keys import REC_API_KEY, MAPS_KEY, TOMTOM_KEY
-from datetime import timedelta, date, datetime
+import requests
+from keys import REC_API_KEY, TOMTOM_KEY
+from datetime import timedelta
 
 REC_BASE_URL = "https://ridb.recreation.gov/api/v1"
 GEOCODE_BASE_URL = "https://api.tomtom.com/search/2/structuredGeocode.json"
@@ -15,8 +15,6 @@ FACILITIES = "facilities"
 PERMIT = "permitentrances"
 RECAREAS = "recareas"
 TOURS = "tours"
-
-
 
 ################# REC API SEARCH FUNCTIONS ############################
 def resource_search(endpoint, query="", limit="", offset="", full="true", state="", activity="", lat="", lon="", radius="", sort=""):
@@ -37,7 +35,6 @@ def resource_search(endpoint, query="", limit="", offset="", full="true", state=
 			"radius" : radius,
 			"sort" : sort
 		})
-    print(resp.json()["RECDATA"])
     return resp.json()["RECDATA"]
 
 def location_detail_search(location_id):
@@ -74,8 +71,6 @@ def geolocation_search(city, state):
 							"entityTypeSet" : "Municipality"
                         })
     
-
-
     return resp.json().get("results")
 
 def get_location_options(city, state):
@@ -96,8 +91,6 @@ def get_location_options(city, state):
         for city in data]
 
     return location_options
-
-
 
 
 ############################ MAIN SEARCH FUNCTION ###########################
@@ -135,8 +128,12 @@ def clean_fac_search (data):
 					"id" : f"fac{f['FacilityID']}",
 					"type" : f["FacilityTypeDescription"],
 					"name" : f["FacilityName"],
-					"city" : f["FACILITYADDRESS"][0].get("City") if len(f["FACILITYADDRESS"]) > 0 else None,
-					"state" : f["FACILITYADDRESS"][0].get("AddressStateCode") if len(f["FACILITYADDRESS"]) > 0 else None,
+					"city" : f["FACILITYADDRESS"][0].get("City") 
+                        if len(f["FACILITYADDRESS"]) > 0 else None,
+					"state" : f["FACILITYADDRESS"][0].get("AddressStateCode") 
+                        if len(f["FACILITYADDRESS"]) > 0 else None,
+                    "img" : f["MEDIA"][0].get("URL")
+                        if len(f["MEDIA"]) > 0 else "https://cdn.pixabay.com/photo/2018/11/17/22/15/trees-3822149_1280.jpg"
 				} 
             for f in data]
         
@@ -146,8 +143,12 @@ def clean_recarea_search (data):
 					"id" : f"rec{r['RecAreaID']}",
 					"type" : "Recreation Area",
 					"name" : r["RecAreaName"],
-					"city" : r["RECAREAADDRESS"][0].get("City") if len(r["RECAREAADDRESS"]) > 0 else None,
-					"state" : r["RECAREAADDRESS"][0].get("AddressStateCode") if len(r["RECAREAADDRESS"]) > 0 else None
+					"city" : r["RECAREAADDRESS"][0].get("City") 
+                        if len(r["RECAREAADDRESS"]) > 0 else None,
+					"state" : r["RECAREAADDRESS"][0].get("AddressStateCode") 
+                        if len(r["RECAREAADDRESS"]) > 0 else None,
+                    "img" : r["MEDIA"][0].get("URL")
+                        if len(r["MEDIA"]) > 0 else "https://cdn.pixabay.com/photo/2018/11/17/22/15/trees-3822149_1280.jpg"
 				} 
             for r in data]
 
@@ -157,106 +158,12 @@ def make_poi_list(facilities, recareas):
      
     return [*facility_list, *recarea_list]
 
-
-# def search_by_location(city, state, latitude, longitude, radius="50"):
-#     """ give geo location information, cleaned data about acitivities and campgrounds returned"""
-
-#     lat = latitude
-#     long = longitude
-#     if not lat and not long:
-#         coords = get_coordinates(city, state)
-#         lat = coords[0].get("lat")
-#         long = coords[0].get("lon")
-    
-#     activities_campgrounds = get_activities_campgrounds(lat, long, radius)
-
-#     results = {
-#         		"search_geolocation" : {"lat" : lat, "long" : long, "radius" : radius},
-#                 "activities" : activities_campgrounds["activities"],
-#                 "campgrounds" : activities_campgrounds["campgrounds"]
-# 	}
-
-#     return results
-
 def get_poi_details(location_id):
     """ given a specific location (facility or recarea) id, cleaned data is returned"""
     data = location_detail_search(location_id)
     details = clean_location_data(data)
     
     return details
-        
-
-######################## SEARCH HELPERS ##################################    
-def get_activities_campgrounds(lat, long, radius):
-    """ given geo location data, activity and campground data is returned in a dicitonary"""
-    facilities = resource_search(FACILITIES, lat=lat, long=long, radius=radius)["RECDATA"]
-    clean_facilities = clean_resources("Facility", facilities)
-
-    recareas = resource_search(RECAREAS, lat=lat, long=long, radius=radius)["RECDATA"]
-    clean_recareas = clean_resources("RecArea", recareas)
-
-    locations = clean_facilities + clean_recareas
-
-    activity_ids = []
-    for loc in locations:
-        for act in loc["activities"]:
-            activity_ids.append(act["id"])
-    unique_activity_ids = list(set(activity_ids))
-
-
-	
-    activities = [{"id": id, "name" : "", "locations" : []} for id in unique_activity_ids]
-    
-
-
-    for act in activities:
-        for loc in locations:
-            for loc_act in loc["activities"]:
-                if loc_act["id"] == act["id"]:
-                    act["name"] = loc_act["name"]
-                    act["locations"].append(loc)
-    
-    campgrounds = filter_campgrounds(locations)
-
-    return {"activities": activities, "campgrounds" : campgrounds}
-
-
-
-
-############################### FILTER AND CLEAN #########################
-def filter_campgrounds(facilities):
-    """ given a list of facilities, a list of campgrounds is returned;
-        (all campgrounds are facilities, all facilities are not campgrounds)
-    """
-
-    campgrounds = []
-
-    for fac in facilities:
-        for act in fac["activities"]:
-            if act["id"] == 9:
-                campgrounds.append(fac)
-
-    return campgrounds
-
-def clean_resources(type, resource_list):
-    """ given a list of resources, of a particular type (facility or recarea)
-        a list with cleaned data is returned
-    """
-    if type == "Facility":
-        typ_abr = "fac"
-    if type == "RecArea":
-        typ_abr = "rec"
-
-    resources = [{
-        "id" : typ_abr + res[f"{type}ID"],
-        "name" : res[f"{type}Name"].title(),
-        "lat" : res[f"{type}Latitude"],
-        "long" : res[f"{type}Longitude"],
-        "activities" : [{"id": act["ActivityID"], "name" : act["ActivityName"].title()} for act in res["ACTIVITY"]]
-		}
-    	for res in resource_list]
-    
-    return resources
 
 def clean_location_data(resp_data):
     """give data on a single location (facility or recarea), clean data is returned"""
@@ -274,10 +181,14 @@ def clean_location_data(resp_data):
             "phone" : data[f"{type}Phone"],
             "description" : data[f"{type}Description"],
             "directions" : data[f"{type}Directions"],
-            "address" : data.get(f"{type.upper()}ADDRESS")[0][f"{type}StreetAddress1"],
-            "city" : data.get(f"{type.upper()}ADDRESS")[0]["City"],
-            "state" : data.get(f"{type.upper()}ADDRESS")[0]["AddressStateCode"],
-            "zip" : data.get(f"{type.upper()}ADDRESS")[0]["PostalCode"],
+            "address" : data.get(f"{type.upper()}ADDRESS")[0][f"{type}StreetAddress1"] 
+                if len(data.get(f"{type.upper()}ADDRESS")) > 0 else None,
+            "city" : data.get(f"{type.upper()}ADDRESS")[0]["City"]
+                if len(data.get(f"{type.upper()}ADDRESS")) > 0 else None,
+            "state" : data.get(f"{type.upper()}ADDRESS")[0]["AddressStateCode"]
+                if len(data.get(f"{type.upper()}ADDRESS")) > 0 else None,
+            "zip" : data.get(f"{type.upper()}ADDRESS")[0]["PostalCode"]
+                if len(data.get(f"{type.upper()}ADDRESS")) > 0 else None,
             "lat" : data[f"{type}Latitude"],
             "long" : data[f"{type}Longitude"],
             "links" : [{"title" : link["Title"], 
@@ -299,10 +210,14 @@ def clean_location_data(resp_data):
             "phone" : data[f"{type}Phone"],
             "description" : data[f"{type}Description"],
             "directions" : data[f"{type}Directions"],
-            "address" : data.get(f"{type.upper()}ADDRESS")[0][f"{type}StreetAddress1"],
-            "city" : data.get(f"{type.upper()}ADDRESS")[0]["City"],
-            "state" : data.get(f"{type.upper()}ADDRESS")[0]["AddressStateCode"],
-            "zip" : data.get(f"{type.upper()}ADDRESS")[0]["PostalCode"],
+            "address" : data.get(f"{type.upper()}ADDRESS")[0][f"{type}StreetAddress1"]
+                if len(data.get(f"{type.upper()}ADDRESS")) > 0 else None,
+            "city" : data.get(f"{type.upper()}ADDRESS")[0]["City"]
+                if len(data.get(f"{type.upper()}ADDRESS")) > 0 else None,
+            "state" : data.get(f"{type.upper()}ADDRESS")[0]["AddressStateCode"]
+                if len(data.get(f"{type.upper()}ADDRESS")) > 0 else None,
+            "zip" : data.get(f"{type.upper()}ADDRESS")[0]["PostalCode"]
+                if len(data.get(f"{type.upper()}ADDRESS")) > 0 else None,
             "lat" : data[f"{type}Latitude"],
             "long" : data[f"{type}Longitude"],
             "links" : [{"title" : link["Title"], 
@@ -313,8 +228,6 @@ def clean_location_data(resp_data):
             "activities" :[act["ActivityName"] for act in data["ACTIVITY"]]
         }
 
-    print("#################################")
-    print(details)
     return details
 
 
@@ -367,25 +280,116 @@ def display_date(date):
     return date.strftime("%b %-d, %Y")
 
 
-def poi_activities(poi_id):
-    endpoint = ""
-    if "rec" in poi_id:
-        endpoint = "recareas"
-    if "fac" in poi_id:
-        endpoint = "facilities"
+# def poi_activities(poi_id):
+#     endpoint = ""
+#     if "rec" in poi_id:
+#         endpoint = "recareas"
+#     if "fac" in poi_id:
+#         endpoint = "facilities"
 
-    id = "".join(filter(str.isdigit, poi_id))
+#     id = "".join(filter(str.isdigit, poi_id))
 
-    resp = requests.get(f"{REC_BASE_URL}/{endpoint}/{id}/activities",
-            params={"apikey" : REC_API_KEY})
+#     resp = requests.get(f"{REC_BASE_URL}/{endpoint}/{id}/activities",
+#             params={"apikey" : REC_API_KEY})
 
-    activities = []
-    for act in resp.json()["RECDATA"]:
-        activities.append(
-            {
-                "id" : act.get("ActivityID"),
-                "name" : act.get("ActivityName")
-            }
-        )
+#     activities = []
+#     for act in resp.json()["RECDATA"]:
+#         activities.append(
+#             {
+#                 "id" : act.get("ActivityID"),
+#                 "name" : act.get("ActivityName")
+#             }
+#         )
 
-    return activities
+#     return activities
+
+# def search_by_location(city, state, latitude, longitude, radius="50"):
+#     """ give geo location information, cleaned data about acitivities and campgrounds returned"""
+
+#     lat = latitude
+#     long = longitude
+#     if not lat and not long:
+#         coords = get_coordinates(city, state)
+#         lat = coords[0].get("lat")
+#         long = coords[0].get("lon")
+    
+#     activities_campgrounds = get_activities_campgrounds(lat, long, radius)
+
+#     results = {
+#         		"search_geolocation" : {"lat" : lat, "long" : long, "radius" : radius},
+#                 "activities" : activities_campgrounds["activities"],
+#                 "campgrounds" : activities_campgrounds["campgrounds"]
+# 	}
+
+#     return results
+
+######################## SEARCH HELPERS ##################################    
+# def get_activities_campgrounds(lat, long, radius):
+#     """ given geo location data, activity and campground data is returned in a dicitonary"""
+#     facilities = resource_search(FACILITIES, lat=lat, long=long, radius=radius)["RECDATA"]
+#     clean_facilities = clean_resources("Facility", facilities)
+
+#     recareas = resource_search(RECAREAS, lat=lat, long=long, radius=radius)["RECDATA"]
+#     clean_recareas = clean_resources("RecArea", recareas)
+
+#     locations = clean_facilities + clean_recareas
+
+#     activity_ids = []
+#     for loc in locations:
+#         for act in loc["activities"]:
+#             activity_ids.append(act["id"])
+#     unique_activity_ids = list(set(activity_ids))
+
+
+	
+#     activities = [{"id": id, "name" : "", "locations" : []} for id in unique_activity_ids]
+    
+
+
+#     for act in activities:
+#         for loc in locations:
+#             for loc_act in loc["activities"]:
+#                 if loc_act["id"] == act["id"]:
+#                     act["name"] = loc_act["name"]
+#                     act["locations"].append(loc)
+    
+#     campgrounds = filter_campgrounds(locations)
+
+#     return {"activities": activities, "campgrounds" : campgrounds}
+
+
+
+
+############################### FILTER AND CLEAN #########################
+# def filter_campgrounds(facilities):
+#     """ given a list of facilities, a list of campgrounds is returned;
+#         (all campgrounds are facilities, all facilities are not campgrounds)
+#     """
+
+#     campgrounds = []
+
+#     for fac in facilities:
+#         for act in fac["activities"]:
+#             if act["id"] == 9:
+#                 campgrounds.append(fac)
+
+#     return campgrounds
+
+# def clean_resources(type, resource_list):
+#     """ given a list of resources, of a particular type (facility or recarea)
+#         a list with cleaned data is returned
+#     """
+#     if type == "Facility":
+#         typ_abr = "fac"
+#     if type == "RecArea":
+#         typ_abr = "rec"
+
+#     resources = [{
+#         "id" : typ_abr + res[f"{type}ID"],
+#         "name" : res[f"{type}Name"].title(),
+#         "lat" : res[f"{type}Latitude"],
+#         "long" : res[f"{type}Longitude"],
+#         "activities" : [{"id": act["ActivityID"], "name" : act["ActivityName"].title()} for act in res["ACTIVITY"]]
+# 		}
+#     	for res in resource_list]
+    
