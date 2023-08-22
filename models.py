@@ -135,7 +135,7 @@ class POI(db.Model):
 			type = details.get("type"),
 			subtype = details.get("subtype"),
 			lat = details.get("lat"),
-			long = details.lget("long")
+			long = details.get("long")
 		)
 		db.session.add(poi)
 		db.session.commit()
@@ -263,19 +263,35 @@ class Possibility(db.Model):
 	poi = db.Relationship("POI")
 	
 	@classmethod
-	def add(cls, trip_id, poi):
+	def add(cls, trip_id, poi_id):
 
+		if not POI.query.get(poi_id):
+			POI.create_poi(poi_id)
 
-		if not POI.query.get(poi["id"]):
-			POI.create_poi(**poi)
+		if Possibility.query.filter(and_(Possibility.poi_id==poi_id, Possibility.trip_id==trip_id)).first():
+			return "Already saved to trip!"
 
 		new_poss = Possibility(
 			trip_id = trip_id,
-			poi_id = poi["id"],
+			poi_id = poi_id,
 		)
 
 		db.session.add(new_poss)
 		db.session.commit()
+
+		return "Added to Trip!"
+	
+	@classmethod
+	def remove(cls, poss_id):
+		poss = Possibility.query.get(poss_id)
+
+		poi_name = poss.poi.name
+
+		db.session.delete(poss)
+		db.session.commit()
+
+		return f"{poi_name} Removed"
+
 
 
 

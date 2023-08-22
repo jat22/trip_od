@@ -6,6 +6,9 @@
 <div class="container">
 	<h1 class="display-3 mt-2 mb-2">Trip: {{ trip.name }}</h1>
 	<h4 >{{ days[0].month }} {{ days[0].day}}, {{ days[0].year }} - {{ days[-1].month }} {{ days[-1].day}}, {{ days[-1].year }}</h4>
+	<a class="btn btn-secondary btn-sm mb-3" data-bs-toggle="offcanvas" href="#tripOptionsOffcanvas" role="button" aria-controls="tripOptionsOffcanvas">
+		Saved Campgrounds and Parks
+	</a>
 	<div class="accordion mb-5" id="day-accordian">
 		{% for day in days %}
 			<div class="accordion-item">
@@ -32,7 +35,8 @@
 											{{ day.stay.name }}
 										</button>
 									{% else %}
-										<a class="btn btn-sm btn-info mt-3" href="" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-dayid="{{ day.id }}" data-bs-type="campground-add">Add Campground</a>
+										<a class="btn btn-sm btn-info mt-3" href="" data-bs-toggle="modal" data-bs-target="#editModal" data-bs-dayid="{{ day.id }}" data-bs-type="campground" data-bs-tripid="
+										{{ trip.id }}">Add Campground</a>
 									{% endif %}
 									<ul class="dropdown-menu" aria-labelledby="campground-dropdown">
 										<li>
@@ -94,6 +98,67 @@
 	  </div>
 	</div>
   </div>
+  
+<!-- OFF CANVAS -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="tripOptionsOffcanvas" aria-labelledby="tripOptionsOffcanvasLabel">
+	<div class="offcanvas-header">
+		<h4 class="offcanvas-title" id="tripOptionsOffcanvasLabel">Campgrounds and Parks of Interest</h4>
+		<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+
+		<div class="mb-4">
+			<h5>Saved Campgrounds</h5>
+			{% for poss in trip.possibilities %}
+			{% if poss.poi.subtype == "Campground" %}
+				<div class="dropdown mb-2">
+					<button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="camp-poss-{{ poss.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+							{{ poss.poi.name }}
+					</button>
+					<ul class="dropdown-menu" aria-labelledby="camp-poss-{{ poss.id }}">
+						<li>
+							<a class="dropdown-item" target="_blank" href="/poi/{{ poss.poi.id }}">More Information</a>
+						</li>
+						<li>
+							<form action="/trips/{{ trip.id }}/possibility/{{ poss.id }}/remove" method="POST">
+								<button type="submit" class="dropdown-item">Remove From Trip</button>
+							</form>
+
+						</li>
+					</ul>
+				</div>
+			{% endif %}
+			{% endfor %}
+		</div>
+
+		<div class="mb-5">
+			<h5>Saved Parks</h5>
+			{% for poss in trip.possibilities %}
+			{% if poss.poi.subtype != "Campground" %}
+				<div class="dropdown mb-2">
+					<button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="camp-poss-{{ poss.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+							{{ poss.poi.name }}
+					</button>
+					<ul class="dropdown-menu" aria-labelledby="camp-poss-{{ poss.id }}">
+						<li>
+							<a class="dropdown-item" target="_blank" href="/poi/{{ poss.poi.id }}">More Information</a>
+						</li>
+						<li>
+							<form action="/trips/{{ trip.id }}/possibility/{{ poss.id }}/remove" method="POST">
+								<button type="submit" class="dropdown-item">Remove From Trip</button>
+							</form>
+
+						</li>
+					</ul>
+				</div>
+			{% endif %}
+			{% endfor %}
+		</div>
+		<div class="d-grid gap-2">
+			<a href="/" class="btn btn-secondary">Find more</a>
+		</div>
+	</div>
+</div>
 
 {% endblock %}
 {% block scripts %}

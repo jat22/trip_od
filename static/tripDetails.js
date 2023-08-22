@@ -108,7 +108,10 @@ $('#editModal').on('show.bs.modal', async function(evt){
 	console.log(editType)
 	const resp = await axios.get(`/api/trips/${tripId}/options`)
 	const tripOptions = resp.data
+	console.log(tripOptions)
+
 	$(".modal-body").empty()
+
 	if(editType === "campground"){
 
 		$("#editModalLabel").html("Update Campground")

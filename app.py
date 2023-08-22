@@ -297,16 +297,22 @@ def add_poi_to_trip():
 
     trip_id = request.form.get("trip")
     poi_id = session.get(CURR_POI)
-    
-    check_poi = POI.query.get(poi_id)
-    if not check_poi:
-        POI.create_poi(poi_id)
 
-    Possibility.add(trip_id, poi_id)
+    msg = Possibility.add(trip_id, poi_id)
 
-    flash("Added to Trip!", "success")
+    flash(msg, "success")
     
     return redirect(f"/poi/{poi_id}")
+
+@app.route("/trips/<int:trip_id>/possibility/<int:poss_id>/remove", methods=["POST"])
+def remove_poi_from_trip(trip_id, poss_id):
+    # REMOVE POI FROM TRIP POSSIBILITIES
+
+    msg = Possibility.remove(poss_id)
+    
+    flash(msg, "success")
+
+    return redirect(f"/trips/{trip_id}")
 
 @app.route("/trips/<int:trip_id>/poi/assign", methods=["POST"])
 def assign_poi(trip_id):
@@ -504,8 +510,7 @@ def get_users_trips():
 
 @app.route("/api/trips/<int:trip_id>/options")
 def get_trip_options(trip_id):
-    options_query = Possibility.query.filter(trip_id==trip_id)
-
+    options_query = Possibility.query.filter(Possibility.trip_id==trip_id).all()
     campgrounds = []
     parks = []
 
