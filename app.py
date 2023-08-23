@@ -7,6 +7,7 @@ from data import states
 from models import connect_db, db, User, Trip, POI, TripDay, Activity, TripDayPoiAct, Possibility, bcrypt
 from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, DescriptionUpdateForm, TripUpdateForm
 from functions import search_by_location, get_poi_details, display_date, get_location_options, search_by_poi, search_by_location
+from keys import MAPBOX_KEY
 
 app = Flask(__name__)
 app.app_context().push()
@@ -431,7 +432,7 @@ def search():
     else:
         results = search_by_location(data["term"], data["lat"], data["lon"])
 
-    return render_template("searchResults.html", results=results)
+    return render_template("searchResults.html", results=results, mapbox_key = MAPBOX_KEY)
 
 ################### APIs ##########################
 

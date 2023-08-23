@@ -1,3 +1,4 @@
+
 const $campTab = $("#camp-tab")
 const $parkTab = $("#park-tab")
 const $parksTable = $("#parks-table")

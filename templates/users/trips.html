@@ -5,14 +5,14 @@
 {% block content %}
 <div class="container mt-3">
 	<h1 class="display-5">{{ user.first_name }}'s Adventures</h1>
-	<a href="/trips/create" class="btn btn-secondary">Plan A New Adventure</a>
+	<a href="/trips/create" class="btn btn-outline-secondary">Plan A New Adventure</a>
 	<div class="row">
 		{% for trip in user.trips %}
-		<div class="col-4 trip-card mt-3" id="{{ trip.id }}">
+		<div class="col-12 trip-card mt-3" id="{{ trip.id }}">
 			<div class="card">
+				<h3 class="card-header">{{ trip.name }}</h3>
 				<div class="card-body">
-					<h3 class="card-title">{{ trip.name }}</h3>
-					<h5>{{ trip.start_date }} to {{ trip.end_date }}</h5>
+					<h5>{{ trip.days[0].month }} {{ trip.days[0].day }}, {{ trip.days[0].year}} to {{ trip.days[-1].month }} {{ trip.days[-1].day }}, {{ trip.days[-1].year}}</h5>
 				</div>
 			</div>
 		</div>

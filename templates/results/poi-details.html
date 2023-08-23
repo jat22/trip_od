@@ -3,7 +3,7 @@
 {% block title %}{{ details.name }}{% endblock %}
 
 {% block content %}
-<div class="position-fixed top-0 start-0 d-flex align-items-center justify-content-center d-none pop-up-form" style="height: 100vh; width: 100vw;" id="modal">
+<!-- <div class="position-fixed top-0 start-0 d-flex align-items-center justify-content-center d-none pop-up-form" style="height: 100vh; width: 100vw;" id="modal">
 	<div class="col-3"></div>
 	<div class="col-6">
 		<div class="container card bg-info bg-opacity-75">
@@ -20,7 +20,7 @@
 		</div>
 	</div>
 	<div class="col-3"></div>
-</div>
+</div> -->
 <div class="container mt-2">
 	<h1 class="display-3">{{ details.name }}</h1>
 	{% if details.city and details.state %}
@@ -33,7 +33,7 @@
 		Latitude: {{ details.lat }}, Longitude: {{ details.long }}
 	</h5>
 	{% endif %}
-	<button id="add-to-trip-btn" class="btn btn-sm btn-secondary">Add To A Trip</button>
+	<button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addModal">Add To A Trip</button>
 </div>
 <div class="container mt-3">
 	<div class="row">
@@ -77,11 +77,37 @@
 				{% endif %}
 			</h2>
 		</div>
-	<div class="row mt-3">
+		<div class="row mt-3"></div>
 	</div>
 </div>
-</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-scrollable">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" id="addModalLabel">
+					{% if details.subtype == "Campground" %}
+						<h3>Add Campground</h3>
+					{% else %}
+						<h3>Add Point of Interest</h3>
+					{% endif %}
+				</h4>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				{% if details.subtype == "Campground" %}
+					<p>Add this campground as a possibility to one of your trips, or create a new trip.</p>
+				{% else %}
+					<p>If you're interested in visiting here, add to one of your trips as a possibility, or create a new trip.</p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+  </div>
 {% endblock %}
 {% block scripts %}
 <script src="/static/poiDetails.js"></script>
 {% endblock %}
+
+data-bs-toggle="modal" data-bs-target="#addModal"
