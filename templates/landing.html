@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<div class="px-4 py-5 my-5 text-center" id="landing-hero">
+<div class="px-4 my-5 text-center" id="landing-hero">
 	<h1 class="display-5 fw-bold">Discover Your Next Adventure</h1>
 	<div class="col-lg-6 mx-auto">
 		{% if user %}
@@ -12,77 +12,43 @@
 		{% else %}
 	  		<p class="lead mb-4">Find outdoor activities and places to camp on US public lands. <a href="/login">Log In</a> or <a href="/signup">Create an Account</a> to plan and save a trip itenary.</p>
 		{% endif %}
-	  	<form width:"75%" action="/search">
-			<div class="row">
-				<div class="col-5 mr-1 p0">
-					<input class="form-control m-0" id="term" type="text" name="term" placeholder="What do you want to do?">
-				</div>
-				<div class="col-5 ml-1 p-0" id="city-state-search">	
+			<div class="container">
+				<form action="/search/name">
+					<p class="lead">Search by Park Name</p>
 					<div class="row">
-						<div class="col-8 m-0 p-0">
-							<input class="form-control m-0" id="city" type="text" name="city" placeholder="City">
+						<div class="col-10">
+							<input type="text" class="form-control" name="park-name" placeholder="Park Name" aria-label="Park Name">
 						</div>
-						<div class="col-4 m-0 p-0">
-							<select class="form-select m-0" id="state">
+						<div class="col-2">
+							<button type="submit" class="btn btn-outline-secondary">Search</button>
+						</div>
+					</div>
+				</form>
+				<div class="row align-text-center">
+					<h5 class="display-6 fw-bold mt-3">OR</h5>
+				</div>
+				<form action="/search/state">
+					<p class="lead">Browse Parks by State</p>
+					<div class="row">
+						<div class="col-10">
+							<select class="form-select" name="state" aria-label="State">
 								<option selected>State</option>
 								{% for state in states %}
 								<option>{{ state }}</option>
 								{% endfor %}
 							</select>
 						</div>
-					</div>	
-				</div>
-				<div class="col-5 ml-1 p-0 d-none" id="poi-search">
-					<div class="row">
-						<input type="text" class="form-control m-0" id="poi" name="point-of-interest" placeholder="Point of Interest">
+						<div class="col-2">
+							<button type="submit" class="btn btn-outline-secondary">Search</button>
+						</div>
 					</div>
-				</div>
-				<div class="col-2">
-					<button class="btn btn-outline-secondary" id="search-btn">Search</button>
-				</div>
-			</div>
-			<div class="container mt-2" id="location-radio-btns">
-				<span class="mr-2">Search By:</span>
-				<div class="form-check form-check-inline">
-					<input class="form-check-input" type="radio" id="city-state-radio" name="location-type" value="city-state" checked>
-					<label class="form-check-label" for="city-state-radio">
-						City/State
-					</label>
-				</div>
-				<div class="form-check form-check-inline">
-					<input class="form-check-input" type="radio" id="poi-radio" name="location-type" value="recarea">
-					<label class="form-check-label" for="poi-radio">
-					Point of Interest
-					</label>
-				</div>
+				</form>
 			</div>
 	  	</form>
 	</div>
 </div>
 
-<div class="position-fixed top-0 start-0 d-flex align-items-center justify-content-center d-none pop-up-form" style="height: 100vh; width: 100vw;">
-	<div class="col-3"></div>
-	<div class="col-6">
-		<div class="container card">
-			<div class="card-body">
-				<div class="row">
-					<div class="col-11">
-						<h3 class="mt-2">Confirm City</h3>
-					</div>
-					<div class="col-1">
-						<button class="btn btn-secondary opacity-75 btn-sm" id="close-btn">X</button>
-					</div>
-				</div>
-				<ul class="list-group mb-3 mt-3" id="city-options">
-				</ul>
-			</div>
-		</div>
-	</div>
-	<div class="col-3"></div>
-</div>
-
 {% endblock %}
 {% block scripts %}
-<script src="/static/landing.js"></script>
 {% endblock %}
 

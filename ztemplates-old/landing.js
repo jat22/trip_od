@@ -1,5 +1,4 @@
 const $searchButton = $("#search-btn");
-const $term = $("#term");
 const $cityStateSearch = $("#city-state-search");
 const $poiSearch = $("#poi-search");
 const $city = $("#city");
@@ -54,7 +53,6 @@ async function handleSearch(e){
 		
 		if(exactMatch.length === 1){
 			const searchData = {
-				term : $term.val(),
 				lat : exactMatch[0].cords.lat,
 				lon : exactMatch[0].cords.lon
 			};
@@ -72,7 +70,6 @@ async function handleSearch(e){
 	} else{
 		const searchData = 
 			{
-				term : $term.val(),
 				poi : $poi.val()
 			}
 
@@ -83,7 +80,6 @@ async function handleSearch(e){
 function handleSelectCity(e){
 	const searchData = 
 		{
-			term : $term,
 			lon : $(e.target).data('lon'),
 			lat : $(e.target).data('lat')
 		};

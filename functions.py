@@ -3,6 +3,7 @@
 import requests
 from keys import REC_API_KEY, TOMTOM_KEY
 from datetime import timedelta
+from data import states
 
 REC_BASE_URL = "https://ridb.recreation.gov/api/v1"
 GEOCODE_BASE_URL = "https://api.tomtom.com/search/2/structuredGeocode.json"
@@ -95,32 +96,42 @@ def get_location_options(city, state):
 
 ############################ MAIN SEARCH FUNCTION ###########################
 
-def search_by_location(activity, lat, lon):
+def search_by_location(lat, lon):
 	facilities = resource_search(FACILITIES, 
-                            	activity=activity, 
                                 lat=lat, 
                                 lon=lon,
                                 full="true")
     
 	recareas = resource_search(RECAREAS, 
-								activity=activity, 
 								lat=lat, 
 								lon=lon,
 								full="true")
 	
 	return make_poi_list(facilities, recareas)
 
-def search_by_poi(activity, keyword):
-    facilities = resource_search(FACILITIES, 
-                            	activity=activity,
-                                query=keyword, 
-                                full="true")
-    recareas = resource_search(RECAREAS, 
-                               	activity=activity,
-                                query=keyword, 
-                                full="true")
+def search_by_poi(keyword):
+    resp = requests.get(f"{REC_BASE_URL}/organizations/128/recareas",
+		params={
+			"apikey" : REC_API_KEY,
+			"query" : keyword,
+			"full" : "true",
+		})
+    recareas = resp.json()["RECDATA"]
+    return make_poi_list(recareas, keyword)
+
+def search_by_state(state):
+    state_abrv = states[state]
+
+    resp = requests.get(f"{REC_BASE_URL}/organizations/128/recareas",
+		params={
+			"apikey" : REC_API_KEY,
+			"state" : state_abrv,
+			"full" : "true",
+		})
+    recareas = resp.json()["RECDATA"]
+    raise
+    return make_poi_list(recareas)
     
-    return make_poi_list(facilities, recareas)
 
 def clean_fac_search (data):
     return [
@@ -147,16 +158,19 @@ def clean_recarea_search (data):
                         if len(r["RECAREAADDRESS"]) > 0 else None,
 					"state" : r["RECAREAADDRESS"][0].get("AddressStateCode") 
                         if len(r["RECAREAADDRESS"]) > 0 else None,
+                    "lat" : r["RecAreaLatitude"],
+                    "lon" : r["RecAreaLongitude"],
+                    "activities" : [a["ActivityName"].title() for a in r["ACTIVITY"]],
                     "img" : r["MEDIA"][0].get("URL")
                         if len(r["MEDIA"]) > 0 else "https://cdn.pixabay.com/photo/2018/11/17/22/15/trees-3822149_1280.jpg"
 				} 
             for r in data]
 
-def make_poi_list(facilities, recareas):
-    facility_list = clean_fac_search(facilities)
-    recarea_list = clean_recarea_search(recareas)
-     
-    return [*facility_list, *recarea_list]
+def make_poi_list(recareas):
+    recarea_list = sorted(clean_recarea_search(recareas), key=lambda x: x["name"])
+
+    
+    return [*recarea_list]
 
 def get_poi_details(location_id):
     """ given a specific location (facility or recarea) id, cleaned data is returned"""
@@ -279,6 +293,8 @@ def display_date(date):
     """ given a datatime object, returns a date as Month, day,"""
     return date.strftime("%b %-d, %Y")
 
+
+park_types = ["National Park", "National Monument", "National Historic Site", "National Recreation Area", "National Seashore", "National Lakeshore", "National Preserve", "National River", "National Historic Trail", "National Scenic Trail", "National Military Park", "National Battlefield", "National Memorial", "National Historic Park", "National Cemetery", "National Scenic River", "National Wild River", "National Heritage", "National Geologic Trail", "National Conservation", "Public Lands"]
 
 # def poi_activities(poi_id):
 #     endpoint = ""

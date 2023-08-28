@@ -3,24 +3,6 @@
 {% block title %}{{ details.name }}{% endblock %}
 
 {% block content %}
-<!-- <div class="position-fixed top-0 start-0 d-flex align-items-center justify-content-center d-none pop-up-form" style="height: 100vh; width: 100vw;" id="modal">
-	<div class="col-3"></div>
-	<div class="col-6">
-		<div class="container card bg-info bg-opacity-75">
-			<div class="card-body" id="trip-card">
-				{% if details.subtype == "Campground" %}
-					<h3>Add Campground</h3>
-					<p>Add this campground as a possibility to one of your trips, or create a new trip.</p>
-				{% else %}
-					<h3>Add Point of Interest</h3>
-					<p>If you're interested in visiting here, add to one of your trips as a possibility, or create a new trip.</p>
-				{% endif %}
-				<a href="/trips/create" class="btn btn-sm btn-secondary mb-2">Create A New Trip</a>
-			</div>
-		</div>
-	</div>
-	<div class="col-3"></div>
-</div> -->
 <div class="container mt-2">
 	<h1 class="display-3">{{ details.name }}</h1>
 	{% if details.city and details.state %}
@@ -28,10 +10,16 @@
 		{{ details.city }}, {{ details.state }}<br>
 		Latitude: {{ details.lat }}, Longitude: {{ details.long }}
 	</h5>
+	<h6>
+		<a href="https://www.google.com/maps/?q={{ details.lat }},{{ details.lon }}" target="_blank">Google Maps</a>
+	</h6>
 	{% else %}
 	<h5>
-		Latitude: {{ details.lat }}, Longitude: {{ details.long }}
+		Latitude: {{ details.lat }}, Longitude: {{ details.long }}</a>
 	</h5>
+	<h6>
+		<a href="https://www.google.com/maps/?q={{ details.lat }},{{ details.lon }}" target="_blank">Google Maps</a>
+	</h6>
 	{% endif %}
 	<button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addModal">Add To A Trip</button>
 </div>
@@ -109,5 +97,3 @@
 {% block scripts %}
 <script src="/static/poiDetails.js"></script>
 {% endblock %}
-
-data-bs-toggle="modal" data-bs-target="#addModal"
