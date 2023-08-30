@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.username }}{% endblock %}
+
+{% block content %}
+
+<div class="px-4 my-5 text-center">
+	<h1 class="display-3">Update Your Profile</h1>
+	<div class="col-lg-6 mx-auto">
+		<div class="container text-start">
+			<form class="mt-4" action="/users/{{ user.username }}/profile" method="POST">
+				{{ form.hidden_tag() }}
+				{% for field in form %}
+					{% if field.name != 'csrf_token' %}
+						<div class="form-group mb-3">
+							<label for="{{ field.id }}">{{ field.label }}</label>
+							{{ field(class="form-control bg-light") }}
+						</div>
+					{% endif %}
+				{% endfor %}
+				<button class="btn btn-outline-primary" type="submit">Update</button>
+			</form>
+		</div>
+	</div>
+</div>
+
+
+
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}New Trip{% endblock %}
+
+{% block content %}
+<h1 class="display-5 text-center mt-5">Start Planning Your Trip to {{ park.name }}</h1>
+
+<div class="d-flex justify-content-center mt-5">
+	<form class="page-form" action="/users/{{ user.username }}/trips/new" method="POST">
+		{{ form.hidden_tag() }}
+		{% for field in form %}
+			{% if field.name != 'csrf_token' %}
+				<div class="form-group mb-3">
+					<label for="{{ field.id }}">{{ field.label }}</label>
+					{{ field(class="form-control bg-light") }}
+				</div>
+			{% endif %}
+		{% endfor %}
+		<button class="btn btn-outline-secondary" type="submit">Next</button>
+	</form>
+</div>
+{% endblock %}

@@ -10,36 +10,26 @@
 		{% if user %}
 			<p class="lead mb-4">Find outdoor activities and places to camp on US public lands. Then plan your next trip!
 		{% else %}
-	  		<p class="lead mb-4">Find outdoor activities and places to camp on US public lands. <a href="/login">Log In</a> or <a href="/signup">Create an Account</a> to plan and save a trip itenary.</p>
+	  		<p class="lead mb-4">Find outdoor activities and places to camp on US public lands. <a href="{{ urls.users_login }}">Log In</a> or <a href="{{ urls.users_new }}">Create an Account</a> to plan and save a trip itenary.</p>
 		{% endif %}
 			<div class="container">
-				<form action="/search/name">
-					<p class="lead">Search by Park Name</p>
-					<div class="row">
-						<div class="col-10">
-							<input type="text" class="form-control" name="park-name" placeholder="Park Name" aria-label="Park Name">
-						</div>
-						<div class="col-2">
-							<button type="submit" class="btn btn-outline-secondary">Search</button>
-						</div>
-					</div>
-				</form>
-				<div class="row align-text-center">
-					<h5 class="display-6 fw-bold mt-3">OR</h5>
-				</div>
-				<form action="/search/state">
-					<p class="lead">Browse Parks by State</p>
-					<div class="row">
-						<div class="col-10">
-							<select class="form-select" name="state" aria-label="State">
-								<option selected>State</option>
-								{% for state in states %}
-								<option>{{ state }}</option>
-								{% endfor %}
-							</select>
-						</div>
-						<div class="col-2">
-							<button type="submit" class="btn btn-outline-secondary">Search</button>
+				<form action="/search">
+					<div class="container">
+						<div class="row">
+							<div class="col-5">
+								<select class="form-select bg-light" name="state" aria-label="State">
+									<option selected>State</option>
+									{% for state in state_names %}
+										<option>{{ state }}</option>
+									{% endfor %}
+								</select>
+							</div>
+							<div class="col-5">
+								<input class="form-control bg-light" type="text" name="term" placeholder="Park Name or Keyword" aria-label="Park Name or Keyword">
+							</div>
+							<div class="col-2">
+								<button type="submit" class="btn btn-outline-secondary">Search</button>
+							</div>
 						</div>
 					</div>
 				</form>

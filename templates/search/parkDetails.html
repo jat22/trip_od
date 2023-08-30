@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}{{ details.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-2">
+	<h1 class="display-3">{{ details.name }} </h1>
+	<h2 class="display-6">{{ details.address.city }}, {{ details.address.stateCode }}</h2>
+		{% if user %}
+			<div class="container p-0 mt-3">
+				<a href="{{ urls.users }}/{{ user.username }}/trips/new" class="btn btn-outline-secondary">Plan Trip to {{ details.name }}</a>
+			</div>
+		{% else %}
+			<div class="container p-0 mt-3">
+				<h6>
+					<a href="{{ urls.users_login }}">Login</a> to Plan a Trip Here.
+				</h6>
+			</div>
+		{% endif %}
+	<div class="row mt-3">
+		<div class="col-4">
+			<img src="{{ details.images[0].url }}" class="header-img">
+			<h6 class="mt-3">
+				<a href="{{ details.url }}" target="_blank">Official Website</a>
+			</h6>
+			<h6 class="mt-3">
+				<a href="https://www.google.com/maps/?q={{ details.lat }},{{ details.lon }}"" target="_blank">Google Maps</a>
+			</h6>
+			{% if details.campgrounds|length > 0 %}
+			<div class="container p-0 my-3">
+				<h2 class="display-6">Campgrounds</h2>
+				<div class="accordion" id="campgrounds">
+					{% for campground in details.campgrounds %}
+					<div class="accordion-item">
+						<h2 class="accordion-header" id="cg-{{ campground.id }}-header">
+							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#cg-{{ campground.id }}" aria-expanded="true" aria-controls="cg-{{ campground.id }}">
+								{{ campground.name }}
+							</button>
+						</h2>
+						<div id="cg-{{ campground.id }}" class="accordion-collapse collapse" aria-labelledby="cg-{{ campground.id }}-header">
+							<div class="accordion-body">
+								<div class="row">
+									<div class="col">
+										{% if campground.phone %}
+										<h6>{{ campground.phone }}</h6>
+										{% endif %}
+										{% if campground.email %}
+										<h6>{{ campground.email }}</h6>
+										{% endif %}
+										<p>{{ campground.description}}</p>
+										{% if campground.url|length > 0 %}
+										<h6>
+											<a href="{{ campground.url }}" target="_blank">
+												More Information
+											</a>
+										</h6>
+										{% endif %}
+										{% if campground.reserve_url|length > 0 %}
+										<h6>
+											<a href="{{ campground.reserve_url }}" target="_blank">
+												Reservations
+											</a>
+										</h6>
+										{% endif %}
+										<h6>
+											<a href="https://www.google.com/maps/?q={{ campground.lat }},{{ campground.lon }}" target="_blank">Google Maps</a>
+										</h6>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{% endfor %}
+				</div>
+			</div>
+			{% endif %}
+			{% if details.activities|length > 0 %}
+			<div class="container p-0">
+				<h2 class="display-6">Activities</h2>
+				<p>
+					{% for a in details.activities %}
+						<span class="lead">{{ a }}{{' | ' if not loop.last else ''}}</span>
+					{% endfor %}
+				</p>
+			</div>
+			{% endif %}
+		</div>
+		<div class="col-8">
+			<div class="row">
+				<div class="col">
+					<h2 class="display-6">Description</h2>
+					<p>{{ details.description }}</p>
+				</div>
+			</div>
+			<div class="row mb-5">
+				<h2 class="display-6">Things To Do</h2>
+				{% for thing in details.things_to_do %}
+				<div class="container border mt-3">
+					<div class="row bg-light p-2">
+						<div class="col-2">
+							<img class="thing-img" src="{{ thing.image }}">
+						</div>
+						<div class="col-10">
+							<h5>{{ thing.title }}</h5>
+							<p>{{ thing.desc }}</p>
+							<h6><a target="_blank" href="{{ thing.url }}">More Information</a></h6>
+						</div>
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

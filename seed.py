@@ -1,4 +1,4 @@
-from appOG import app
+from app import app
 from models import db, Trip, User, Park, Campground, ThingToDo, DayThingsToDo, SavedCampground, SavedThingToDo
 import datetime
 
@@ -33,7 +33,6 @@ db.session.commit()
 
 test_park1 = Park.create(
     code = "abcd",
-    api_id = "!@#$%12354",
     name = "Test Park 1",
     url = "www.testpark1.com",
     lat = "123.34",
@@ -42,7 +41,6 @@ test_park1 = Park.create(
 
 test_park2 = Park.create(
     code = "efgh",
-    api_id = "!@#$%22354",
     name = "Test Park 2",
     url = "www.testpark2.com",
     lat = "223.34",
@@ -51,7 +49,6 @@ test_park2 = Park.create(
 
 test_park3 = Park.create(
     code = "ijkl",
-    api_id = "!@#$%32354",
     name = "Test Park 3",
     url = "www.testpark3.com",
     lat = "323.34",

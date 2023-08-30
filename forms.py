@@ -24,10 +24,9 @@ class LoginForm(FlaskForm):
 	password = PasswordField('Password', validators=[DataRequired(), Length(min=8, max=20)])
 
 class CreateTripForm(FlaskForm):
-    name = StringField("Trip Name", validators=[DataRequired()])
-    description = TextAreaField("Description")
-    start_date = DateField("First Day")
-    end_date = DateField("Last Day")
+    start_date = DateField("From", validators=[DataRequired()])
+    end_date = DateField("To", validators=[DataRequired()])
+    notes = TextAreaField("Notes")
     
 class UpdateUserForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired()])

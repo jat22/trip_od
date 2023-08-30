@@ -2,8 +2,11 @@ from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
-from functions import get_all_activities, trip_dates, make_date_range, get_poi_details
+# from functionsOG import get_all_activities, trip_dates, make_date_range, get_poi_details
 from datetime import timedelta
+
+from find import Find
+from helpers import Helpers
 
 bcrypt = Bcrypt()
 db = SQLAlchemy()
@@ -53,28 +56,47 @@ class Park(db.Model):
 	__tablename__ = "parks"
 
 	code = db.Column(db.Text, primary_key=True)
-	api_id = db.Column(db.Text)
 	name = db.Column(db.Text, nullable=False)
 	url = db.Column(db.Text)
 	lat = db.Column(db.Text)
 	lon = db.Column(db.Text)
+
     
 	def __repr__(self):
 		return f"<Park:{self.name} Code:{self.code}>"
 
 	@classmethod
-	def create(cls, code, api_id, name, url, lat, lon):
+	def create(cls, code):
+		park_details = Find.park_details(code)
+
 		new = cls(
 			code = code,
-			api_id = api_id,
-			name = name, 
-			url = url,
-			lat = lat,
-			lon = lon
+			name = park_details.get("name"), 
+			url = park_details.get("url"),
+			lat = park_details.get("lat"),
+			lon = park_details.get("lon")
 		)
-	    
+
 		db.session.add(new)
 		db.session.commit()
+	    
+		for thing in park_details.get("things_to_do"):
+			ThingToDo.create(
+				id = thing.get("id"),
+				park_code = code,
+				title = thing.get("title"),
+				url = thing.get("url")
+			)
+
+		for campground in park_details.get("campgrounds"):
+			Campground.create(
+				id = campground.get("id"),
+				name = campground.get("name"),
+				url = campground.get("url"),
+				lat = campground.get("lat"),
+				lon = campground.get("lon"),
+				park_code = code
+			)
 	
 class Trip(db.Model):
 	__tablename__ = "trips"
@@ -92,7 +114,12 @@ class Trip(db.Model):
 	
 	@classmethod
 	def create(cls, start_date, end_date, notes, username, park_code):
-		trip = Trip(
+		check_park = Park.query.get(park_code)
+		
+		if(not check_park):
+			Park.create(park_code)
+
+		trip = cls(
 	    	start_date = start_date, 
 			end_date = end_date,
 			notes = notes,
@@ -101,7 +128,7 @@ class Trip(db.Model):
 		db.session.add(trip)
 		db.session.commit()
 
-		trip_days = trip_dates(start_date, end_date)
+		trip_days = Helpers.generate_trip_dates(start_date, end_date)
 
 		for d in trip_days:
 			new_day = TripDay(
@@ -135,7 +162,15 @@ class Trip(db.Model):
 
 		db.session.commit()
 
+	@classmethod
+	def delete(cls, trip_id):
+		trip = Trip.query.get(trip_id)
 
+		for day in trip.days:
+			day.delete_day()
+
+		db.session.delete(trip)
+		db.session.commit()
 
 class Campground(db.Model):
 	__tablename__ = "campgrounds"
@@ -161,7 +196,6 @@ class Campground(db.Model):
 			lon = lon,
 			park_code = park_code
 		)
-
 		db.session.add(new)
 		db.session.commit()
 
@@ -173,6 +207,7 @@ class ThingToDo(db.Model):
 	park_code = db.Column(db.ForeignKey("parks.code", ondelete="CASCADE"))
 	title = db.Column(db.Text, nullable=False)
 	url = db.Column(db.Text)
+	park = db.Relationship("Park", backref="things_to_do")
 
 	def __repr__(self):
 		return f"<ThingToDo: {self.title}>"
@@ -193,7 +228,7 @@ class TripDay(db.Model):
 
 	id = db.Column(db.Integer, primary_key=True)
 	trip_id = db.Column(db.ForeignKey("trips.id", 
-				   ondelete="CASCADE"), 
+				   ondelete='CASCADE'), 
 				   nullable=False)
 	date = db.Column(db.Date, nullable=False)
 	dow = db.Column(db.Text)
@@ -201,7 +236,7 @@ class TripDay(db.Model):
 	month = db.Column(db.Text)
 	day = db.Column(db.Text)
 	campground_id = db.Column(db.ForeignKey("campgrounds.id"), nullable=True)
-	campgrounds = db.Relationship("Campground")
+	campground = db.Relationship("Campground")
 	things_to_do = db.Relationship("ThingToDo", secondary="day_things_to_do")
 	trip = db.Relationship("Trip", backref="days")
 
@@ -210,7 +245,7 @@ class TripDay(db.Model):
 	
 	@classmethod
 	def create(cls, start_date, end_date, trip_id):
-		new_trip_days = trip_dates(start_date, end_date)
+		new_trip_days = Helpers.trip_dates(start_date, end_date)
 		for d in new_trip_days:
 			new_day = TripDay(
 				trip_id = trip_id,
@@ -225,17 +260,29 @@ class TripDay(db.Model):
 	
 	@classmethod
 	def delete(cls, start_date, end_date, trip_days):
-		del_days = make_date_range(start_date, end_date)
+		del_days = Helpers.make_date_range(start_date, end_date)
 		for day in trip_days:
 			if day.date in del_days:
 				db.session.delete(day)
 				db.session.commit()
+	
+	@classmethod
+	def add_campground(cls, day_id, campground_id):
+		day = TripDay.query.get(day_id)
+		day.campground_id = campground_id
+
+		db.session.commit()
+		
 
 	@classmethod
-	def remove_campground(cls, id):
-		to_update = TripDay.query.get(id)
+	def remove_campground(cls, day_id):
+		to_update = TripDay.query.get(day_id)
 		to_update.campground_id = None
 
+		db.session.commit()
+
+	def delete_day(self):
+		db.session.delete(self)
 		db.session.commit()
 
 class DayThingsToDo(db.Model):
@@ -258,8 +305,8 @@ class DayThingsToDo(db.Model):
 		db.session.commit()
 	
 	@classmethod
-	def remove(cls, id):
-		to_remove = DayThingsToDo.query.get(id)
+	def remove(cls, day_id, thing_id):
+		to_remove = DayThingsToDo.query.filter(and_(DayThingsToDo.day_id==day_id, thing_id==DayThingsToDo.thing_id)).first()
 
 		db.session.delete(to_remove)
 		db.session.commit()

@@ -12,10 +12,18 @@
 }
 
 .result-img{
-	width: 4rem;
-	height: 4rem;
+	width: 100%;
+	height: auto;
 }
 
 .trip-card{
 	cursor:pointer
+}
+
+.header-img{
+	width:100%;
+}
+
+.thing-img{
+	width:100%;
 }
