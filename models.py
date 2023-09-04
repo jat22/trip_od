@@ -129,7 +129,7 @@ class Trip(db.Model):
 
 		for d in trip_days:
 			new_day = TripDay(
-                trip_id = trip_id,
+                trip_id = trip.trip_id,
                 date = d["datetime"],
                 dow = d["dow"],
                 year = d["year"],
