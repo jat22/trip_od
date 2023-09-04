@@ -16,6 +16,7 @@
 				<div class="card-body">
 					{% if trip.days|length > 0 %}
 					<h5>{{ trip.days[0].month }} {{ trip.days[0].day }}, {{ trip.days[0].year}} to {{ trip.days[-1].month }} {{ trip.days[-1].day }}, {{ trip.days[-1].year}}</h5>
+					{% endif %}
 				</div>
 			</div>
 		</div>
