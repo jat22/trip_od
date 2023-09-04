@@ -1,18 +1,16 @@
 from app import app
-from models import db, Trip, User, Location, Link, TripDay, DayActivity, UTripCamp, UTripAct, Activity
+from models import db, Trip, User, Park, Campground, ThingToDo, DayThingsToDo
 import datetime
 
 db.drop_all()
 db.create_all()
-
-Activity.update_activities()
 
 user1 = User.signup(
     username = "user1",
     email = "user1@email.com",
 	first_name = "User",
     last_name = "One",
-    password = "user12345"
+    password = "password"
 )
 
 user2 = User.signup(
@@ -20,7 +18,7 @@ user2 = User.signup(
     email = "user2@email.com",
 	first_name = "User",
     last_name = "Two",
-    password = "user22345"
+    password = "password"
 )
 
 user3 = User.signup(
@@ -28,56 +26,111 @@ user3 = User.signup(
     email = "user3@email.com",
 	first_name = "User",
     last_name = "Three",
-    password = "user32345"
+    password = "password"
 )
 
 db.session.commit()
 
-trip1 = Trip.create_trip(
-    name = "Smoky Mountains",
+test_park1 = Park.create(
+    code = "abcd",
+    name = "Test Park 1",
+    url = "www.testpark1.com",
+    lat = "123.34",
+    lon = "123.34"
+)
+
+test_park2 = Park.create(
+    code = "efgh",
+    name = "Test Park 2",
+    url = "www.testpark2.com",
+    lat = "223.34",
+    lon = "223.34"
+)
+
+test_park3 = Park.create(
+    code = "ijkl",
+    name = "Test Park 3",
+    url = "www.testpark3.com",
+    lat = "323.34",
+    lon = "323.34"
+)
+
+trip1 = Trip.create(
     start_date = datetime.datetime(2023, 7, 1),
     end_date = datetime.datetime(2023, 7, 4),
-    description = "Walking through the mountains",
-    username = "user1"
+    notes = "Walking through the mountains",
+    username = "user1",
+    park_code = "abcd"
 )
 
-trip1.lat= "35.6532"
-trip1.long = "-83.5070"
-
-trip2 = Trip.create_trip(
-    name = "Salt Lake City",
+trip2 = Trip.create(
     start_date = datetime.datetime(2023, 8, 1),
     end_date = datetime.datetime(2023, 8, 4),
-    description = "We need salt!",
-    username = "user1"
+    notes = "We need salt!",
+    username = "user1",
+    park_code = "efgh"
 )
 
-trip2.lat = "40.7608"
-trip2.long = "-111.8910"
-
-
-trip3 = Trip.create_trip(
-    name = "West Coast Baby",
+trip3 = Trip.create(
     start_date = datetime.datetime(2023, 6, 1),
     end_date = datetime.datetime(2023, 6, 4),
-    description = "Visiting Seaside",
-    username = "user2"
+    notes = "Visiting Seaside",
+    username = "user2",
+    park_code = "ijkl"
 )
 
-trip3.lat = "45.9932",
-trip3.long = "-123.9226",
-
-
-trip4 = Trip.create_trip(
-    name = "Vermont",
+trip4 = Trip.create(
     start_date = datetime.datetime(2023, 8, 15),
     end_date = datetime.datetime(2023, 8, 20),
-    description = "The Long Trail!",
-    username = "user3"
+    notes = "The Long Trail!",
+    username = "user3",
+    park_code = "ijkl"
 )
 
-trip4.lat = "43.6106"
-trip4.long = "-72.9726"
+campground1 = Campground.create(
+    id = "campground1",
+    name = "Campground One",
+    url = "qqq.aasd",
+    lat = "123",
+    lon = "234",
+    park_code = "abcd"
+)
 
-db.session.commit()
+campground2 = Campground.create(
+    id = "campground2",
+    name = "Campground Two",
+    url = "qqq.aasd",
+    lat = "123",
+    lon = "234",
+    park_code = "ijkl"
+)
 
+campground3 = Campground.create(
+    id = "campground3",
+    name = "Campground Three",
+    url = "qqq.aasd",
+    lat = "123",
+    lon = "234",
+    park_code = "efgh"
+)
+
+thing_to_do_1 = ThingToDo.create(
+    id = "thing1",
+    park_code = "abcd",
+    title = "Thing One",
+    url = "url1"
+)
+
+thing_to_do_2 = ThingToDo.create(
+    id = "thing2",
+    park_code = "efgh",
+    title = "Thing Two",
+    url = "url2"
+)
+
+thing_to_do_1 = ThingToDo.create(
+    id = "thing3",
+    park_code = "ijkl",
+    title = "Thing Three",
+    url = "url3"
+)

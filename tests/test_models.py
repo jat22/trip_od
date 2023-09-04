@@ -1,93 +1,130 @@
 import os
 from unittest import TestCase
-from datetime import date
+from unittest.mock import Mock, patch
+from datetime import datetime
 
-from models import db, connect_db, User, Trip, Location, TripDay
+from models import db, connect_db, User, Park, Trip, Campground, ThingToDo, TripDay, DayThingsToDo
+from find import Find
 
-os.environ["DATABASE_URL"] = 'postgresql:///rec_trip_test'
+os.environ["DATABASE_URL"] = "postgresql:///adventurely-test"
 
 from app import app
 
 db.create_all()
 
 class UserModelTestCase(TestCase):
-    
 	def setUp(self):
 		db.drop_all()
 		db.create_all()
 
-		test_user1 = User.signup("user1", "user1@test.com", "user1", "test", "testuser1234")
+		test_user1 = User.signup("testuser1", "test1@user.com", "Test1", "User1", "password")
+
 		db.session.commit()
-	
+
 	def tearDown(self):
 		res = super().tearDown()
 		db.session.rollback()
 		return res
 	
-	def test_create_user(self):
-		test_user2 = User.signup("user2", "user2@test.com", "user2", "test", "testuser2234")
+	def test_signup(self):
+		testuser2 = User.signup("testuser2", "test2@user.com", "Test2", "User2", "password")
+
 		db.session.commit()
 
-		test_user1 = User.query.get("user2")
+		user = User.query.get("testuser2")
 
-		self.assertEqual(test_user1.username, "user2")
+		self.assertEqual(user.username, "testuser2")
+		self.assertTrue(user.password.startswith('$2b$'))
 
-	def test_authenticate_user(self):
-		user = User.authenticate("user1", "testuser1234")
-		self.assertEqual(user.username, "user1")
+	def test_authenticate(self):
+		user_correct = User.authenticate("testuser1", "password")
+		user_incorrect = User.authenticate("testuser1", "notcorrect")
 
-class TripModelTestCase(TestCase):
+		self.assertEqual(user_correct.username, "testuser1")
+		self.assertFalse(user_incorrect)
+
+class ParkModelTestCase(TestCase):
 	def setUp(self):
 		db.drop_all()
 		db.create_all()
 
-		test_user1 = User.signup("user1", "user1@test.com", "user1", "test", "testuser1234")
-		db.session.commit()
-
-		test_trip = Trip.create_trip("test trip 1", date(2023, 6, 1), date(2023, 6, 5), "testing trip description", "user1")
-	
 	def tearDown(self):
 		res = super().tearDown()
 		db.session.rollback()
 		return res
 	
-	def test_create_trip(self):
-		new_trip = Trip.create_trip("test trip 2", date(2023, 7, 1), date(2023, 7, 5), "testing trip description 2", "user1")
+	@patch('find.Find.park_details')
+	def test_create(self, mock_park_details):
+		mock_park_data = {
+			"name" : "Test Park",
+			"url" : "www.park.com",
+			"lat" : "111.222",
+			"lon" : "-45.234",
+			"things_to_do" : [{
+				"id" : "thing1",
+				"park_code" : "tstp",
+				"title" : "test thing",
+				"url" : "www.thing.test"
+			}],
+			"campgrounds" : [{
+				"id" : "123",
+				"name" : "test campground",
+				"url" : "www.camping.com",
+				"lat" : "123.123",
+				"lon" : "-123",
+				"park_code" : "tstp"
+			}]
+		}
 
-		new_trip_days = TripDay.query.filter(TripDay.trip_id==new_trip.id).all()
+		mock_park_details.return_value = mock_park_data
 
-		self.assertIsNot(new_trip.id, None)
-		self.assertEqual(new_trip.name, "test trip 2")
-		self.assertEqual(len(new_trip_days), 5)
+		Park.create("tstp")
 
-	def test_create_location(self):
-		location = Location.create_location('rec1234', "Test Location", "123-456-7890", "location@test.com", "This is a test location.", "Turn left at test location dr and continue on until morning.", "1234 Test Rd", "A City", "SomeState", "11111", "12.12345", "-123.1234", [{"title" : "test-link1", "url" : "http://this.test1.com", "location_id" : 'rec1234'}, {"title" : "test-link2", "url" : "http://this.test2.com", "location_id" : 'rec1234'}])
+		park = Park.query.get("tstp")
 
-		self.assertIsNot(location.id, None)
-		self.assertEqual(location.name, "Test Location")
-		self.assertEqual(len(location.links), 2)
+		self.assertEqual(park.name, "Test Park")
+		self.assertEqual(len(park.campgrounds), 1)
+		self.assertEqual(len(park.things_to_do), 1)
 
-
-class TripDayTestCase(TestCase):
+class TripTestCase(TestCase):
 	def setUp(self):
 		db.drop_all()
 		db.create_all()
 
-		test_user1 = User.signup("user1", "user1@test.com", "user1", "test", "testuser1234")
+		test_user1 = User.signup("testuser1", "test1@user.com", "Test1", "User1", "password")
+
 		db.session.commit()
 
-		test_trip = Trip.create_trip("test trip 1", date(2023, 6, 1), date(2023, 6, 5), "testing trip description", "user1")
-	
 	def tearDown(self):
 		res = super().tearDown()
 		db.session.rollback()
 		return res
-	
-	def test_add_tripday(self):
-		trip = Trip.query.filter(Trip.name=="test trip 1").first()
-		new_days = TripDay.add(date(2023, 5, 30), date(2023, 5, 31), trip.id)
-		all_days = TripDay.query.order_by(TripDay.date).all()
 
-		self.assertEqual(len(trip.days), 7)
-		self.assertEqual(all_days[0].date, date(2023, 5, 30))
-		self.assertEqual(all_days[-1].date, date(2023, 6, 5))
+	@patch('find.Find.park_details')
+	def test_create(self, mock_park_details):
+		mock_park_data = {
+			"name" : "Test Park",
+			"url" : "www.park.com",
+			"lat" : "111.222",
+			"lon" : "-45.234",
+			"things_to_do" : [{
+				"id" : "thing1",
+				"park_code" : "tstp",
+				"title" : "test thing",
+				"url" : "www.thing.test"
+			}],
+			"campgrounds" : [{
+				"id" : "123",
+				"name" : "test campground",
+				"url" : "www.camping.com",
+				"lat" : "123.123",
+				"lon" : "-123",
+				"park_code" : "tstp"
+			}]
+		}
+
+		mock_park_details.return_value = mock_park_data
+
+		trip = Trip.create(datetime(2023,9,1), datetime(2023,9,5), "testuser1", "tstp")
+
+		self.assertTrue(trip)

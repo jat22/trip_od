@@ -1,8 +1,10 @@
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-
-from functions import get_all_activities, trip_dates, make_date_range
+from sqlalchemy import and_
 from datetime import timedelta
+
+from find import Find
+from helpers import Helpers
 
 bcrypt = Bcrypt()
 db = SQLAlchemy()
@@ -15,7 +17,7 @@ class User(db.Model):
 	__tablename__ = "users"
 
 	username = db.Column(db.Text, primary_key=True, autoincrement=False)
-	email = db.Column(db.Text)
+	email = db.Column(db.Text, unique=True)
 	password = db.Column(db.Text, nullable=False)
 	first_name = db.Column(db.Text)
 	last_name = db.Column(db.Text)
@@ -48,44 +50,82 @@ class User(db.Model):
 		
 		return False
 	
+class Park(db.Model):
+	__tablename__ = "parks"
+
+	code = db.Column(db.Text, primary_key=True)
+	name = db.Column(db.Text, nullable=False)
+	url = db.Column(db.Text)
+	lat = db.Column(db.Text)
+	lon = db.Column(db.Text)
+
+    
+	def __repr__(self):
+		return f"<Park:{self.name} Code:{self.code}>"
+
+	@classmethod
+	def create(cls, code):
+		park_details = Find.park_details(code)
+
+		new = cls(
+			code = code,
+			name = park_details.get("name"), 
+			url = park_details.get("url"),
+			lat = park_details.get("lat"),
+			lon = park_details.get("lon")
+		)
+
+		db.session.add(new)
+		db.session.commit()
+	    
+		for thing in park_details.get("things_to_do"):
+			ThingToDo.create(
+				id = thing.get("id"),
+				park_code = code,
+				title = thing.get("title"),
+				url = thing.get("url")
+			)
+
+		for campground in park_details.get("campgrounds"):
+			Campground.create(
+				id = campground.get("id"),
+				name = campground.get("name"),
+				url = campground.get("url"),
+				lat = campground.get("lat"),
+				lon = campground.get("lon"),
+				park_code = code
+			)
+	
 class Trip(db.Model):
 	__tablename__ = "trips"
 
 	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.Text, nullable=False)
 	start_date = db.Column(db.Date)
 	end_date = db.Column(db.Date)
-	lat = db.Column(db.Text)
-	long = db.Column(db.Text)
-	description = db.Column(db.Text)
+	notes = db.Column(db.Text)
 	username = db.Column(db.ForeignKey("users.username", ondelete="CASCADE"))
-	days = db.Relationship("TripDay", backref="trip", cascade="all, delete")
-	u_camps = db.Relationship("Location",
-				  secondary="u_camps", cascade="all, delete")
-	u_acts = db.Relationship("UTripAct", cascade="all, delete")
-	
+	park_code = db.Column(db.ForeignKey("parks.code", ondelete="SET NULL"))
+	park = db.Relationship("Park", backref="trips")
 
 	def __repr__(self):
-		return f"<Trip #{self.id}: {self.name} for {self.username}>"
+		return f"<Trip #{self.id}: {self.park.name} for {self.username}>"
 	
 	@classmethod
-	def create_trip(cls, name, start_date, end_date, description, username):
-		trip = Trip(
-			name = name,
+	def create(cls, start_date, end_date, username, park_code):
+		check_park = Park.query.get(park_code)
+		
+		if(not check_park):
+			Park.create(park_code)
+
+		trip = cls(
 	    	start_date = start_date, 
 			end_date = end_date,
-			description = description,
-			username = username)
+			username = username,
+			park_code = park_code)
 		db.session.add(trip)
 		db.session.commit()
 
-		cls.create_trip_days(trip.id, start_date, end_date)
-		
-		return trip
-	
-	@classmethod
-	def create_trip_days(cls, trip_id, start_date, end_date):
-		trip_days = trip_dates(start_date, end_date)
+		trip_days = Helpers.generate_trip_dates(start_date, end_date)
 
 		for d in trip_days:
 			new_day = TripDay(
@@ -98,105 +138,93 @@ class Trip(db.Model):
             )
 			db.session.add(new_day)
 			db.session.commit()
-	
+		
+		return trip
+
 	@classmethod
-	def update(cls, trip, name, description, start_date, end_date):
-		trip_days = trip.days
-		if trip.start_date != start_date and trip.start_date > start_date:
-			TripDay.add(start_date, (trip.start_date - timedelta(days=1)), trip.id)
-		if trip.start_date != start_date and trip.start_date < start_date:
-			TripDay.delete(trip.start_date, (start_date - timedelta(days=1)), trip_days)
-		if trip.end_date != end_date and trip.end_date > end_date:
-			TripDay.delete((end_date + timedelta(days=1)), trip.end_date, trip_days)
-		if trip.end_date != end_date and trip.end_date < end_date:
-			TripDay.add((trip.end_date + timedelta(days=1)), end_date, trip.id)
-		trip.name = name
-		trip.description = description
-		trip.start_date = start_date
-		trip.end_date = end_date
+	def delete(cls, trip_id):
+		trip = Trip.query.get(trip_id)
+
+		for day in trip.days:
+			day.delete_day()
+
+		db.session.delete(trip)
 		db.session.commit()
 
+class Campground(db.Model):
+	__tablename__ = "campgrounds"
 
-class Location(db.Model):
-	__tablename__ = "locations"
-
-	id = db.Column(db.Text, primary_key=True, autoincrement=False)
-	name = db.Column(db.Text)
-	phone = db.Column(db.Text)
-	email = db.Column(db.Text)
-	description = db.Column(db.Text)
-	directions = db.Column(db.Text)
-	address = db.Column(db.Text)
-	city = db.Column(db.Text)
-	state = db.Column(db.Text)
-	zip = db.Column(db.Text)
+	id = db.Column(db.Text, primary_key=True)
+	name = db.Column(db.Text, nullable=False)
+	url = db.Column(db.Text)
 	lat = db.Column(db.Text)
-	long = db.Column(db.Text)
-	links = db.Relationship("Link")
-	day_acts = db.Relationship("DayActivity", backref="location", cascade="all, delete")
-	u_acts = db.Relationship("UTripAct", backref="location", cascade="all, delete")
-	trip_day = db.Relationship("TripDay", backref="location", cascade="all, delete")
-	u_camps = db.Relationship("UTripCamp", backref="location", cascade="all, delete")
-	trip_day = db.Relationship("TripDay", backref="camp", cascade="all, delete")
+	lon = db.Column(db.Text)
+	park_code = db.Column(db.ForeignKey("parks.code", ondelete="CASCADE"))
+	park = db.Relationship("Park", backref="campgrounds")
 
 	def __repr__(self):
-		return f"<Location #{self.id}: {self.name}>"
-
+		return f"<Campground:{self.name}>"
+	
 	@classmethod
-	def create_location(cls, id, name, phone, email, description, directions, address, city, state, zip, lat, long, links):
-
-		location = Location(
+	def create(cls, id, name, url, lat, lon, park_code):
+		new = cls(
 			id = id,
 			name = name,
-			phone = phone,
-			email = email,
-			description = description,
-			directions = directions,
-			address = address,
-			city = city,
-			state = state,
-			zip = zip,
+			url = url,
 			lat = lat,
-			long = long
+			lon = lon,
+			park_code = park_code
 		)
-		db.session.add(location)
+		db.session.add(new)
 		db.session.commit()
 
-		for link in links:
-			new_link = Link(**link)
-			db.session.add(new_link)
-			db.session.commit()
-		
-		return location
 
+class ThingToDo(db.Model):
+	__tablename__ = "things_to_do"
 
-class Link(db.Model):
-	__tablebane__ = "links"
-
-	id = db.Column(db.Integer, primary_key=True)
-	title = db.Column(db.Text)
+	id = db.Column(db.Text, primary_key=True)
+	park_code = db.Column(db.ForeignKey("parks.code", ondelete="CASCADE"))
+	title = db.Column(db.Text, nullable=False)
 	url = db.Column(db.Text)
-	location_id = db.Column(db.ForeignKey("locations.id", ondelete="CASCADE"))
+	park = db.Relationship("Park", backref="things_to_do")
+
+	def __repr__(self):
+		return f"<ThingToDo: {self.title}>"
+
+	@classmethod
+	def create(cls, id, park_code, title, url):
+		new_thing = cls(
+			id = id,
+			park_code = park_code,
+			title = title,
+			url = url
+		)
+		db.session.add(new_thing)
+		db.session.commit()
 
 class TripDay(db.Model):
 	__tablename__ = "trip_days"
 
 	id = db.Column(db.Integer, primary_key=True)
-	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"), nullable=False)
+	trip_id = db.Column(db.ForeignKey("trips.id", 
+				   ondelete='CASCADE'), 
+				   nullable=False)
 	date = db.Column(db.Date, nullable=False)
 	dow = db.Column(db.Text)
 	year = db.Column(db.Text)
 	month = db.Column(db.Text)
 	day = db.Column(db.Text)
-	camp_id = db.Column(db.ForeignKey("locations.id"), nullable=True)
-	day_acts = db.Relationship("DayActivity", backref="trip_day", cascade="all, delete")
-	
+	campground_id = db.Column(db.ForeignKey("campgrounds.id"), nullable=True)
+	campground = db.Relationship("Campground")
+	things_to_do = db.Relationship("ThingToDo", secondary="day_things_to_do")
+	trip = db.Relationship("Trip", backref="days")
+
 	def __repr__(self):
 		return f"<TripDay Trip#{self.trip_id} date: {self.date}>"
-
+	
 	@classmethod
-	def add(cls, start_date, end_date, trip_id):
-		new_trip_days = trip_dates(start_date, end_date)
+	def create(cls, start_date, end_date, trip_id):
+		new_trip_days = Helpers.trip_dates(start_date, end_date)
 		for d in new_trip_days:
 			new_day = TripDay(
 				trip_id = trip_id,
@@ -208,61 +236,56 @@ class TripDay(db.Model):
 			)
 			db.session.add(new_day)
 			db.session.commit()
-
+	
 	@classmethod
 	def delete(cls, start_date, end_date, trip_days):
-		del_days = make_date_range(start_date, end_date)
+		del_days = Helpers.make_date_range(start_date, end_date)
 		for day in trip_days:
 			if day.date in del_days:
 				db.session.delete(day)
 				db.session.commit()
-
-class Activity(db.Model):
-	__tablename__ = "activities"
-	
-	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.Text)
-	day_act = db.Relationship("DayActivity", backref="activity")
-	u_acts = db.Relationship("UTripAct", backref="activity")
-	
-	def __repr__(self):
-		return f"<Activity: {self.name}>"
 	
 	@classmethod
-	def update_activities(self):
-		activities = get_all_activities()
-		existing_act_ids = [id[0] for id in db.session.query(Activity.id).all()]
+	def add_campground(cls, day_id, campground_id):
+		day = TripDay.query.get(day_id)
+		day.campground_id = campground_id
 
-		for activity in activities:
-			if activity["id"] not in existing_act_ids:
-				new_activity = Activity(
-					id=activity["id"],
-					name=activity["name"]
-				)
-				db.session.add(new_activity)
-				db.session.commit()
+		db.session.commit()
+		
 
+	@classmethod
+	def remove_campground(cls, day_id):
+		to_update = TripDay.query.get(day_id)
+		to_update.campground_id = None
 
-class DayActivity(db.Model):
-	__tablename__ = "day_acts"
+		db.session.commit()
 
-	id = db.Column(db.Integer, primary_key=True)
-	trip_day_id = db.Column(db.ForeignKey("trip_days.id", ondelete="CASCADE"), nullable=False)
-	act_id = db.Column(db.ForeignKey("activities.id"))
-	location_id = db.Column(db.ForeignKey("locations.id"), nullable=False)
+	def delete_day(self):
+		db.session.delete(self)
+		db.session.commit()
 
-class UTripCamp(db.Model):
-	__tablename__ = "u_camps"
+class DayThingsToDo(db.Model):
+	__tablename__ = "day_things_to_do"
 
 	id = db.Column(db.Integer, primary_key=True)
-	location_id = db.Column(db.ForeignKey("locations.id"), nullable=False)
-	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"), nullable=False)
+	day_id = db.Column(db.ForeignKey("trip_days.id", ondelete="CASCADE"))
+	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"))
+	thing_id = db.Column(db.ForeignKey("things_to_do.id", ondelete="CASCADE"))
+	thing = db.Relationship("ThingToDo")
 
-class UTripAct(db.Model):
-	__tablename__ = "u_acts"
+	@classmethod
+	def create(cls, day_id, trip_id, thing_id):
+		new_day_thing = cls(
+			day_id=day_id,
+			trip_id=trip_id,
+			thing_id=thing_id
+		)
+		db.session.add(new_day_thing)
+		db.session.commit()
+	
+	@classmethod
+	def remove(cls, day_id, thing_id):
+		to_remove = DayThingsToDo.query.filter(and_(DayThingsToDo.day_id==day_id, thing_id==DayThingsToDo.thing_id)).first()
 
-	id = db.Column(db.Integer, primary_key=True)
-	act_id = db.Column(db.ForeignKey("activities.id"), nullable=False)
-	location_id = db.Column(db.ForeignKey("locations.id"), nullable=False)
-	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"), nullable=False)
-
+		db.session.delete(to_remove)
+		db.session.commit()

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+
+<div class="container mt-2">
+	<h1 class="display-3">Search Results</h1>
+</div>
+<form action="/search">
+	<div class="container">
+		<div class="row">
+			<div class="col-5">
+				<select class="form-select bg-light" name="state" aria-label="State">
+					<option selected>State</option>
+					{% for state in state_names %}
+					{% if state == search.state %}
+						<option selected>{{ state }}</option>
+					{% else %}
+						<option>{{ state }}</option>
+					{% endif %}
+					{% endfor %}
+				</select>
+			</div>
+			<div class="col-5">
+				{% if search.term %}
+					<input class="form-control" type="text" name="term" placeholder="Park Name or Keyword" aria-label="Park Name" value="{{ search.term }}">
+				{% else %}
+					<input class="form-control bg-light" type="text" name="term" placeholder="Park Name or Keyword" aria-label="Park Name or Keyword">
+				{% endif %}
+			</div>
+			<div class="col-2">
+				<button type="submit" class="btn btn-outline-secondary">Search</button>
+			</div>
+		</div>
+	</div>
+</form>
+<div class="container mt-3">
+	{% for r in results %}
+	<div class="row border-bottom mb-3">
+		<div class="row mb-2">
+			<div class="col">
+				<h3><a class="text-dark" href="/parks/{{ r.park_code }}">{{ r.name }}</a></h3>
+				{% for s in r.states %}
+						<span class="lead"> {{ state_codes[s] }}{{', ' if not loop.last else ''}}</span>
+				{% endfor %}
+			</div>
+		</div>
+		<div class="row mb-3">
+			<div class="col-8 mb-1">
+				<p>{{ r.description }}</p>
+				{% if r.activities|length > 0 %}
+				<h5>Activities:</h5>
+				<p>
+					{% for a in r.activities %}
+						<span class="lead">{{ a }}{{' | ' if not loop.last else ''}}</span>
+					{% endfor %}
+				</p>
+				{% endif %}
+				<p><a href="https://www.google.com/maps/?q={{ r.lat }},{{ r.lon }}" target="_blank">Google Maps</a></p>
+			</div>
+			<div class="col-4">
+				<img class="result-img" src="{{ r.image.url }}">
+			</div>
+		</div>
+	</div>
+	{% endfor %}
+</div>
+
+	<table class="table table-hover mt-3 d-none mb-5" id="campgrounds-table">
+		<tbody id="campgrounds-tbody">
+			{% for result in results %}
+			{% if result.type == "Campground" %}
+			<tr onclick="window.location='/poi/{{ result.id }}';" >
+				<td class="img-col align-middle">
+					<img class="result-img" src="{{ result.img }}">
+				</td>
+				<td class="name-col align-middle">{{ result.name }}</td>
+				{% if result.city and result.state%}
+					<td class="loc-col align-middle">{{ result.city}}, {{ result.state }}</td>
+				{% elif not result.city %}
+				<td class="loc-col align-middle">{{ result.state }}</td>
+				{% endif %}
+			</tr>
+			{% endif %}
+			{% endfor %}
+		</tbody>
+	  </table>
+	
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/searchResults.js"></script>
+{% endblock %}
+
+<!-- <div class="btn-group">
+	<button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="sort-button">
+		Facility Type
+	</button>
+	<ul class="dropdown-menu" id="fac-type-menu">
+		<li><a class="dropdown-item" href="#">All</a></li>
+		{% for fac_type in fac_types %}
+		<li><a class="dropdown-item" href="#">{{fac_type}}</a></li>
+		{% endfor %}
+	</ul>
+</div> -->

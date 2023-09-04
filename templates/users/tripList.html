@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}My Trips{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+	<h1 class="display-3">{{ user.first_name }}'s Trips</h1>
+	<a href="/" class="btn btn-outline-secondary">Start Planning A New Trip</a>
+	<div class="row">
+		{% for trip in user.trips %}
+		<div class="col-12 trip-card mt-3" id="{{ trip.id }}">
+			<div class="card">
+				<h3 class="card-header">
+					<a href="/users/{{ user.username }}/trips/{{ trip.id }}" class="text-dark">{{ trip.park.name }}</a>
+				</h3>
+				<div class="card-body">
+					<h5>{{ trip.days[0].month }} {{ trip.days[0].day }}, {{ trip.days[0].year}} to {{ trip.days[-1].month }} {{ trip.days[-1].day }}, {{ trip.days[-1].year}}</h5>
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	
+</div>
+
+
+{% endblock %}

@@ -4,76 +4,64 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="/static/style.css">
-	<link rel="stylesheet" href="/static/css/main.min.css">
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@400;700&display=swap" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+	<link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+	<link href="/static/style.css" rel="stylesheet">
 	<title>{% block title %}{% endblock %}</title>
 </head>
-<body class="bg-background">
-	<nav class="navbar navbar-expand-sm bg-dark no-bottom-margin" style="padding:0;">
+<body>
+	<nav class="navbar navbar-expand-lg bg-secondary text-primary">
 		<div class="container-fluid">
-		  <a class="navbar-brand logo" href="/" style="padding:0;">AdventureOD</a>
-		  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+		  <a class="navbar-brand" href="/">Adventurely</a>
+		  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
 		  </button>
-		  <div class="collapse navbar-collapse">
-			<ul class="navbar-nav ms-auto mb-2 mb-sm-0">
-				{% if g.user %}
-				<li class="nav-item top-link">
-					<a class="nav-link" href="/users/{{g.user.username}}/edit">{{g.user.username}}</a>
+		  <div class="collapse navbar-collapse" id="navbarContent">
+			<ul class="navbar-nav mb-2 mb-lg-0">
+				{% if user %}
+				<li class="nav-item dropdown">
+				  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+					{{user.username}}
+				  </a>
+				  <ul class="dropdown-menu">
+					<li>
+						<a class="dropdown-item" href="{{ urls.users }}/{{ user.username }}/profile">Profile</a>
+					</li>
+					<li>
+						<hr class="dropdown-divider">
+					</li>
+					<li>
+						<a class="dropdown-item" href="{{ urls.users_logout }}">Log Out</a>
+					</li>
+				  </ul>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link top-link" href="/logout">Log Out</a>
+					<a class="nav-link" href="{{ urls.users }}/{{ user.username }}/trips">My Trips</a>
 				</li>
-				<li class="nav-item">
-					<a class="nav-link top-link" href="/trips">My Trips</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link top-link" href="/trips/create">New Trip</a>
-				</li>
-
 				{% else %}
 				<li class="nav-item">
-					<a class="nav-link top-link" href="/users/new">Create Account</a>
+				  <a class="nav-link" href="{{ urls.users_login }}">Sign In</a>
 				</li>
-				<li class="nav-item top-link">
-					<a class="nav-link" href="/">Log In</a>
-				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="{{ urls.users_new }}">Create Account</a>
+				  </li>
 				{% endif %}
 			</ul>
 		  </div>
 		</div>
 	</nav>
-
-
+	
 	{% for category, message in get_flashed_messages(with_categories=True) %}
 			<div class="alert alert-{{ category }} no-side-space text-center" style="margin:0; padding:0;">{{ message }}</div>
 	{% endfor %}
 
+	{% block content %}{% endblock %}
 
-	<div class="container-fluid no-side-space">
-		<div class="row no-side-space">
-			<div class="col no-side-space home-info-container">
-				<div class="row no-side-space" >
-					<div class="col no-side-space">
-						<div class="jumbotron-fluid text-center no-side-space">
-							<h1 class="text-text header-h1">
-								{% block header %}{% endblock %}
-							</h1>		
-							{% block subheader %} {% endblock %}
-						</div>
-					</div>
-				</div>
-		{% block content %}{% endblock %}
-		{% block bg_pics %}{% endblock %}
-	</div>
-
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-	<script src="https://unpkg.com/jquery"></script>
-	<script src="https://unpkg.com/axios/dist/axios.js"></script>
-	<script src="/static/app.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	<script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+	{% block scripts %}{% endblock %}
 </body>
-
 </html>
