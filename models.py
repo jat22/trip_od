@@ -1,8 +1,6 @@
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
-
-# from functionsOG import get_all_activities, trip_dates, make_date_range, get_poi_details
 from datetime import timedelta
 
 from find import Find
@@ -113,7 +111,7 @@ class Trip(db.Model):
 		return f"<Trip #{self.id}: {self.park.name} for {self.username}>"
 	
 	@classmethod
-	def create(cls, start_date, end_date, notes, username, park_code):
+	def create(cls, start_date, end_date, username, park_code):
 		check_park = Park.query.get(park_code)
 		
 		if(not check_park):
@@ -122,7 +120,6 @@ class Trip(db.Model):
 		trip = cls(
 	    	start_date = start_date, 
 			end_date = end_date,
-			notes = notes,
 			username = username,
 			park_code = park_code)
 		db.session.add(trip)
@@ -310,55 +307,3 @@ class DayThingsToDo(db.Model):
 
 		db.session.delete(to_remove)
 		db.session.commit()
-
-class SavedThingToDo(db.Model):
-	__tablename__ = "saved_things_to_do"
-
-	id = db.Column(db.Integer, primary_key=True)
-	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"))
-	thing_id = db.Column(db.ForeignKey("things_to_do.id", ondelete="CASCADE"))
-	trip = db.Relationship("Trip", backref="saved_things_to_do")
-	thing = db.Relationship("ThingToDo")
-
-	@classmethod
-	def create(cls, trip_id, thing_id):
-		new_saved = cls(
-			trip_id = trip_id,
-			thing_id = thing_id
-		)
-
-		db.session.add(new_saved)
-		db.session.commit()
-	
-	@classmethod
-	def remove(cls, id):
-		to_remove = SavedThingToDo.query.get(id)
-
-		db.session.delete(to_remove)
-		db.session.commit()
-
-class SavedCampground(db.Model):
-	__tablename__ = "saved_campgrounds"
-
-	id = db.Column(db.Integer, primary_key=True)
-	trip_id = db.Column(db.ForeignKey("trips.id", ondelete="CASCADE"))
-	campground_id = db.Column(db.ForeignKey("campgrounds.id", ondelete="CASCADE"))
-	trip = db.Relationship("Trip", backref="saved_campgrounds")
-	campground = db.Relationship("Campground")
-
-	@classmethod
-	def create(cls, trip_id, campground_id):
-		new_saved = cls(
-			trip_id = trip_id,
-			campground_id = campground_id
-		)
-
-		db.session.add(new_saved)
-		db.session.commit()
-	
-	@classmethod
-	def remove(cls, id):
-		to_remove = SavedCampground.query.get(id)
-
-		db.session.delete(to_remove)
-		db.session.commit() 

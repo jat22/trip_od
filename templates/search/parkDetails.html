@@ -41,11 +41,11 @@
 							<div class="accordion-body">
 								<div class="row">
 									<div class="col">
-										{% if campground.phone %}
-										<h6>{{ campground.phone }}</h6>
+										{% if campground.phone.phoneNumber %}
+										<h6>{{ campground.phone.phoneNumber }}</h6>
 										{% endif %}
-										{% if campground.email %}
-										<h6>{{ campground.email }}</h6>
+										{% if campground.email.emailAddress %}
+										<h6>{{ campground.email.emailAddress }}</h6>
 										{% endif %}
 										<p>{{ campground.description}}</p>
 										{% if campground.url|length > 0 %}
@@ -92,6 +92,7 @@
 					<p>{{ details.description }}</p>
 				</div>
 			</div>
+			{% if details.things_to_do %}
 			<div class="row mb-5">
 				<h2 class="display-6">Things To Do</h2>
 				{% for thing in details.things_to_do %}
@@ -109,6 +110,7 @@
 				</div>
 				{% endfor %}
 			</div>
+			{% endif %}
 		</div>
 	</div>
 </div>
