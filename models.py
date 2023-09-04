@@ -140,24 +140,6 @@ class Trip(db.Model):
 			db.session.commit()
 		
 		return trip
-	
-	@classmethod
-	def update(cls, trip, notes, start_date, end_date):
-		trip_days = trip.days
-		if trip.start_date != start_date and trip.start_date > start_date:
-			TripDay.create(start_date, (trip.start_date - timedelta(days=1)), trip.id)
-		if trip.start_date != start_date and trip.start_date < start_date:
-			TripDay.delete(trip.start_date, (start_date - timedelta(days=1)), trip_days)
-		if trip.end_date != end_date and trip.end_date > end_date:
-			TripDay.delete((end_date + timedelta(days=1)), trip.end_date, trip_days)
-		if trip.end_date != end_date and trip.end_date < end_date:
-			TripDay.create((trip.end_date + timedelta(days=1)), end_date, trip.id)
-
-		trip.notes = notes
-		trip.start_date = start_date
-		trip.end_date = end_date
-
-		db.session.commit()
 
 	@classmethod
 	def delete(cls, trip_id):

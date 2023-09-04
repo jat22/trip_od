@@ -1,5 +1,5 @@
 from app import app
-from models import db, Trip, User, Park, Campground, ThingToDo, DayThingsToDo, SavedCampground, SavedThingToDo
+from models import db, Trip, User, Park, Campground, ThingToDo, DayThingsToDo
 import datetime
 
 db.drop_all()

@@ -1,24 +1,20 @@
-from flask import Flask, redirect, render_template, request, flash, session, g, jsonify
-from flask_debugtoolbar import DebugToolbarExtension
+from flask import Flask, redirect, render_template, request, flash, session, g
 from sqlalchemy.exc import IntegrityError
+import config, random
 
 from states import state_names, state_codes
 from find import Find
 from models import bcrypt, connect_db, db, Trip, User, DayThingsToDo, TripDay
 from forms import CreateAccountForm, CreateTripForm, LoginForm, EditUserForm, AddToDayForm, RemoveButton
-from keys import NPS_KEY
 import urls
-import templates
 
 app = Flask(__name__)
+
 app.app_context().push()
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///rec_trips"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
 
-app.config['SECRET_KEY'] = "secrets"
-
-debug = DebugToolbarExtension(app)
+app.config['SECRET_KEY'] = config.SECRET_KEY
+# app.config['WTF_CSRF_SECRET_KEY'] = config.WTF_CSRF_SECRET_KEY
 
 connect_db(app)
 
@@ -140,7 +136,7 @@ def signup():
 
         except IntegrityError:
             flash("Username or Email is already being used", "danger")
-            return render_template(templates.users_new, form=form)
+            return render_template("/users/new", form=form)
         
         do_login(User.query.get(username))
         return redirect(f"/")

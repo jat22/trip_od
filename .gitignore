@@ -2,8 +2,9 @@ venv/
 keys.py
 .DS_store
 __pycache__/
-planning/
 .env
 node_modules/
 package-lock.json
 package.json
+.vscode
+tests/__pycache__/
