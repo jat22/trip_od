@@ -1,5 +1,8 @@
 ## Adventurely
-Simple tool for planning trips to National Park Service lands in the United States. Browse parks by state or search for a park name or keyword.
+Simple tool for planning trips to National Park Service lands in the United States. Browse parks by state or search for a park name or keyword.<br>
+
+https://adventureod.onrender.com/ <br>
+(NOTE: this deployment will take a minute to spin up, thanks for your patience!)
 
 ## Features
 - Explore parks and what they have to offer.
@@ -23,9 +26,10 @@ The left side of this page is your trip itinerary and the right side contains a 
 This page shows a list of a trips that the user has planned. You can click on any of the trips and get to the Trip Details Page.
 
 ## API and Stack:
-The data utilized comes from the National Park Service's API: https://www.nps.gov/subjects/developer/api-documentation.htm </br>
+The data utilized comes from the National Park Service's API: <br>
+https://www.nps.gov/subjects/developer/api-documentation.htm </br>
 
-Backend: Python/Flask
-Database: PostgreSQL
-ORM: SQLAlchemy
-Frontend: Bootstrap
+Backend: Python/Flask<br>
+Database: PostgreSQL<br>
+ORM: SQLAlchemy<br>
+Frontend: Bootstrap<br>

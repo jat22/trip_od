@@ -45,7 +45,11 @@
 											{% if day.campground %}
 											<tr>
 												<td>
-													<a href="{{ day.campground.url }}" target="_blank">{{ day.campground.name }}</a>
+													{% if day.campground.url %}
+														<a href="{{ day.campground.url }}" target="_blank">{{ day.campground.name }}</a>
+													{% else %}
+														<p>{{ day.campground.name }}</p>
+													{% endif %}
 												</td>
 												<td>
 													<form action="/trips/{{ trip.id }}/days/{{ day.id }}/campground/remove" method="POST">
@@ -68,7 +72,11 @@
 											{% for thing in day.things_to_do %}
 											<tr>
 												<td>
-													<a href="{{ thing.url }}" target="_blank">{{ thing.title }}</a>
+													{% if thing.url %}
+														<a href="{{ thing.url }}" target="_blank">{{ thing.title }}</a>
+													{% else %}
+														<p>{{ thing.title }}</p>
+													{% endif %}
 												</td>
 												<td>
 													<form action="/trips/{{ trip.id }}/days/{{ day.id }}/thing/{{ thing.id }}/remove" method="POST">
@@ -101,6 +109,7 @@
 							<h4 class="text-muted">
 								Things To Do
 							</h4>
+						</button>
 					</h2>
 					<div id="things" class="accordion-collapse collapse" aria-labelledby="things-heading" >
 						<div class="accordion-body">
@@ -108,7 +117,11 @@
 							{% for thing in trip.park.things_to_do %}
 							<div class="row mb-2 pb-2 border-bottom">
 								<div class="col">
-									<a href="{{ thing.url }}" target="_blank">{{ thing.title }}</a>
+									{% if thing.url %}
+										<a href="{{ thing.url }}" target="_blank">{{ thing.title }}</a>
+									{% else %}
+										<p>{{ thing.title }}</p>
+									{% endif %}
 									<form action="/trips/{{ trip.id }}/things/{{ thing.id }}/add" method="POST" class="mt-2">
 										<div class="row">
 											<div class="col-8">
@@ -143,7 +156,11 @@
 							{% for campground in trip.park.campgrounds %}
 							<div class="row mb-2 pb-2 border-bottom">
 								<div class="col">
+									{% if campground.url %}
 									<a href="{{ campground.url }}" target="_blank">{{ campground.name }}</a>
+									{% else %}
+									<p>{{ campground.name }}</p>
+									{% endif %}
 									<form action="/trips/{{ trip.id }}/campgrounds/{{ campground.id }}/add" method="POST" class="mt-2">
 										<div class="row">
 											<div class="col-8">

@@ -84,7 +84,9 @@ def login():
         If form validates, handles login and redirects to previous page before login.; 
         Otherwise renders login page.
     """
-
+    if g.user:
+        return redirect("/")
+    
     form = LoginForm()
     
     if form.validate_on_submit():

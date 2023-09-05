@@ -1,15 +1,3 @@
-.img-col{
-	width: 5%;
-}
-.name-col{
-	width:40%;
-}
-.parent-col{
-	width:30%
-}
-.loc-col{
-	width:20%
-}
 
 .result-img{
 	width: 100%;
@@ -27,13 +15,3 @@
 .thing-img{
 	width:100%;
 }
-
-/* .attribute-container {
-	position: relative;
-	bottom: 0;
-	width: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-} */
-

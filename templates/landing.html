@@ -8,9 +8,9 @@
 	<h1 class="display-5 fw-bold">Discover Your Next Adventure</h1>
 	<div class="col-lg-6 mx-auto">
 		{% if user %}
-			<p class="lead mb-4">Find outdoor activities and places to camp on US public lands. Then plan your next trip!
+			<p class="lead mb-4">See what our National Parks have to offer! Browse by state and/or search by name or keyword.
 		{% else %}
-	  		<p class="lead mb-4">Find outdoor activities and places to camp on US public lands. <a href="{{ urls.users_login }}">Log In</a> or <a href="{{ urls.users_new }}">Create an Account</a> to plan and save a trip itenary.</p>
+	  		<p class="lead mb-4">See what our National Parks have to offer! Browse by state and/or search by name or keyword. <a href="{{ urls.users_login }}">Log In</a> or <a href="{{ urls.users_new }}">Create an Account</a> to plan and save a trip itenary.</p>
 		{% endif %}
 			<div class="container">
 				<form action="/search">
@@ -34,10 +34,11 @@
 					</div>
 				</form>
 			</div>
-	  	</form>
+			<div class="container mt-5 pt-5">
+				<p>All park information on this site is provided by the US National Park Service</p>
+			</div>
 	</div>
 </div>
-
 {% endblock %}
 {% block scripts %}
 {% endblock %}
